@@ -58,11 +58,11 @@ network_ssid:password
 ```
 That is, the SSID of the network to connect to and the password, on one line, separated by a colon. This file should be created in the `data/` directory of this project. A `.gitignore` is present to prevent the file from being checked in to source control inadvertently.
 
-To load the file on the robot, you can either reload the entire file system with the "ESP8266 Sketch Data Upload", or follow faster procedure:
+To load the file on the robot, you can either reload the entire file system with the "ESP8266 Sketch Data Upload", or follow an alternative faster procedure:
 
  1. Connect to the robot in the default access point (AP) mode.
- 2. Open a commandline and navigate to base project directory, the one with this file in it.
- 3. Run this command in a shell:
+ 2. Open a shell and navigate to base project directory, the one with this file in it.
+ 3. Run this command in the shell:
 ```
 $ ./upload.sh wifi.config
 ```
@@ -74,5 +74,5 @@ $ ./delete.sh wifi.config
 ```
 This command will delete a file from the robot file system.
 
-Note that the `upload.sh` and `delete.sh` can also be used to update the HTML resources on the robot during development. If `upload.sh` is run with no argument, it will upload all file in the `data/` directory. This is slow, but is still significantly faster than reloading the entire file system.
+Note that the `upload.sh` and `delete.sh` can also be used to update the HTML resources on the robot during development. If `upload.sh` is run with no argument, it will upload all files in the `data/` directory. This is slow, but is still significantly faster than reloading the entire file system.
 
