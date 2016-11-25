@@ -12,4 +12,4 @@ Platform specifications:
  3. Arduino core libraries for the [ESP8266](http://esp8266.github.io/Arduino/versions/2.3.0/doc/libraries.html#mdns-and-dns-sd-responder-esp8266mdns-library). 
  4. Control over WiFi from a mobile device or computer via a browser-based user interface.
  
-The goal is to keep the cost of a complete "kit" to under 20USD.
+The goal is to keep the cost of a base "kit" to under 20USD.
