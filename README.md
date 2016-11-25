@@ -39,7 +39,7 @@ for a basic robot setup. Subsequent sections describe the development environmen
  4. Load the Sketch to the module, "Sketch" > "Upload".
  
 #### Driving: ####
-After the default firmware is loaded, the robot should be driveable. To test:
+After the default firmware is loaded, the robot should be drivable. In the default configuration, the robot creates a WiFi access point (AP). If you connect to this network and enter the URL of the robot, a user interface will be served up in the browser, allowing you to drive.
 
  1. Connect to the WiFi network "BattleBot-xxxxxxxxxxxx". "xxxxxxxxxxxx" is a unique string for each robot. 
    * Use a phone or tablet to use the built-in touch interface.
@@ -47,3 +47,32 @@ After the default firmware is loaded, the robot should be driveable. To test:
  2. Navigate to the robot in a web browser at `http://battlebot.local/`.
  3. Enjoy.
  
+## Development Setup ##
+Connecting to the robot access point is inconvenient for development, since it generally precludes using the internet at the same time. For development, an alternative configuration is provided. In this setup, the robot will connect to an existing WiFi network. The development machine also connects to this network, making the robot and internet available at the same time.
+
+To prevent hard-coding the network credentials in the source code, WiFi configuration is accomplished via a configuration file uploaded to the robot file system in the `data/` directory of this project.
+
+data/wifi.config:
+```
+network_ssid:password
+```
+That is, the SSID of the network to connect to and the password, on one line, separated by a colon. This file should be created in the `data/` directory of this project. A `.gitignore` is present to prevent the file from being checked in to source control inadvertently.
+
+To load the file on the robot, you can either reload the entire file system with the "ESP8266 Sketch Data Upload", or follow faster procedure:
+
+ 1. Connect to the robot in the default access point (AP) mode.
+ 2. Open a commandline and navigate to base project directory, the one with this file in it.
+ 3. Run this command in a shell:
+```
+$ ./upload.sh wifi.config
+```
+This command will upload any file (relative to the root of the `data/` directory) to the robot file system.
+
+When complete, reset the robot. The robot should now connect to the WiFi network specified in the file. To return to access point mode, simply delete the configuration file and reload the file system, or use the abreviated command (as above):
+```
+$ ./delete.sh wifi.config
+```
+This command will delete a file from the robot file system.
+
+Note that the `upload.sh` and `delete.sh` can also be used to update the HTML resources on the robot during development. If `upload.sh` is run with no argument, it will upload all file in the `data/` directory. This is slow, but is still significantly faster than reloading the entire file system.
+
