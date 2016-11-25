@@ -39,8 +39,9 @@
  * Network Configuration                                                        *
  ********************************************************************************/
  
-#define SERVER_PORT 80
-#define HOST_NAME   "battlebot"
+#define SERVER_PORT   80
+#define HOST_NAME     "battlebot"
+#define AP_SSID_BASE  "BattleBot-"
 
 /********************************************************************************
  * WiFi Setup                                                                   *
@@ -67,26 +68,42 @@ void setupWiFi() {
     int index = contents.indexOf(":");
     ssid     = contents.substring(0, index);
     password = contents.substring(index + 1);
+    password.trim(); // file may have trailing whitespace //
     file.close();
   }
 
-  if(ssid) {
+  if(ssid.length()) {
     // connect to WiFi network //
+    WiFiMode_t oldMode = WiFi.getMode();
+    WiFi.mode(WIFI_STA);
     DBG_OUTPUT_PORT.printf("Connecting to \'%s\'...\n", ssid.c_str());
-    if (String(WiFi.SSID()) != ssid) {
+    if(oldMode != WIFI_STA || String(WiFi.SSID()) != ssid) {
+      DBG_OUTPUT_PORT.print("Resetting connection");
       WiFi.begin(ssid.c_str(), password.c_str());
     }
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
       DBG_OUTPUT_PORT.print(".");
     }
+    DBG_OUTPUT_PORT.println("");
+    DBG_OUTPUT_PORT.print("Connected! IP address: ");
+    DBG_OUTPUT_PORT.println(WiFi.localIP());
   } else {
-    DBG_OUTPUT_PORT.println("FIXME: access point stuff here");
+    // access point mode //
+    byte mac[6];
+    WiFi.softAPmacAddress(mac);
+    ssid = AP_SSID_BASE;
+    for(int i = 5; i >= 0; i--) {
+      ssid += String(mac[i], HEX);
+    } 
+
+    DBG_OUTPUT_PORT.println("Starting AP, SSID: " + ssid);
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(ssid.c_str());
+    DBG_OUTPUT_PORT.println("");
+    DBG_OUTPUT_PORT.print("Started! IP address: ");
+    DBG_OUTPUT_PORT.println(WiFi.softAPIP());
   }
-  
-  DBG_OUTPUT_PORT.println("");
-  DBG_OUTPUT_PORT.print("Connected! IP address: ");
-  DBG_OUTPUT_PORT.println(WiFi.localIP());
 
   // start mDNS //
   MDNS.begin(HOST_NAME);
@@ -273,7 +290,7 @@ void setWheelPower(int left, int right) {
   right = constrain(right, -1023, 1023);
 
   digitalWrite(PIN_L_DIR, left >= 0);
-  digitalWrite(PIN_R_DIR, left >= 0);
+  digitalWrite(PIN_R_DIR, right >= 0);
   
   analogWrite(PIN_L_PWM, abs(left));
   analogWrite(PIN_R_PWM, abs(right));
@@ -294,8 +311,8 @@ void handleControlPut(){
   int i = body.substring(0, index).toInt();
   int j = body.substring(index + 1).toInt();  
   
-  DBG_OUTPUT_PORT.print("i: "); DBG_OUTPUT_PORT.print(i); 
-  DBG_OUTPUT_PORT.print(", j: "); DBG_OUTPUT_PORT.println(j); 
+  //DBG_OUTPUT_PORT.print("i: "); DBG_OUTPUT_PORT.print(i); 
+  //DBG_OUTPUT_PORT.print(", j: "); DBG_OUTPUT_PORT.println(j); 
 
   setWheelPower(i, j);
   
