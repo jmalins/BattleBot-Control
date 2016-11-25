@@ -40,10 +40,60 @@
  ********************************************************************************/
  
 #define SERVER_PORT 80
+#define HOST_NAME   "battlebot"
 
-const char* ssid     = "******";
-const char* password = "******";
-const char* host     = "battlebot";
+/********************************************************************************
+ * WiFi Setup                                                                   *
+ *  Implement flexible WiFi setup. The default is create an access point for    *
+ *  the controller device to connect to. This is inconvenient for development,  *
+ *  however. If a file called `wifi.config` is present in the file system,      *
+ *  then the controller will instead connect to an existing WiFi network.       *
+ *                                                                              *
+ *  The format of `wifi.config` is one line:                                    *
+ *  SSID:password                                                               *
+ ********************************************************************************/
+
+#define CONFIG_FILE "/wifi.config"
+
+// configure and connect to wifi //
+void setupWiFi() {
+  // check for config file //
+  String ssid, password;
+  if(SPIFFS.exists(CONFIG_FILE)) {
+    DBG_OUTPUT_PORT.println("WiFi configuration found");
+ 
+    File file = SPIFFS.open(CONFIG_FILE, "r");
+    String contents = file.readString();
+    int index = contents.indexOf(":");
+    ssid     = contents.substring(0, index);
+    password = contents.substring(index + 1);
+    file.close();
+  }
+
+  if(ssid) {
+    // connect to WiFi network //
+    DBG_OUTPUT_PORT.printf("Connecting to \'%s\'...\n", ssid.c_str());
+    if (String(WiFi.SSID()) != ssid) {
+      WiFi.begin(ssid.c_str(), password.c_str());
+    }
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      DBG_OUTPUT_PORT.print(".");
+    }
+  } else {
+    DBG_OUTPUT_PORT.println("FIXME: access point stuff here");
+  }
+  
+  DBG_OUTPUT_PORT.println("");
+  DBG_OUTPUT_PORT.print("Connected! IP address: ");
+  DBG_OUTPUT_PORT.println(WiFi.localIP());
+
+  // start mDNS //
+  MDNS.begin(HOST_NAME);
+  DBG_OUTPUT_PORT.print("Open http://");
+  DBG_OUTPUT_PORT.print(HOST_NAME);
+  DBG_OUTPUT_PORT.println(".local/ to access user interface");
+}
 
 /********************************************************************************
  * Web Server                                                                   *
@@ -222,8 +272,8 @@ void setWheelPower(int left, int right) {
   left  = constrain(left,  -1023, 1023);
   right = constrain(right, -1023, 1023);
 
-  digitalWrite(DIR_L, left >= 0);
-  digitalWrite(DIR_R, left >= 0);
+  digitalWrite(PIN_L_DIR, left >= 0);
+  digitalWrite(PIN_R_DIR, left >= 0);
   
   analogWrite(PIN_L_PWM, abs(left));
   analogWrite(PIN_R_PWM, abs(right));
@@ -279,24 +329,7 @@ void setup(void){
     DBG_OUTPUT_PORT.printf("\n");
   }
   
-  // connect to WiFi network //
-  DBG_OUTPUT_PORT.printf("Connecting to \'%s\'\n", ssid);
-  if (String(WiFi.SSID()) != String(ssid)) {
-    WiFi.begin(ssid, password);
-  }
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    DBG_OUTPUT_PORT.print(".");
-  }
-  DBG_OUTPUT_PORT.println("");
-  DBG_OUTPUT_PORT.print("Connected! IP address: ");
-  DBG_OUTPUT_PORT.println(WiFi.localIP());
-
-  // start mDNS //
-  MDNS.begin(host);
-  DBG_OUTPUT_PORT.print("Open http://");
-  DBG_OUTPUT_PORT.print(host);
-  DBG_OUTPUT_PORT.println(".local/edit to see the file browser");
+  setupWiFi();
   
   // web server control, file browser routes //
   server.on("/list", HTTP_GET, handleFileList);
