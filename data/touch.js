@@ -139,7 +139,7 @@ var lastTime = new Date();
 function sendUpdate() {
   var xhr = new XMLHttpRequest();
   
-  xhr.open('PUT', '/foo', true);
+  xhr.open('PUT', '/control', true);
   xhr.onreadystatechange = function() {
     if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
       //console.log(xhr.responseText);
