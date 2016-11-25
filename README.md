@@ -44,6 +44,6 @@ After the default firmware is loaded, the robot should be driveable. To test:
  1. Connect to the WiFi network "BattleBot-xxxxxxxxxxxx". "xxxxxxxxxxxx" is a unique string for each robot. 
    * Use a phone or tablet to use the built-in touch interface.
    * Use a computer to use the mouse or a gamepad (coming soon).
- 2. Navigate to the robot in a web browser at `http://battlebot.local/'.
+ 2. Navigate to the robot in a web browser at `http://battlebot.local/`.
  3. Enjoy.
  
