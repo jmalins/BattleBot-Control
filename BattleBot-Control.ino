@@ -33,6 +33,23 @@
 #include <FS.h>
 #include <stdlib.h>
 
+/********************************************************************************
+ * Globals                                                                      *
+ ********************************************************************************/
+
+// states //
+enum RobotState {
+  STATE_START = 1,
+  STATE_SETUP,
+  STATE_CONNECT,
+  STATE_IDLE,
+  STATE_DRIVING
+};
+
+// function prototypes //
+void enterState(RobotState);
+void runStateMachine(void);
+
 #define DBG_OUTPUT_PORT Serial
 
 /********************************************************************************
@@ -81,10 +98,12 @@ void setupWiFi() {
       DBG_OUTPUT_PORT.print("Resetting connection");
       WiFi.begin(ssid.c_str(), password.c_str());
     }
+    enterState(STATE_CONNECT);
     while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      DBG_OUTPUT_PORT.print(".");
+      runStateMachine();
     }
+    enterState(STATE_SETUP);
+    
     DBG_OUTPUT_PORT.println("");
     DBG_OUTPUT_PORT.print("Connected! IP address: ");
     DBG_OUTPUT_PORT.println(WiFi.localIP());
@@ -221,11 +240,13 @@ void handleFileList() {
     File entry = dir.openFile("r");
     if (output != "[") output += ',';
     bool isDir = false;
-    output += "{\"type\":\"";
+    output += "{ \"type\": \"";
     output += (isDir)?"dir":"file";
-    output += "\",\"name\":\"";
+    output += "\", \"name\": \"";
     output += String(entry.name()).substring(1);
-    output += "\"}";
+    output += "\", \"size\": \"";
+    output += formatFileSize(entry.size());
+    output += "\" }";
     entry.close();
   }
   output += "]";
@@ -266,6 +287,9 @@ void handleFileCreate(){
 #define PIN_LED1    2   // note: conflicts with dir B
 #define PIN_LED2    16
 
+// drive command timeout //
+long _lastCommandMillis;
+
 // configure the hardware //
 void setupHardware() {
   // motor control pins to output //
@@ -276,11 +300,16 @@ void setupHardware() {
 
   // LED to output //
   pinMode(PIN_LED2, OUTPUT);
-  setLED(false);
+  setStatusLED(false);
+}
+
+// get the debugging LED //
+bool getStatusLED() {
+  return !digitalRead(PIN_LED2);
 }
 
 // set the debugging LED //
-void setLED(bool active) {
+void setStatusLED(bool active) {
   digitalWrite(PIN_LED2, !active);
 }
 
@@ -303,9 +332,11 @@ void setWheelPower(int left, int right) {
 //          rightPower - int [-1023, 1023]
 //
 //  positive values are forward 
-void handleControlPut(){
+void handleControlPut() {
+  enterState(STATE_DRIVING);
+  
   String body = server.arg("plain"); // "plain" is the PUT body //
-  DBG_OUTPUT_PORT.println("handleControlPut: " + body);
+  //DBG_OUTPUT_PORT.println("handleControlPut: " + body);
 
   int index = body.indexOf(":");
   int i = body.substring(0, index).toInt();
@@ -321,31 +352,94 @@ void handleControlPut(){
 }
 
 /********************************************************************************
+ * Status State Machine                                                         *
+ *  State machine to implement global status handling within firmware. Handles  *
+ *  blinking of the status LED as well as the command timeout.                  *
+ ********************************************************************************/
+
+#define DRIVE_TIMEOUT  2000  // only drive for 2 seconds w/o connection //
+
+RobotState _state = STATE_START, _lastState;
+long _stateDelay, _driveTimeout;
+
+// enter the specified state //
+void enterState(RobotState state) {
+  switch(state) {
+    case STATE_CONNECT:
+      setStatusLED(false);
+      break;
+    case STATE_IDLE:
+      setStatusLED(false);
+      setWheelPower(0, 0);
+      break;
+    case STATE_DRIVING:
+      _driveTimeout = millis() + DRIVE_TIMEOUT;
+      break;
+  }
+  DBG_OUTPUT_PORT.print("State: "); DBG_OUTPUT_PORT.println(state);
+  _state = state;  
+}
+
+// run the state machine //
+void runStateMachine() {
+  switch(_state) {
+    case STATE_START:
+      setStatusLED(false);
+      break;
+    case STATE_SETUP:
+      setStatusLED(true);
+      break;
+    case STATE_CONNECT:
+      // fast blink //
+      if (millis() > _stateDelay) {
+        setStatusLED(!getStatusLED()); // toggle LED //
+        _stateDelay = millis() + 100;
+      }
+      break;
+    case STATE_IDLE:
+      // chirp blink //
+      if (millis() > _stateDelay) {
+        setStatusLED(!getStatusLED());
+        _stateDelay = millis() + (getStatusLED()? 100: 2000);
+      }
+      break;
+    case STATE_DRIVING:
+      // check for timeout, if expired, stop driving //
+      if(millis() > _driveTimeout) {
+        enterState(STATE_IDLE);
+        break;
+      }
+      // medium blink //
+      if (millis() > _stateDelay) {
+        setStatusLED(!getStatusLED());
+        _stateDelay = millis() + 500;
+      }
+      break;
+  }
+}
+
+/********************************************************************************
  * Main Entry Points                                                            *
  *  Configure the hardware, connect to WiFi, start mDNS and setup web server    *
  *  route handling.                                                             *
  ********************************************************************************/
 
 void setup(void){
-  setupHardware();
-
   // configure debug serial port //
   DBG_OUTPUT_PORT.begin(115200);
   DBG_OUTPUT_PORT.print("\n");
   DBG_OUTPUT_PORT.setDebugOutput(true);
 
-  // start file system and debug contents //
-  SPIFFS.begin();
-  {
-    Dir dir = SPIFFS.openDir("/");
-    while (dir.next()) {    
-      String fileName = dir.fileName();
-      size_t fileSize = dir.fileSize();
-      DBG_OUTPUT_PORT.printf("FS File: %s, size: %s\n", fileName.c_str(), formatFileSize(fileSize).c_str());
-    }
-    DBG_OUTPUT_PORT.printf("\n");
-  }
+  enterState(STATE_SETUP);
+  runStateMachine();
   
+  // configure the hardware //
+  setupHardware();
+
+  // start file system //
+  SPIFFS.begin();
+
+  // start wifi //
   setupWiFi();
   
   // web server control, file browser routes //
@@ -372,8 +466,10 @@ void setup(void){
   // we're ready //
   server.begin();
   DBG_OUTPUT_PORT.println("HTTP server started");
+  enterState(STATE_IDLE);
 }
  
 void loop(void){
+  runStateMachine();
   server.handleClient();
 }
