@@ -93,9 +93,13 @@ The NodeMCU has two blue LEDs. One (the "front") LED is directly on ESP8266 boar
 
 Luckily, the middle rear LED is connected to a dedicated line and can be used for general status. The default firmware utilizes different blink patterns on this LED to indicate various robot states. These states are:
 
- 1. Solid on -> Robot is running various setup code, such as WiFi, mDNS and other hardware setup. In testing these operations generally complete quickly, so this state isn't likely to be observed unless something goes wrong.
+ 1. Solid on -> Robot is running various setup code, such as WiFi, mDNS and other hardware setup. In testing, these operations generally complete quickly, so this state isn't likely to be observed unless something goes wrong.
  2. 10Hz fast blink -> This state indicates the robot is trying to connect to a WiFi network (development mode).
  3. Chirp blink (short on, long off) -> Robot is in an "idle" state, waiting for a client to connect.
  4. 1Hz medium blink -> Robot is in the "driving" state. Client is connected and the robot is actively receiving drive commands. 
 
-Note, if the robot is in driving state and the client becomes disconnected, the robot will stop and revert to the idle state after 2.5 seconds. This is a safety measure to prevent the robot from getting stuck on the last command it received and running away in the event of connection trouble.
+Note, if the robot is in the driving state and the client becomes disconnected, the robot will stop and revert to the idle state after 2.5 seconds. This is a safety measure to prevent the robot from getting stuck on the last command it received and running away in the event of connection trouble.
+
+#### Serial Monitor: ####
+The robot emits various debugging messages over the USB serial connection. These can be observed from the Arduino IDE or in a dedicated serial terminal. The baud rate is 115200.
+
