@@ -89,7 +89,8 @@ void setupWiFi() {
     file.close();
   }
 
-  if(ssid.length()) {
+  bool stationMode = !!ssid.length();
+  if(stationMode) {
     // connect to WiFi network //
     WiFiMode_t oldMode = WiFi.getMode();
     WiFi.mode(WIFI_STA);
@@ -99,12 +100,20 @@ void setupWiFi() {
       WiFi.begin(ssid.c_str(), password.c_str());
     }
     enterState(STATE_CONNECT);
+    long connectTimeout = millis() + 10000; // 10 seconds //
     while (WiFi.status() != WL_CONNECTED) {
       delay(10); // need to yield or we get a WDT reset //
       runStateMachine();
+      if(millis() > connectTimeout) {
+        DBG_OUTPUT_PORT.println("Connect timed out, falling back to AP mode");
+        stationMode = false; // after timeout, fallback
+        break;
+      }
     }
     enterState(STATE_SETUP);
-    
+  }
+
+  if(stationMode) {
     DBG_OUTPUT_PORT.println("");
     DBG_OUTPUT_PORT.print("Connected! IP address: ");
     DBG_OUTPUT_PORT.println(WiFi.localIP());
