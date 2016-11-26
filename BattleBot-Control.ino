@@ -60,6 +60,10 @@ void runStateMachine(void);
 #define HOST_NAME     "battlebot"
 #define AP_SSID_BASE  "BattleBot-"
 
+// set to recover from a bad wifi.config //
+// then run './delete.sh wifi.config'    //
+#define FORCE_AP_MODE false         
+
 /********************************************************************************
  * WiFi Setup                                                                   *
  *  Implement flexible WiFi setup. The default is create an access point for    *
@@ -89,7 +93,7 @@ void setupWiFi() {
     file.close();
   }
 
-  bool stationMode = !!ssid.length();
+  bool stationMode = !!ssid.length() && !FORCE_AP_MODE;
   if(stationMode) {
     // connect to WiFi network //
     WiFiMode_t oldMode = WiFi.getMode();
