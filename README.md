@@ -76,3 +76,26 @@ This command will delete a file from the robot file system.
 
 Note that the `upload.sh` and `delete.sh` can also be used to update the HTML resources on the robot during development. If `upload.sh` is run with no argument, it will upload all files in the `data/` directory. This is slow, but is still significantly faster than reloading the entire file system.
 
+## Hardware Setup ##
+The default firmware assumes a certain robot hardware / wiring configuration.
+
+#### Wiring: ####
+
+ * Motor channel A -> Right motor (as judged from *behind* the robot)
+ * Motor channek B -> Left motor (as judged from *behind* the robot)
+ * Motors should be wired so that a positive voltage on the A+/B+ terminal produces *forward* motion.
+
+Get this wrong and the robot will not drive as expected with the default control interface.
+
+#### Status LED: ####
+
+The NodeMCU has two blue LEDs. One (the "front") LED is directly on ESP8266 board, near the antenna. The second (the "middle rear") LED is on the NodeMCU carrier board, closer to micro-USB connection. Due to the pin usage on the motor driver board, the connection to front LED is shared with the direction signal for the B channel. Therefore, this LED will be illuminated whenever the left motor is travelling in the reverse direction.
+
+Luckily, the middle rear LED is connected to a dedicated line and can be used for general status. The default firmware utilizes different blink patterns on this LED to indicate various robot states. These states are:
+
+ 1. Solid on -> Robot is running various setup code, such as WiFi, mDNS and other hardware setup. In testing these operations generally complete quickly, so this state isn't likely to be observed unless something goes wrong.
+ 2. 10Hz fast blink -> This state indicates the robot is trying to connect to a WiFi network (development mode).
+ 3. Chirp blink (short on, long off) -> Robot is in an "idle" state, waiting for a client to connect.
+ 4. 1Hz medium blink -> Robot is in the "driving" state. Client is connected and the robot is actively receiving drive commands. 
+
+Note, if the robot is in driving state and the client becomes disconnected, the robot will stop and revert to the idle state after 2.5 seconds. This is a safety measure to prevent the robot from getting stuck on the last command it received and running away in the event of connection trouble.
