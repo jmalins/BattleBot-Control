@@ -377,7 +377,9 @@ void enterState(RobotState state) {
       _driveTimeout = millis() + DRIVE_TIMEOUT;
       break;
   }
-  DBG_OUTPUT_PORT.print("State: "); DBG_OUTPUT_PORT.println(state);
+  if(_state != state) {
+    DBG_OUTPUT_PORT.print("State: "); DBG_OUTPUT_PORT.println(state);
+  }
   _state = state;  
 }
 
