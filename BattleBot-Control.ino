@@ -95,11 +95,12 @@ void setupWiFi() {
     WiFi.mode(WIFI_STA);
     DBG_OUTPUT_PORT.printf("Connecting to \'%s\'...\n", ssid.c_str());
     if(oldMode != WIFI_STA || String(WiFi.SSID()) != ssid) {
-      DBG_OUTPUT_PORT.print("Resetting connection");
+      DBG_OUTPUT_PORT.println("Resetting connection");
       WiFi.begin(ssid.c_str(), password.c_str());
     }
     enterState(STATE_CONNECT);
     while (WiFi.status() != WL_CONNECTED) {
+      delay(10); // need to yield or we get a WDT reset //
       runStateMachine();
     }
     enterState(STATE_SETUP);
