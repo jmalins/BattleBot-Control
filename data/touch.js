@@ -1,131 +1,60 @@
 
 var canvas, c, container;
-var powerL = 0, powerR = 0;
+
 
 setupCanvas();
+TouchManager.setCanvas(canvas);
+//TouchManager.debug = true;
 
-var mouseX, mouseY;
-var touchable = ('createTouch' in document);
-var touches   = []; // array of touch vectors
+// map touch starts to joystick IDs //
+TouchManager.ontouchstart = function(touch, tracker) {
 
+  if(touch.clientX < (window.innerWidth / 2 - 100)) {
+    tracker.addJoystick('left', 60, 'cyan', { x: touch.clientX, y: window.innerHeight / 2 });
+  } else if(touch.clientX > (window.innerWidth / 2 + 100)) {
+    tracker.addJoystick('right', 60, 'magenta', { x: touch.clientX, y: window.innerHeight / 2 });
+  } else {
+    tracker.addButton('trigger', 'red');
+  }
+}
+
+// start robot communication and draw loops //
 setInterval(draw, 1000/35); 
 RobotControl.start();
-
-if(touchable) {
-  canvas.addEventListener('touchstart', onTouchStart, false);
-  canvas.addEventListener('touchmove',  onTouchMove,  false);
-  canvas.addEventListener('touchend',   onTouchEnd,   false);
-  window.onorientationchange = resetCanvas;  
-  window.onresize = resetCanvas;  
-} else {
-  canvas.addEventListener('mousemove', onMouseMove, false);
-}
 
 function resetCanvas(e) {  
   // resize the canvas - but remember - this clears the canvas too. 
   canvas.width  = window.innerWidth; 
   canvas.height = window.innerHeight;
   
-  //make sure we scroll to the top left. 
+  // make sure we scroll to the top left. 
   window.scrollTo(0, 0); 
 }
 
 function draw() {  
   c.clearRect(0, 0, canvas.width, canvas.height); 
-
-  if(true || touchable) {  
-    var leftSet = false, rightSet = false;
-
-    for(var i = 0; i < touches.length; i++) {
-      var touch = touches[i]; 
-
-      var leftSide = (touch.clientX < window.innerWidth / 2);
-      c.beginPath(); 
-      c.fillStyle = 'white';
-      /*c.fillText('touch id : ' + touch.identifier 
-        + ' x:' + touch.clientX
-        + ' y:' + touch.clientY, 
-        touch.clientX + 30, touch.clientY - 30
-      );*/ 
-      c.beginPath(); 
-      c.strokeStyle = leftSide? 'cyan': 'magenta';
-      c.lineWidth = '6';
-      c.arc(touch.clientX, touch.clientY, 40, 0, Math.PI * 2, true); 
-      c.stroke();
-
-      if(leftSide) {
-        powerL = ((window.innerHeight / 2) - touch.clientY) / (window.innerHeight / 2);
-        leftSet = true;
-      } else {
-        powerR = ((window.innerHeight / 2) - touch.clientY) / (window.innerHeight / 2);
-        rightSet = true;
-      }
-    }
-    if(!leftSet) {
-      powerL = 0;
-    }
-    if(!rightSet) {
-      powerR = 0;
-    }
-
-    c.fillStyle = 'white';
-    var powers = RobotControl.getPower();
-    c.fillText('left: ' + powers.left, 30, window.innerHeight - 20); 
-    c.fillText('right: ' + powers.right, window.innerWidth / 2 + 30, window.innerHeight - 20); 
-    c.fillText('rate: ' + RobotControl.getUpdateRate() + ' Hz', 10, 15);
-
-    var state = RobotControl.getState();
-    c.fillStyle = (state === RobotControl.ERROR)? 'red': 'green';
-    c.fillText('state: ' + state.toUpperCase(), 80, 15);
-
-  } else {    
-    c.fillStyle   = 'white'; 
-    c.fillText('mouse : ' + mouseX + ', ' + mouseY, mouseX, mouseY); 
-  }
   
-  var sensitivity = 2;
-  var left  = Math.floor(powerL * 1023 * sensitivity);
-  var right = Math.floor(powerR * 1023 * sensitivity);
-  RobotControl.setPower(left, right);
-}
+  TouchManager.draw(c);
 
-/*  
- *  Touch event (e) properties : 
- *  e.touches:       Array of touch objects for every finger currently touching the screen
- *  e.targetTouches:   Array of touch objects for every finger touching the screen that
- *            originally touched down on the DOM object the transmitted the event.
- *  e.changedTouches  Array of touch objects for touches that are changed for this event.           
- *            I'm not sure if this would ever be a list of more than one, but would 
- *            be bad to assume. 
- *
- *  Touch objects : 
- *
- *  identifier: An identifying number, unique to each touch event
- *  target: DOM object that broadcast the event
- *  clientX: X coordinate of touch relative to the viewport (excludes scroll offset)
- *  clientY: Y coordinate of touch relative to the viewport (excludes scroll offset)
- *  screenX: Relative to the screen
- *  screenY: Relative to the screen
- *  pageX: Relative to the full page (includes scrolling)
- *  pageY: Relative to the full page (includes scrolling)
- */  
-function onTouchStart(e) { 
-  touches = e.touches; 
-}
- 
-function onTouchMove(e) {
-  // Prevent the browser from doing its default thing (scroll, zoom)
-  e.preventDefault();
-  touches = e.touches; 
-} 
- 
-function onTouchEnd(e) { 
-  touches = e.touches; 
-}
+  // get powers //
+  var leftStick = TouchManager.getItem('left');
+  var left = (leftStick)? -leftStick.y: 0;
+  var rightStick = TouchManager.getItem('right');
+  var right = (rightStick)? -rightStick.y: 0;
+  RobotControl.setPower(left * 1023, right * 1023);
 
-function onMouseMove(event) {
-  mouseX = event.offsetX;
-  mouseY = event.offsetY;
+  c.fillStyle = 'white';
+  var powers = RobotControl.getPower();
+  c.fillText('left: ' + powers.left, 30, window.innerHeight - 20); 
+  c.fillText('right: ' + powers.right, window.innerWidth / 2 + 30, window.innerHeight - 20); 
+  c.fillText('rate: ' + RobotControl.getUpdateRate() + ' Hz', 10, 15);
+
+  var state = RobotControl.getState();
+  c.fillStyle = (state === RobotControl.ERROR)? 'red': 'green';
+  c.fillText('state: ' 
+    + state.toUpperCase() 
+    + ((state === RobotControl.ERROR)? ' (' + RobotControl.getLastError() + ')': ''), 
+    80, 15);
 }
 
 function setupCanvas() {  
