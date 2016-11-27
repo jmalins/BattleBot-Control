@@ -21,7 +21,7 @@ for a basic robot setup. Subsequent sections describe the development environmen
 #### Installation steps: ####
 
  1. Download and install the [Arduino IDE](https://www.arduino.cc/en/Main/Software). 
- 2. Install the ESP8266 devtools add-on. Directions [here](http://www.instructables.com/id/Programming-the-ESP8266-12E-using-Arduino-software/?ALLSTEPS). TODO: include custom directions that also explain quirks of getting to work on OS X.
+ 2. Install the ESP8266 devtools add-on. Directions [here](http://www.instructables.com/id/Programming-the-ESP8266-12E-using-Arduino-software/?ALLSTEPS). TODO: include custom directions that also explain the quirks of getting to work on OS X, Linux.
  3. Install the ESP8266FS file system upload add-on. Directions [here](http://esp8266.github.io/Arduino/versions/2.3.0/doc/filesystem.html).
 
 #### Loading the firmware: ####
@@ -87,19 +87,19 @@ The default firmware assumes a certain robot hardware / wiring configuration.
 #### Wiring: ####
 
  * Motor channel A -> Right motor (as judged from *behind* the robot)
- * Motor channek B -> Left motor (as judged from *behind* the robot)
+ * Motor channel B -> Left motor (as judged from *behind* the robot)
  * Motors should be wired so that a positive voltage on the A+/B+ terminal produces *forward* motion.
 
 Get this wrong and the robot will not drive as expected with the default control interface.
 
 #### Status LED: ####
 
-The NodeMCU has two blue LEDs. One (the "front") LED is directly on ESP8266 board, near the antenna. The second (the "middle rear") LED is on the NodeMCU carrier board, closer to micro-USB connection. Due to the pin usage on the motor driver board, the connection to front LED is shared with the direction signal for the B channel. Therefore, this LED will be illuminated whenever the left motor is travelling in the reverse direction.
+The NodeMCU has two blue LEDs. One (the "front") LED is directly on ESP8266 board, near the antenna. The second (the "middle rear") LED is on the NodeMCU carrier board, closer to micro-USB connection. Due to the pin usage on the motor driver board, the connection to front LED is shared with the direction signal for the B motor channel. Therefore, this LED will be illuminated whenever the left motor is travelling in the reverse direction.
 
 Luckily, the middle rear LED is connected to a dedicated line and can be used for general status. The default firmware utilizes different blink patterns on this LED to indicate various robot states. These states are:
 
  1. Solid on -> Robot is running various setup code, such as WiFi, mDNS and other hardware setup. In testing, these operations generally complete quickly, so this state isn't likely to be observed unless something goes wrong.
- 2. 10Hz fast blink -> This state indicates the robot is trying to connect to a WiFi network (development mode).
+ 2. 10Hz fast blink -> This state indicates the robot is trying to connect to a WiFi network (non-AP development mode with `wifi.config` loaded).
  3. Chirp blink (short on, long off) -> Robot is in an "idle" state, waiting for a client to connect.
  4. 1Hz medium blink -> Robot is in the "driving" state. Client is connected and the robot is actively receiving drive commands. 
 
