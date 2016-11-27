@@ -44,7 +44,10 @@ After the default firmware is loaded, the robot should be drivable. In the defau
  1. Connect to the WiFi network "BattleBot-xxxxxxxxxxxx". "xxxxxxxxxxxx" is a unique string for each robot. 
    * Use a phone or tablet to use the built-in touch interface.
    * Use a computer to use the mouse or a gamepad (coming soon).
- 2. Navigate to the robot in a web browser at `http://battlebot.local/`.
+ 2. Navigate to the robot in a web browser.
+   * On iOS, OS X and Linux, the robot can be found with mDNS at `http://battlebot.local/`.
+   * On Android and Windows (without mDNS installed) use `http://192.168.4.1/` (in the default AP mode *only*). When connected to an external WiFi network, use an mDNS app like [ZeroConf Browser](https://play.google.com/store/apps/details?id=com.melloware.zeroconf) to find the IP address of the robot. TODO: add notes for connecting from Windows (involves installing mDNS / Bonjour for Windows).
+   * You may need to explicitly type `http://` before the URL or IP to connect, as some browsers will assume `https://`, which is not supported.
  3. Enjoy.
  
 ## Development Setup ##
