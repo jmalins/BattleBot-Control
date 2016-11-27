@@ -75,16 +75,16 @@ void runStateMachine(void);
  *  SSID:password                                                               *
  ********************************************************************************/
 
-#define CONFIG_FILE "/wifi.config"
+#define WIFI_CONFIG_FILE "/wifi.config"
 
 // configure and connect to wifi //
 void setupWiFi() {
   // check for config file //
   String ssid, password;
-  if(SPIFFS.exists(CONFIG_FILE)) {
+  if(SPIFFS.exists(WIFI_CONFIG_FILE)) {
     DBG_OUTPUT_PORT.println("WiFi configuration found");
  
-    File file = SPIFFS.open(CONFIG_FILE, "r");
+    File file = SPIFFS.open(WIFI_CONFIG_FILE, "r");
     String contents = file.readString();
     int index = contents.indexOf(":");
     ssid     = contents.substring(0, index);
@@ -106,7 +106,7 @@ void setupWiFi() {
     enterState(STATE_CONNECT);
     long connectTimeout = millis() + 10000; // 10 seconds //
     while (WiFi.status() != WL_CONNECTED) {
-      delay(10); // need to yield or we get a WDT reset //
+      yield(); // need to yield or we get a WDT reset //
       runStateMachine();
       if(millis() > connectTimeout) {
         DBG_OUTPUT_PORT.println("Connect timed out, falling back to AP mode");
@@ -143,6 +143,18 @@ void setupWiFi() {
   DBG_OUTPUT_PORT.print("Open http://");
   DBG_OUTPUT_PORT.print(HOST_NAME);
   DBG_OUTPUT_PORT.println(".local/ to access user interface");
+}
+
+// delete the WiFi config file //
+void deleteWiFiConfig() {
+  if (!SPIFFS.exists(WIFI_CONFIG_FILE)) return;
+  
+  // delete the config file and signal on status LED //
+  setStatusLED(true);
+  SPIFFS.remove(WIFI_CONFIG_FILE);
+  DBG_OUTPUT_PORT.println("Deleted wifi config file");
+  delay(2000); // 2 second signal //
+  setStatusLED(false);
 }
 
 /********************************************************************************
@@ -295,8 +307,8 @@ void handleFileCreate(){
 // hardware definitions //
 #define PIN_R_PWM   5   // 1,2EN aka D1 pwm A
 #define PIN_R_DIR   0   // 1A,2A aka D3 dir A
-#define PIN_L_PWM   4   // 1,2EN aka D1 pwm B
-#define PIN_L_DIR   2   // 1A,2A aka D3 dir B
+#define PIN_L_PWM   4   // 1,2EN aka D2 pwm B
+#define PIN_L_DIR   2   // 1A,2A aka D4 dir B
 
 #define PIN_LED1    2   // note: conflicts with dir B
 #define PIN_LED2    16
