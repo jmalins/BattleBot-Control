@@ -33,7 +33,7 @@ for a basic robot setup. Subsequent sections describe the development environmen
    * Flash Size: "4M (3M SPIFFS)"
    * Upload Speed: "115200"
    * Choose correct serial port for module
- 3. Run "Tool" > "ESP8266 Sketch Data Upload" to initialize the file system and load the HTML / javascript user interface
+ 3. Run "Tools" > "ESP8266 Sketch Data Upload" to initialize the file system and load the HTML / javascript user interface
     files to the module. This process takes a while, since it is uploading a formatted 3MB file system image. Spend the time
     pondering what life was like for your great-grandfather on dial-up.
  4. Load the Sketch to the module, "Sketch" > "Upload".
