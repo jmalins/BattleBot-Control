@@ -31,6 +31,10 @@ function resetCanvas(e) {
   window.scrollTo(0, 0); 
 }
 
+// reset canvas on resize //
+window.onorientationchange = resetCanvas;  
+window.onresize = resetCanvas
+
 function draw() {  
   c.clearRect(0, 0, canvas.width, canvas.height); 
   
