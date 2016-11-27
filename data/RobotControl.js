@@ -125,12 +125,12 @@
       _leftPower = (
         (left >  1023)? 1023:
         (left < -1023)? -1023:
-        left
+        Math.round(left)
       );
       _rightPower = (
         (right >  1023)? 1023:
         (right < -1023)? -1023:
-        right
+        Math.round(right)
       );
     },
     getPower: function() {
