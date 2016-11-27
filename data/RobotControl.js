@@ -12,10 +12,12 @@
  *                  CONNECTING  start() was called, attempting first connection
  *                  CONNECTED   robot is being updated
  *                  ERROR       the last update failed
- *    onstatechanged : handler function to be notified on state changes
+ *    onstatechanged : [function] to be notified on state changes
+ *      arguments are (newState, oldState)
  *
  *    getUpdateRate() : rate of robot updates in Hz
  *    getLastError() : the error return, or null if no error
+ *    timeout : [number] network timeout in millis
  *
  *    setPower(left, right) : update the robot motor powers
  *    getPower() : returns the current motor powers as a { left, right } object
@@ -54,7 +56,7 @@
     xhr.onerror = function(e) {
       callback(e.type, e);
     };
-    xhr.timeout   = 1000; // 1 second //
+    xhr.timeout   = RobotControl.timeout;
     xhr.ontimeout = xhr.onerror;
 
     xhr.send(value);
@@ -116,6 +118,7 @@
     getUpdateRate: function() {
       return _updateRate;
     },
+    timeout: 250, // 250ms //
 
     // control motor power //
     setPower: function(left, right) {
