@@ -36,6 +36,14 @@
 #include "NodeMCU-Hardware.h"
 
 /********************************************************************************
+ * Network Configuration                                                        *
+ ********************************************************************************/
+ 
+#define SERVER_PORT   80
+#define HOST_NAME     "battlebot"
+#define AP_SSID_BASE  "BattleBot-"
+
+/********************************************************************************
  * Globals                                                                      *
  ********************************************************************************/
 
@@ -51,20 +59,9 @@ enum RobotState {
 // function prototypes //
 void enterState(RobotState);
 void runStateMachine(void);
+bool getWiFiForceAPMode();
 
 #define DBG_OUTPUT_PORT Serial
-
-/********************************************************************************
- * Network Configuration                                                        *
- ********************************************************************************/
- 
-#define SERVER_PORT   80
-#define HOST_NAME     "battlebot"
-#define AP_SSID_BASE  "BattleBot-"
-
-// set to recover from a bad wifi.config //
-// then run './delete.sh wifi.config'    //
-#define FORCE_AP_MODE false         
 
 /********************************************************************************
  * WiFi Setup                                                                   *
@@ -95,7 +92,7 @@ void setupWiFi() {
     file.close();
   }
 
-  bool stationMode = !!ssid.length() && !FORCE_AP_MODE;
+  bool stationMode = !!ssid.length() && !getWiFiForceAPMode();
   if(stationMode) {
     // connect to WiFi network //
     WiFiMode_t oldMode = WiFi.getMode();
@@ -145,18 +142,6 @@ void setupWiFi() {
   DBG_OUTPUT_PORT.print("Open http://");
   DBG_OUTPUT_PORT.print(HOST_NAME);
   DBG_OUTPUT_PORT.println(".local/ to access user interface");
-}
-
-// delete the WiFi config file //
-void deleteWiFiConfig() {
-  if (!SPIFFS.exists(WIFI_CONFIG_FILE)) return;
-  
-  // delete the config file and signal on status LED //
-  setStatusLED(true);
-  SPIFFS.remove(WIFI_CONFIG_FILE);
-  DBG_OUTPUT_PORT.println("Deleted wifi config file");
-  delay(2000); // 2 second signal //
-  setStatusLED(false);
 }
 
 /********************************************************************************
@@ -313,6 +298,9 @@ void handleFileCreate(){
 #define PIN_L_PWM   PIN_PWM_B   // B is left       //
 #define PIN_L_DIR   PIN_DIR_B   // high is forward //
 
+// use SD2 for WIFI override //
+#define PIN_WIFI_AP_MODE  PIN_D5
+
 // drive command timeout //
 long _lastCommandMillis;
 
@@ -327,6 +315,9 @@ void setupHardware() {
   // LED to output //
   pinMode(PIN_LED2, OUTPUT);
   setStatusLED(false);
+
+  // WiFi override //
+  pinMode(PIN_WIFI_AP_MODE, INPUT_PULLUP);
 }
 
 // get the debugging LED //
@@ -337,6 +328,11 @@ bool getStatusLED() {
 // set the debugging LED //
 void setStatusLED(bool active) {
   digitalWrite(PIN_LED2, !active);
+}
+
+// is the WiFi forced to AP mode by jumper //
+bool getWiFiForceAPMode() {
+  return !digitalRead(PIN_WIFI_AP_MODE);
 }
 
 // set power to the wheels //
