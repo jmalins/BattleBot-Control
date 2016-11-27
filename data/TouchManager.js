@@ -116,9 +116,9 @@
 
   // add event handlers //
   function onTouchStart(e) {
-	  for(var i = 0; i < e.changedTouches.length; i++) {
-		  doAdd(e.changedTouches[i]);
-	  }
+    for(var i = 0; i < e.changedTouches.length; i++) {
+      doAdd(e.changedTouches[i]);
+    }
   }
 
   function onMouseStart(e) {
@@ -132,12 +132,12 @@
     // stop the default browser behavior (scroll, zoom) //
     e.preventDefault();
 
-	  for(var i = 0; i < e.changedTouches.length; i++) {
+    for(var i = 0; i < e.changedTouches.length; i++) {
       var touch = e.changedTouches[i];
-		  var item  = _touches[touch.identifier];
+      var item  = _touches[touch.identifier];
       if(!item) continue;
       doUpdate(item, touch);      
-	  }
+    }
   }
 
   function onMouseMove(e) {
@@ -148,12 +148,12 @@
 
   // remove ended touches //
   function onTouchEnd(e) {
-	  for(var i = 0; i < e.changedTouches.length; i++) {
+    for(var i = 0; i < e.changedTouches.length; i++) {
       var touch = e.changedTouches[i];
-		  var item   = _touches[touch.identifier];
+      var item   = _touches[touch.identifier];
       if(!item) continue;
       doRemove(item);
-	  }
+    }
   }
 
   function onMouseEnd(e) {
@@ -220,26 +220,26 @@
           case 'joystick':
             // draw a joystick //
             c.beginPath(); 
-				    c.strokeStyle = style; 
-				    c.lineWidth   = 6; 
-				    c.arc(touch.originPos.x, touch.originPos.y, 40, 0, Math.PI * 2, true); 
-				    c.stroke();
-				
+            c.strokeStyle = style; 
+            c.lineWidth   = 6; 
+            c.arc(touch.originPos.x, touch.originPos.y, 40, 0, Math.PI * 2, true); 
+            c.stroke();
+        
             c.beginPath(); 
-				    c.strokeStyle = style;
-				    c.lineWidth   = 2; 
-				    c.arc(touch.originPos.x, touch.originPos.y, 60, 0, Math.PI * 2, true); 
-				    c.stroke();
-				    
+            c.strokeStyle = style;
+            c.lineWidth   = 2; 
+            c.arc(touch.originPos.x, touch.originPos.y, 60, 0, Math.PI * 2, true); 
+            c.stroke();
+            
             c.beginPath();
-				    c.strokeStyle = style; 
-				    c.arc(pos.x, pos.y, 40, 0, Math.PI * 2, true); 
-				    c.stroke();
+            c.strokeStyle = style; 
+            c.arc(pos.x, pos.y, 40, 0, Math.PI * 2, true); 
+            c.stroke();
 
             if(TouchManager.debug) {
               c.beginPath(); 
-    				  c.fillStyle = 'white';
-				      c.fillText('joystick: ' + touch.key 
+              c.fillStyle = 'white';
+              c.fillText('joystick: ' + touch.key 
                 + ', x: ' + (Math.round(touch.x * 1000) / 1000)
                 + ', y: ' + (Math.round(touch.y * 1000) / 1000),
                 touch.originPos.x - 50, touch.originPos.y + 75
@@ -248,16 +248,16 @@
             break;
           case 'button':
             // draw a button // 
-    				c.beginPath(); 
-				    c.strokeStyle = style;
-				    c.lineWidth   = '6';
-				    c.arc(pos.x, pos.y, 40, 0, Math.PI * 2, true); 
-				    c.stroke();
+            c.beginPath(); 
+            c.strokeStyle = style;
+            c.lineWidth   = '6';
+            c.arc(pos.x, pos.y, 40, 0, Math.PI * 2, true); 
+            c.stroke();
 
             if(TouchManager.debug) {
               c.beginPath(); 
-    				  c.fillStyle = 'white';
-				      c.fillText('button: ' + touch.key + ', x: ' + pos.x + ', y: ' + pos.y,
+              c.fillStyle = 'white';
+              c.fillText('button: ' + touch.key + ', x: ' + pos.x + ', y: ' + pos.y,
                 pos.x - 45, pos.y + 55
               );
             }
