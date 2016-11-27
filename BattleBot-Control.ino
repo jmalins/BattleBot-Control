@@ -32,6 +32,7 @@
 #include <ESP8266mDNS.h>
 #include <FS.h>
 #include <stdlib.h>
+#include <Servo.h>
 
 #include "NodeMCU-Hardware.h"
 
@@ -301,6 +302,8 @@ void handleFileCreate(){
 // use SD2 for WIFI override //
 #define PIN_WIFI_AP_MODE  PIN_D5
 
+//Servo testServo, testServo2;
+
 // drive command timeout //
 long _lastCommandMillis;
 
@@ -318,6 +321,11 @@ void setupHardware() {
 
   // WiFi override //
   pinMode(PIN_WIFI_AP_MODE, INPUT_PULLUP);
+
+  //testServo.attach(PIN_D6);
+  //testServo.write(90);
+  //testServo2.attach(PIN_D7);
+  //testServo2.write(90);
 }
 
 // get the debugging LED //
