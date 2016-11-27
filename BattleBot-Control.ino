@@ -33,6 +33,8 @@
 #include <FS.h>
 #include <stdlib.h>
 
+#include "NodeMCU-Hardware.h"
+
 /********************************************************************************
  * Globals                                                                      *
  ********************************************************************************/
@@ -304,14 +306,12 @@ void handleFileCreate(){
  *  Handle control of robot hardware based on calls to the web API.             *
  ********************************************************************************/
 
-// hardware definitions //
-#define PIN_R_PWM   5   // 1,2EN aka D1 pwm A
-#define PIN_R_DIR   0   // 1A,2A aka D3 dir A
-#define PIN_L_PWM   4   // 1,2EN aka D2 pwm B
-#define PIN_L_DIR   2   // 1A,2A aka D4 dir B
+// map motor driver channels //
+#define PIN_R_PWM   PIN_PWM_A   // A is right      //
+#define PIN_R_DIR   PIN_DIR_A   // high is forward //
 
-#define PIN_LED1    2   // note: conflicts with dir B
-#define PIN_LED2    16
+#define PIN_L_PWM   PIN_PWM_B   // B is left       //
+#define PIN_L_DIR   PIN_DIR_B   // high is forward //
 
 // drive command timeout //
 long _lastCommandMillis;
