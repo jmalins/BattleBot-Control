@@ -8,11 +8,11 @@ TouchManager.setCanvas(canvas);
 
 // map touch starts to joystick IDs //
 TouchManager.ontouchstart = function(touch, tracker) {
-
+  var maxTouchRange = 160; //djl 60 //60= radius of origin circle
   if(touch.clientX < (window.innerWidth / 2 - 100)) {
-    tracker.addJoystick('left', 60, 'cyan', { x: touch.clientX, y: window.innerHeight / 2 });
+    tracker.addJoystick('left', maxTouchRange, 'cyan', { x: touch.clientX, y: window.innerHeight / 2 });
   } else if(touch.clientX > (window.innerWidth / 2 + 100)) {
-    tracker.addJoystick('right', 60, 'magenta', { x: touch.clientX, y: window.innerHeight / 2 });
+    tracker.addJoystick('right', maxTouchRange, 'magenta', { x: touch.clientX, y: window.innerHeight / 2 });
   } else {
     tracker.addButton('trigger', 'red');
   }
