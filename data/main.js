@@ -14,7 +14,7 @@ TouchManager.ontouchstart = function(touch, tracker) {
   } else if(touch.clientX > (window.innerWidth / 2 + 100)) {
     tracker.addJoystick('right', maxTouchRange, 'magenta', { x: touch.clientX, y: window.innerHeight / 2 });
   } else {
-    tracker.addButton('trigger', 'red');
+    tracker.addButton('weaponPower', 'red');
   }
 }
 
@@ -47,11 +47,19 @@ function draw() {
   var right = (rightStick)? -rightStick.y: 0;
   RobotControl.setPower(left * 1023, right * 1023);
 
+  var weapon = TouchManager.getItem('weaponPower');
+  if(weapon) {
+    var weaponPower = ((window.innerHeight - weapon.currentPos.y) / window.innerHeight);
+    if(weaponPower < 0.1) weaponPower = 0;
+    RobotControl.setWeaponPower(weaponPower);
+  }
+
   c.fillStyle = 'white';
   var powers = RobotControl.getPower();
   c.fillText('left: ' + powers.left, 30, window.innerHeight - 20); 
   c.fillText('right: ' + powers.right, window.innerWidth / 2 + 30, window.innerHeight - 20); 
   c.fillText('rate: ' + RobotControl.getUpdateRate() + ' Hz', 10, 15);
+  c.fillText('weapon: ' + RobotControl.getWeaponPower().toFixed(3), 200, 15);
 
   var state = RobotControl.getState();
   c.fillStyle = (state === RobotControl.ERROR)? 'red': 'green';

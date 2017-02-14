@@ -24,7 +24,7 @@
  **/
 (function() {
   var _state, _updateRate = 0;
-  var _leftPower = 0, _rightPower = 0;
+  var _leftPower = 0, _rightPower = 0, _weaponPower = 0;
 
   // handle state change //
   function setState(state) {
@@ -40,7 +40,7 @@
 
   // build a packet from current values //
   function getPacketValue() {
-    return _leftPower + ':' + _rightPower;
+    return _leftPower + ':' + _rightPower + ':' + Math.round(_weaponPower * 1023);
   }
 
   // send a control packet to the robot   //
@@ -135,6 +135,12 @@
     },
     getPower: function() {
       return { left: _leftPower, right: _rightPower };
+    },
+    setWeaponPower: function(power) {
+      _weaponPower = power;
+    },
+    getWeaponPower: function() {
+      return _weaponPower;
     }
   };
 

@@ -302,7 +302,7 @@ void handleFileCreate(){
 // use SD2 for WIFI override //
 #define PIN_WIFI_AP_MODE  PIN_D5
 
-//Servo testServo, testServo2;
+Servo weaponESC, servo;
 
 // drive command timeout //
 long _lastCommandMillis;
@@ -322,10 +322,11 @@ void setupHardware() {
   // WiFi override //
   pinMode(PIN_WIFI_AP_MODE, INPUT_PULLUP);
 
-  //testServo.attach(PIN_D6);
-  //testServo.write(90);
-  //testServo2.attach(PIN_D7);
-  //testServo2.write(90);
+  weaponESC.attach(PIN_D6);
+  weaponESC.writeMicroseconds(900);
+  
+  servo.attach(PIN_D7);
+  servo.write(90);
 }
 
 // get the debugging LED //
@@ -355,6 +356,14 @@ void setWheelPower(int left, int right) {
   analogWrite(PIN_R_PWM, abs(right));
 }
 
+// set the weapon power //
+void setWeaponPower(int power) {
+  power = constrain(power, 0, 1023);
+  
+  int usec = 900 + (power * 900) / 1024;
+  weaponESC.writeMicroseconds(usec);
+}
+
 // interpret data PUT to the control endpoint //
 //  format: "${leftPower}:${rightPower}"
 //
@@ -368,14 +377,24 @@ void handleControlPut() {
   String body = server.arg("plain"); // "plain" is the PUT body //
   //DBG_OUTPUT_PORT.println("handleControlPut: " + body);
 
-  int index = body.indexOf(":");
+  int index = body.indexOf(":"), index2 = body.indexOf(":", index + 1);
   int i = body.substring(0, index).toInt();
-  int j = body.substring(index + 1).toInt();  
+  int j = (index2 >= 0)? 
+    body.substring(index + 1, index2).toInt(): 
+    body.substring(index + 1).toInt();  
+  int k = (index2 >= 0)? 
+    body.substring(index2 + 1).toInt(): 
+    0;
   
   //DBG_OUTPUT_PORT.print("i: "); DBG_OUTPUT_PORT.print(i); 
   //DBG_OUTPUT_PORT.print(", j: "); DBG_OUTPUT_PORT.println(j); 
 
   setWheelPower(i, j);
+  setWeaponPower(k);
+  
+  //int servo2 = 90 + (j * 90) / 1024;
+  //DBG_OUTPUT_PORT.print(", s2: "); DBG_OUTPUT_PORT.println(servo2); 
+  //testServo2.write(servo2);
   
   server.send(200, "text/plain", "");
   body = String();
