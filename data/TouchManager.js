@@ -228,7 +228,7 @@
             c.beginPath(); 
             c.strokeStyle = style;
             c.lineWidth   = 2; 
-            c.arc(touch.originPos.x, touch.originPos.y, 60, 0, Math.PI * 2, true); 
+            c.arc(touch.originPos.x, touch.originPos.y, touch.maxMagnitude, 0, Math.PI * 2, true); 
             c.stroke();
             
             c.beginPath();

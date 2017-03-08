@@ -8,7 +8,7 @@ TouchManager.setCanvas(canvas);
 
 // map touch starts to joystick IDs //
 TouchManager.ontouchstart = function(touch, tracker) {
-  var maxTouchRange = 160; //djl 60 //60= radius of origin circle
+  var maxTouchRange = 100; //djl 60 //60= radius of origin circle
   if(touch.clientX < (window.innerWidth / 2 - 100)) {
     tracker.addJoystick('left', maxTouchRange, 'cyan', { x: touch.clientX, y: window.innerHeight / 2 });
   } else if(touch.clientX > (window.innerWidth / 2 + 100)) {
@@ -42,10 +42,15 @@ function draw() {
 
   // get powers //
   var leftStick = TouchManager.getItem('left');
-  var left = (leftStick)? -leftStick.y: 0;
+  /*var left = (leftStick)? -leftStick.y: 0;
   var rightStick = TouchManager.getItem('right');
   var right = (rightStick)? -rightStick.y: 0;
-  RobotControl.setPower(left * 1023, right * 1023);
+  RobotControl.setPower(left * 1023, right * 1023);*/
+  if(leftStick) {
+    RobotControl.arcadeDrive(-leftStick.y, -leftStick.x, false);
+  } else {
+    RobotControl.setPower(0, 0);
+  }
 
   var weapon = TouchManager.getItem('weaponPower');
   if(weapon) {

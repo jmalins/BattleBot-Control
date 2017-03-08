@@ -48,6 +48,9 @@
   function sendUpdate(value, callback) {
     var xhr = new XMLHttpRequest();
 
+    // suppress update when debugging locally //
+    if(document.location.protocol === 'file:') return;
+
     xhr.open('PUT', '/control', true);
     xhr.onload = function(e) {
       var res = { text: xhr.responseText, status: xhr.status };
@@ -141,6 +144,45 @@
     },
     getWeaponPower: function() {
       return _weaponPower;
+    },
+
+    arcadeDrive: function(speed, rotation, squaredInputs) {
+      // clamp the inputs //
+      speed    = (speed > 1)?    1: (speed < -1)?    -1: speed;
+      rotation = (rotation > 1)? 1: (rotation < -1)? -1: rotation;
+
+      // square the inputs (while preserving the sign) to increase //
+      // fine control while permitting full power                  //
+      if(squaredInputs) {
+        speed    = (speed >= 0.0)? speed * speed: -(speed * speed);
+        rotation = (rotation >= 0.0)? rotation * rotation: -(rotation * rotation);
+      }
+
+      // mix speed and rotation signals //
+      var leftOutput, rightOutput;
+      if(speed > 0.0) {
+        if(rotation > 0.0) {
+          leftOutput  = speed - rotation;
+          rightOutput = Math.max(speed, rotation);
+        } else {
+          leftOutput  = Math.max(speed, -rotation);
+          rightOutput = speed + rotation;
+        }
+      } else {
+        if(rotation > 0.0) {
+          leftOutput  = -Math.max(-speed, rotation);
+          rightOutput = speed + rotation;
+        } else {
+          leftOutput  = speed - rotation;
+          rightOutput = -Math.max(-speed, -rotation);
+        }
+      }
+
+      // clamp motor outputs //
+      leftOutput  = (leftOutput  > 1)? 1: (leftOutput  < -1)? -1: leftOutput;
+      rightOutput = (rightOutput > 1)? 1: (rightOutput < -1)? -1: rightOutput;
+      
+      window.RobotControl.setPower(leftOutput * 1023, rightOutput * 1023);
     }
   };
 
