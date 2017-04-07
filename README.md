@@ -11,6 +11,7 @@ well-documented: Arduino, HTML5 and javascript. The hope is to leverage common m
     [here](https://www.aliexpress.com/item/1X-for-Arduino-Smart-Car-Robot-Plastic-Tire-Wheel-with-DC-3-6V-Gear-Motor-New/32693010819.html).
  3. Arduino core libraries for the [ESP8266](http://esp8266.github.io/Arduino/versions/2.3.0/doc/libraries.html#mdns-and-dns-sd-responder-esp8266mdns-library). 
  4. Control over WiFi from a mobile device or computer via a browser-based user interface.
+ 5. Cardboard robot body, ranging from a simple box, to a laser cut design from CAD. OnShape files for the parts, and a sample robot body for the ["(BOX) Factory of Sadness"](https://cad.onshape.com/documents/e8cde76fb8fa97701da61992/w/c29f61e2e364ccd29e25da63/e/e3f6378e05fc7aa48f5b6eb2) robot make a good starting point.
  
 The goal is to keep the cost of a base "kit" to under 20USD.
 
