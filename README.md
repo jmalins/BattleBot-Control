@@ -24,6 +24,7 @@ for a basic robot setup. Subsequent sections describe the development environmen
  1. Download and install the [Arduino IDE](https://www.arduino.cc/en/Main/Software). 
  2. Install the ESP8266 devtools add-on. Directions [here](http://www.instructables.com/id/Programming-the-ESP8266-12E-using-Arduino-software/?ALLSTEPS). TODO: include custom directions that also explain the quirks of getting to work on OS X, Linux.
  3. Install the ESP8266FS file system upload add-on. Directions [here](http://esp8266.github.io/Arduino/versions/2.3.0/doc/filesystem.html).
+ 4. Install the WebSockets for Arduino add-on. It can be found in the Library Manager as "WebSockets". GitHub page [here](https://github.com/Links2004/arduinoWebSockets).
 
 #### Loading the firmware: ####
 
