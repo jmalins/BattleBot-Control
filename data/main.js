@@ -20,6 +20,7 @@ TouchManager.ontouchstart = function(touch, tracker) {
 
 // start robot communication and draw loops //
 setInterval(draw, 1000/35); 
+RobotControl.setDeadBand(200, 200);
 RobotControl.start();
 
 function resetCanvas(e) {  
@@ -47,7 +48,7 @@ function draw() {
   var right = (rightStick)? -rightStick.y: 0;
   RobotControl.setPower(left * 1023, right * 1023);*/
   if(leftStick) {
-    RobotControl.arcadeDrive(-leftStick.y, -leftStick.x, false);
+    RobotControl.arcadeDrive(-leftStick.y, -leftStick.x, true);
   } else {
     RobotControl.setPower(0, 0);
   }
@@ -63,15 +64,14 @@ function draw() {
   var powers = RobotControl.getPower();
   c.fillText('left: ' + powers.left, 30, window.innerHeight - 20); 
   c.fillText('right: ' + powers.right, window.innerWidth / 2 + 30, window.innerHeight - 20); 
-  c.fillText('rate: ' + RobotControl.getUpdateRate() + ' Hz', 10, 15);
   c.fillText('weapon: ' + RobotControl.getWeaponPower().toFixed(3), 200, 15);
 
   var state = RobotControl.getState();
-  c.fillStyle = (state === RobotControl.ERROR)? 'red': 'green';
+  c.fillStyle = (state !== RobotControl.CONNECTED)? 'red': 'green';
   c.fillText('state: ' 
     + state.toUpperCase() 
     + ((state === RobotControl.ERROR)? ' (' + RobotControl.getLastError() + ')': ''), 
-    80, 15);
+    10, 15);
 }
 
 function setupCanvas() {  

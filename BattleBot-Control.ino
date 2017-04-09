@@ -293,6 +293,9 @@ void handleControlPut() {
 // websocket server instance //
 WebSocketsServer webSocket = WebSocketsServer(WEBSOCKET_PORT);
 
+// 'active' connection //
+uint8_t _activeSocket = -1;
+
 // WebSocket event callback //
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
   // handle event by type //
@@ -304,12 +307,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       }
       // send success message to client //
       webSocket.sendTXT(num, "Connected");
+      _activeSocket = num;
       enterState(STATE_DRIVING);
       setWheelPower(0, 0);
       setWeaponPower(0);
       break;
     case WStype_DISCONNECTED:
       DBG_OUTPUT_PORT.printf("[%u] Disconnected!\n", num);
+      _activeSocket = -1;
       enterState(STATE_IDLE);
       break;
     case WStype_TEXT:
@@ -320,9 +325,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       }
       break;
     }
-
 }
 
+// set a message to the active web socket //
+// used for heartbeat to client app       //
+void webSocketMessage(String msg) {
+  if(_activeSocket == -1) return;
+  webSocket.sendTXT(_activeSocket, msg.c_str());
+}
 
 /********************************************************************************
  * Hardware Control                                                             *
@@ -490,6 +500,9 @@ void runStateMachine() {
       if (millis() > _stateDelay) {
         setStatusLED(!getStatusLED());
         _stateDelay = millis() + 500;
+        
+        // send heartbeat back to client //
+        webSocketMessage("heartbeat");
       }
       break;
   }
