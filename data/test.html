@@ -1,0 +1,56 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script language="javascript" type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+  <script language="javascript" type="text/javascript" src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+  <script>
+	  // var connection = new WebSocket('ws://'+location.hostname+':81/', ['arduino']);
+	  var connection = new WebSocket('ws://battlebot.local:81/', ['arduino']);
+	  connection.onopen    = function () { connection.send('Connect ' + new Date()); }; 
+	  connection.onerror   = function (error) { 
+      console.log('WebSocket Error ', error);
+      $('<div>Error: ' + error + '</div>').appendTo('#messages')
+    };
+	  connection.onmessage = function (e) {  
+		  console.log('Server: ', e.data);
+		  $('<div>WebSocket Connected!</div>').appendTo('#messages')
+	  };
+	  connection.onclose = function(e) {
+		  console.log('Server: ', e.data);
+		  $('<div>WebSocket Disconnected!</div>').appendTo('#messages')
+	  };
+	  function sendUpdate(){
+	    var l = parseInt(document.getElementById('l').value);  
+		  var r = parseInt(document.getElementById('r').value);  
+		  var w = parseInt(document.getElementById('w').value);  
+		
+		  var cmd = l + ':' + r + ':' + w;    
+		  console.log('Command: ' + cmd); 
+		  connection.send(cmd);
+	  }
+  </script>
+
+  <style>
+    #title { margin: 20px; font-weight: bold; font-size: 24px; }
+    #form { margin: 0px 20px; }
+    #messages { margin: 20px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div id='title'>BattleBot Control</div>
+
+  <form id='form'>
+    <label for="l">Left</label>
+    <input id="l" type="range" min="-1023" max="1023" step="1" onchange="sendUpdate();" value="0" /><br/>
+  
+    <label for="r">Right</label>
+    <input id="r" type="range" min="-1023" max="1023" step="1" onchange="sendUpdate();" value="0" /><br/>
+
+    <label for="w">Weapon</label>
+    <input id="w" type="range" min="0" max="1023" step="1" onchange="sendUpdate();" value="0" /><br/>
+  </form>
+
+  <div id='messages'></div>
+</body>
+</html>
