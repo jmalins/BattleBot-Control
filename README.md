@@ -22,7 +22,7 @@ for a basic robot setup. Subsequent sections describe the development environmen
 #### Installation steps: ####
 
  1. Download and install the [Arduino IDE](https://www.arduino.cc/en/Main/Software). 
- 2. Install the ESP8266 devtools add-on. Directions [here](http://www.instructables.com/id/Programming-the-ESP8266-12E-using-Arduino-software/?ALLSTEPS). TODO: include custom directions that also explain the quirks of getting to work on OS X, Linux.
+ 2. Install the ESP8266 devtools add-on. Directions [here](http://www.instructables.com/id/Programming-the-ESP8266-12E-using-Arduino-software/?ALLSTEPS). OS X users must install serial port drivers. The NodeMCU typically has an CP210x usb to serial chip, but to save money the manufacturer might have used a CH340 or CH341 chip. Identify the chip on your board by looking at the markings on the chip. The chip should can be just in front of the usb port. CH340 and CH341 driver [here] (https://blog.sengotta.net/signed-mac-os-driver-for-winchiphead-ch340-serial-bridge/) CP210x driver [here](https://www.silabs.com/products/mcu/Pages/USBtoUARTBridgeVCPDrivers.aspx#mac).
  3. Install the ESP8266FS file system upload add-on. Directions [here](http://esp8266.github.io/Arduino/versions/2.3.0/doc/filesystem.html).
 
 #### Loading the firmware: ####
