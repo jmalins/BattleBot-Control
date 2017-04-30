@@ -2,32 +2,15 @@
   Cardboard BattleBot Control Firmware
   Copyright (c) 2016-17 Jeff Malins. All rights reserved.
   
-  HTTP Server adapted from FSBrowser - Example WebServer with SPIFFS backend for esp8266
-  Copyright (c) 2015 Hristo Gochkov.
-
-  WebSocket Server adapted from ESP8266_WebSockets_NeoPixels - ESP8266 Websockets demo using NeoPixels
-  Copyright (c) 2016 Aditya Tannu.
-  
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 #include <ESP8266WiFi.h>
-//#include <ESP8266WiFiMulti.h>
-#include <WiFiClient.h>
-#include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-#include <WebSocketsServer.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 #include <FS.h>
+#include <SPIFFSEditor.h>
+
 #include <stdlib.h>
 #include <Servo.h>
 
@@ -38,7 +21,6 @@
  ********************************************************************************/
  
 #define HTTP_PORT       80
-#define WEBSOCKET_PORT  81
 #define HOST_NAME       "battlebot"
 #define AP_SSID_BASE    "BattleBot-"
 
@@ -141,7 +123,6 @@ void setupWiFi() {
   // start mDNS //
   MDNS.begin(HOST_NAME);
   MDNS.addService("http", "tcp", HTTP_PORT);
-  MDNS.addService("ws",   "tcp", WEBSOCKET_PORT);
   
   DBG_OUTPUT_PORT.print("Open http://");
   DBG_OUTPUT_PORT.print(HOST_NAME);
@@ -149,189 +130,87 @@ void setupWiFi() {
 }
 
 /********************************************************************************
- * Web Server                                                                   *
- *  Implementation of web server methods to server up the UI web resources and  *
- *  allow updating of modifications during development.                         *
+ * REST Event Handler                                                           *
+ *  Respond to REST interface from the client.                                  *
  ********************************************************************************/
-
-// web server instance //
-ESP8266WebServer server(HTTP_PORT);
-
-// file handle for the current upload //
-File fsUploadFile;
-
-// format file size as a human-readable string //
-String formatFileSize(size_t bytes){
-  if (bytes < 1024){
-    return String(bytes) + "B";
-  } else if (bytes < (1024 * 1024)){
-    return String(bytes/1024.0) + "KB";
-  } else if (bytes < (1024 * 1024 * 1024)){
-    return String(bytes / 1024.0 / 1024.0) + "MB";
-  } else {
-    return String(bytes / 1024.0 / 1024.0 / 1024.0) + "GB";
-  }
-}
-
-// infer the content type from the file extension //
-String getContentType(String filename){
-  if (server.hasArg("download"))       return "application/octet-stream";
-  else if (filename.endsWith(".htm"))  return "text/html";
-  else if (filename.endsWith(".html")) return "text/html";
-  else if (filename.endsWith(".css"))  return "text/css";
-  else if (filename.endsWith(".js"))   return "application/javascript";
-  else if (filename.endsWith(".png"))  return "image/png";
-  else if (filename.endsWith(".gif"))  return "image/gif";
-  else if (filename.endsWith(".jpg"))  return "image/jpeg";
-  else if (filename.endsWith(".ico"))  return "image/x-icon";
-  else if (filename.endsWith(".xml"))  return "text/xml";
-  else if (filename.endsWith(".pdf"))  return "application/x-pdf";
-  else if (filename.endsWith(".zip"))  return "application/x-zip";
-  else if (filename.endsWith(".gz"))   return "application/x-gzip";
-  return "text/plain";
-}
-
-// serve the contents of a file back to client //
-bool handleFileRead(String path){
-  DBG_OUTPUT_PORT.println("handleFileRead: " + path);
-  if (path.endsWith("/")) path += "index.html";
-  String contentType = getContentType(path);
-  String pathWithGz = path + ".gz";
-  if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)){
-    if (SPIFFS.exists(pathWithGz))
-      path += ".gz";
-    File file = SPIFFS.open(path, "r");
-    size_t sent = server.streamFile(file, contentType);
-    file.close();
-    return true;
-  }
-  return false;
-}
-
-// update the contents of a file in the file system //
-void handleFileUpload(){
-  if (server.uri() != "/edit") return;
-  HTTPUpload& upload = server.upload();
-  if (upload.status == UPLOAD_FILE_START) {
-    String filename = upload.filename;
-    if (!filename.startsWith("/")) filename = "/"+filename;
-    DBG_OUTPUT_PORT.print("handleFileUpload Name: "); DBG_OUTPUT_PORT.println(filename);
-    fsUploadFile = SPIFFS.open(filename, "w");
-    filename = String();
-  } else if (upload.status == UPLOAD_FILE_WRITE) {
-    DBG_OUTPUT_PORT.print("handleFileUpload Data: "); DBG_OUTPUT_PORT.println(upload.currentSize);
-    if (fsUploadFile)
-      fsUploadFile.write(upload.buf, upload.currentSize);
-  } else if (upload.status == UPLOAD_FILE_END) {
-    if (fsUploadFile) 
-      fsUploadFile.close();
-    DBG_OUTPUT_PORT.print("handleFileUpload Size: "); DBG_OUTPUT_PORT.println(upload.totalSize);
-  }
-}
-
-// delete a file from the file system //
-void handleFileDelete(){
-  if (server.args() == 0) return server.send(500, "text/plain", "BAD ARGS");
-  String path = server.arg(0);
-  DBG_OUTPUT_PORT.println("handleFileDelete: " + path);
-  if (path == "/")
-    return server.send(500, "text/plain", "BAD PATH");
-  if (!SPIFFS.exists(path))
-    return server.send(404, "text/plain", "FileNotFound");
-  SPIFFS.remove(path);
-  server.send(200, "text/plain", "");
-  path = String();
-}
-
-// return the contents of a directory in the file system as JSON //
-void handleFileList() {
-  if (!server.hasArg("dir")) {server.send(500, "text/plain", "BAD ARGS"); return;}
-    
-  String path = server.arg("dir");
-  DBG_OUTPUT_PORT.println("handleFileList: " + path);
-  Dir dir = SPIFFS.openDir(path);
-  path = String();
-
-  String output = "[";
-  while (dir.next()){
-    File entry = dir.openFile("r");
-    if (output != "[") output += ',';
-    bool isDir = false;
-    output += "{ \"type\": \"";
-    output += (isDir)?"dir":"file";
-    output += "\", \"name\": \"";
-    output += String(entry.name()).substring(1);
-    output += "\", \"size\": \"";
-    output += formatFileSize(entry.size());
-    output += "\" }";
-    entry.close();
-  }
-  output += "]";
-  server.send(200, "text/json", output);
-}
-
-// handle control put
-void handleControlPut() {
-  enterState(STATE_DRIVING_WITH_TIMEOUT);
+ 
+/*void handleControlPut(AsyncWebServerRequest *request) {
+  enterState(STATE_DRIVING);
   
-  String body = server.arg("plain"); // "plain" is the PUT body //
+  String body = 
   //DBG_OUTPUT_PORT.println("handleControlPut: " + body);
 
-  // update the hardware //
-  updateHardware(body);
+  int index = body.indexOf(":"), index2 = body.indexOf(":", index + 1);
+  int i = body.substring(0, index).toInt();
+  int j = (index2 >= 0)? 
+    body.substring(index + 1, index2).toInt(): 
+    body.substring(index + 1).toInt();  
+  int k = (index2 >= 0)? 
+    body.substring(index2 + 1).toInt(): 
+    0;
   
-  server.send(200, "text/plain", "");
-  body = String();
-}
+  setWheelPower(i, j);
+  setWeaponPower(k);
+  
+  request->send(200, "text/plain", "");
+}*/
 
 /********************************************************************************
- * Web Server                                                                   *
- *  Implementation of WebSocket API to accept streaming commands from client    *
- *  with low overhead. This can be used simul                         *
+ * WebSocket Event Handler                                                      *
+ *  Implement the WebSocket interface. These functions handle connect,          *
+ *  disconnect and data packets from the client.                                *
  ********************************************************************************/
 
 // websocket server instance //
-WebSocketsServer webSocket = WebSocketsServer(WEBSOCKET_PORT);
+AsyncWebSocketClient *_activeClient;
 
-// 'active' connection //
-uint8_t _activeSocket = -1;
-
-// WebSocket event callback //
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
-  // handle event by type //
+void onWSEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
   switch(type) {
-    case WStype_CONNECTED: 
-      {
-        IPAddress ip = webSocket.remoteIP(num);
-        DBG_OUTPUT_PORT.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-      }
+    case WS_EVT_CONNECT:
+      DBG_OUTPUT_PORT.printf("ws[%s][%u] connect\n", server->url(), client->id());
       // send success message to client //
-      webSocket.sendTXT(num, "Connected");
-      _activeSocket = num;
+      client->printf("Connected: %u", client->id());
+      client->ping();
+      // enable driving //
+      _activeClient = client;
       enterState(STATE_DRIVING);
       setWheelPower(0, 0);
       setWeaponPower(0);
       break;
-    case WStype_DISCONNECTED:
-      DBG_OUTPUT_PORT.printf("[%u] Disconnected!\n", num);
-      _activeSocket = -1;
+    case WS_EVT_DISCONNECT:
+      DBG_OUTPUT_PORT.printf("[%u] Disconnected!\n", client->id());
+      _activeClient = NULL;
       enterState(STATE_IDLE);
       break;
-    case WStype_TEXT:
-      DBG_OUTPUT_PORT.printf("[%u] get Text: %s\n", num, payload);
-      {
-        String cmd((const char *) payload);
-        updateHardware(cmd);
+    case WS_EVT_ERROR:
+      DBG_OUTPUT_PORT.printf("ws[%s][%u] error(%u): %s\n", server->url(), client->id(), *((uint16_t*) arg), (char*) data);
+      break;
+    case WS_EVT_PONG:
+      DBG_OUTPUT_PORT.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len)? (char*)data: "");
+      break;
+    case WS_EVT_DATA:
+      AwsFrameInfo * info = (AwsFrameInfo*) arg;
+      // only handle a single data packet, for now //
+      if(info->final && info->index == 0 && info->len == len) {
+        if(info->opcode == WS_TEXT) {
+          data[len] = 0;
+          DBG_OUTPUT_PORT.printf("[%u] get Text: %s\n", client->id(), data);
+          {
+            String cmd((char *) data);
+            updateHardware(cmd);
+          }
+        }
       }
       break;
-    }
+  }
 }
 
 // set a message to the active web socket //
 // used for heartbeat to client app       //
 void webSocketMessage(String msg) {
-  if(_activeSocket == -1) return;
-  webSocket.sendTXT(_activeSocket, msg.c_str());
+  if(!_activeClient) return;
+  DBG_OUTPUT_PORT.printf("[%u] send message: %s\n", _activeClient->id(), msg.c_str());
+  _activeClient->text(msg.c_str());
 }
 
 /********************************************************************************
@@ -514,6 +393,10 @@ void runStateMachine() {
  *  route handling.                                                             *
  ********************************************************************************/
 
+// web server instance //
+AsyncWebServer server(HTTP_PORT);
+AsyncWebSocket ws("/ws");
+
 void setup(void){
   // configure debug serial port //
   DBG_OUTPUT_PORT.begin(115200);
@@ -532,31 +415,26 @@ void setup(void){
   // start wifi //
   setupWiFi();
 
-  // start the web socket server //
-  webSocket.begin();
-  webSocket.onEvent(webSocketEvent);
-  
-  // web server control, file browser routes //
-  server.on("/list", HTTP_GET, handleFileList);
-  server.on("/edit", HTTP_GET, [](){
-    if(!handleFileRead("/edit.htm")) server.send(404, "text/plain", "FileNotFound");
-  });
-  //server.on("/edit", HTTP_PUT, handleFileCreate);
-  server.on("/edit", HTTP_DELETE, handleFileDelete);
-  server.on("/edit", HTTP_POST, 
-    [](){ server.send(200, "text/plain", ""); }, 
-    handleFileUpload
-  );
+  // attach WebSocket interface //
+  ws.onEvent(onWSEvent);
+  server.addHandler(&ws);
 
-  // hardware control routes //
-  server.on("/control", HTTP_PUT, handleControlPut);
-  
-  // use the not-found route to server up arbitrary files //
-  server.onNotFound([](){
-    if(!handleFileRead(server.uri()))
-      server.send(404, "text/plain", "FileNotFound");
-  });
+  // attach REST interface //
+  //server.on("/control", HTTP_PUT, handleControlPut)
 
+  // serve static file system //
+  server
+     .serveStatic("/", SPIFFS, "/")
+    .setDefaultFile("index.html");
+  
+  // file system editor //
+  server.addHandler(new SPIFFSEditor());
+
+  // 404'd! //
+  server.onNotFound([](AsyncWebServerRequest *request){
+    request->send(404);
+  });
+  
   // we're ready //
   server.begin();
   DBG_OUTPUT_PORT.println("HTTP server started");
@@ -565,6 +443,4 @@ void setup(void){
  
 void loop(void){
   runStateMachine();
-  webSocket.loop();
-  server.handleClient();
 }

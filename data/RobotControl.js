@@ -71,11 +71,11 @@
     const host = (document.location.protocol === 'file:')?
       'battlebot.local': document.location.hostname
 
-  	_socket = new WebSocket('ws://' + host + ':81/', ['arduino']);
+  	_socket = new WebSocket('ws://' + host + '/ws', ['arduino']);
 	  _socket.onopen = function() { 
       _lastHeartbeat = Date.now();
       setState(RobotControl.CONNECTED);
-    }; 
+    };
 	  _socket.onerror = function(error) {
       _lastError = error;
       console.error('Error', error);
