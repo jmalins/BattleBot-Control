@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0' /> 
+    <title>Robot Controller</title>
+    <link rel='stylesheet' type='text/css' href='main.css' />
+  </head>
+  <body>
+    <div id='container'>
+      <div id='heading'>
+        <span id='status-box'></span>
+        <span id='status-text'>Connected</span>
+        <img id='settings-img' src='settings-512.png' />
+      </div>
+      <canvas id='touch-canvas' />
+    </div>
+    <!-- landscape mode message -->
+    <div id='landscape-message'>
+      <div>To drive your robot, <i>Rotate Device</i></div>
+      <img src='05ee958758.png' />
+    </div>
+    <!-- javascript -->
+    <script src='TouchManager.js'></script>
+    <script src='RobotControl.js'></script>
+    <script src='main.js'></script>
+  </body>
+</html>

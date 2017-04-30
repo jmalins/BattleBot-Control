@@ -4,13 +4,14 @@ var canvas, c, container;
 
 setupCanvas();
 TouchManager.setCanvas(canvas);
-//TouchManager.debug = true;
+TouchManager.debug = true;
 
 // map touch starts to joystick IDs //
 TouchManager.ontouchstart = function(touch, tracker) {
+  console.log(canvas.height)
   var maxTouchRange = 100; //djl 60 //60= radius of origin circle
   if(touch.clientX < (window.innerWidth / 2 - 100)) {
-    tracker.addJoystick('left', maxTouchRange, 'cyan', { x: touch.clientX, y: window.innerHeight / 2 });
+    tracker.addJoystick('left', maxTouchRange, 'cyan', { x: touch.clientX, y: canvas.height / 2 });
   } else if(touch.clientX > (window.innerWidth / 2 + 100)) {
     tracker.addJoystick('right', maxTouchRange, 'magenta', { x: touch.clientX, y: window.innerHeight / 2 });
   } else {
@@ -20,12 +21,15 @@ TouchManager.ontouchstart = function(touch, tracker) {
 
 // start robot communication and draw loops //
 setInterval(draw, 1000/35); 
-RobotControl.start();
+//RobotControl.start();
 
 function resetCanvas(e) {  
-  // resize the canvas - but remember - this clears the canvas too. 
-  canvas.width  = window.innerWidth; 
-  canvas.height = window.innerHeight;
+  container = document.getElementById('container')
+  const header = document.getElementById('heading')
+  console.log(container.offsetWidth, container.offsetHeight, window.innerHeight)
+  canvas.width = container.offsetWidth;
+  canvas.height = container.offsetHeight - header.offsetHeight;
+
   
   // make sure we scroll to the top left. 
   window.scrollTo(0, 0); 
@@ -56,12 +60,12 @@ function draw() {
   if(weapon) {
     var weaponPower = ((window.innerHeight - weapon.currentPos.y) / window.innerHeight);
     if(weaponPower < 0.1) weaponPower = 0;
-    RobotControl.setWeaponPower(weaponPower);
+    //RobotControl.setWeaponPower(weaponPower);
   }
 
   c.fillStyle = 'white';
   var powers = RobotControl.getPower();
-  c.fillText('left: ' + powers.left, 30, window.innerHeight - 20); 
+  /*c.fillText('left: ' + powers.left, 30, window.innerHeight - 20); 
   c.fillText('right: ' + powers.right, window.innerWidth / 2 + 30, window.innerHeight - 20); 
   c.fillText('rate: ' + RobotControl.getUpdateRate() + ' Hz', 10, 15);
   c.fillText('weapon: ' + RobotControl.getWeaponPower().toFixed(3), 200, 15);
@@ -71,20 +75,26 @@ function draw() {
   c.fillText('state: ' 
     + state.toUpperCase() 
     + ((state === RobotControl.ERROR)? ' (' + RobotControl.getLastError() + ')': ''), 
-    80, 15);
+    80, 15);*/
 }
 
 function setupCanvas() {  
-  canvas = document.createElement('canvas');
+  //canvas = document.createElement('canvas');
+  canvas = document.getElementById('touch-canvas')
   c = canvas.getContext( '2d' );
 
-  container = document.createElement('div');
+  container = document.getElementById('container')
+  const header = document.getElementById('heading')
+  console.log(container.offsetWidth, container.offsetHeight, window.innerHeight)
+  canvas.width = container.offsetWidth;
+  canvas.height = container.offsetHeight - header.offsetHeight;
+  /*container = document.createElement('div');
   container.className = 'container';
   canvas.width  = window.innerWidth; 
   canvas.height = window.innerHeight; 
 
-  document.body.appendChild(container);
-  container.appendChild(canvas);  
+  //document.body.appendChild(container);
+  container.appendChild(canvas);*/
   
   c.strokeStyle = '#ffffff';
   c.lineWidth   = 2;  

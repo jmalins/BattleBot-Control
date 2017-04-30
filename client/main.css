@@ -1,0 +1,93 @@
+/**
+ *  Master layout
+ **/
+* {
+  -webkit-touch-callout:    none;
+  -webkit-text-size-adjust: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0); 
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0); 
+}
+html {
+  height: 100%;
+}
+body {
+  height: 100%;
+
+  background-color: #111133;
+  color: #ffffff;
+  margin: 0px;
+  font-family: sans-serif;
+  font-weight: 100;
+}
+
+/**
+ *  Show rotate message in portrait mode.
+ **/
+#container {
+  height: 100%;
+}
+#heading {
+  border-bottom: 1px solid #cccccc;
+  padding-left: 2.5vh;
+  height: 10vh;
+  font-size: 7.5vh;
+}
+#status-box {
+  display: inline-block;
+  background-color: green;
+  width: 7vh;
+  height: 7vh;
+  border-radius: 3.5vh;
+  vertical-align: middle;
+}
+#status-text {
+  vertical-align: middle;
+}
+#settings-img {
+  width: 7.5vh;
+  height: 7.5vh;
+  float: right;
+  margin-top: 1.25vh;
+  margin-right: 2vh;
+  cursor: pointer;
+  filter: invert(100%)
+}
+
+#touch-canvas {
+  background-color: #000000;
+  display: block; 
+  position: absolute; 
+}
+
+/**
+ *  Show rotate message in portrait mode.
+ **/
+#landscape-message {
+  display: none;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+
+  text-align: center;
+  font-size: 5vh;
+}
+#landscape-message img {
+  margin-top: 20px;
+  height: 30vh;
+  width: 30vh;
+  filter: invert(100%)
+}
+@media only screen and (orientation:portrait) {
+  #container {
+    display: none;
+  }
+  #landscape-message {
+    display: block;
+  }
+}
+@media only screen and (orientation:landscape) {
+  #landscape-message {
+    display: none;
+  }
+}
