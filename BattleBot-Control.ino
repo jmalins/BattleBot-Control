@@ -172,7 +172,11 @@ AsyncWebSocketClient *_activeClient;
 void onWSEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
   switch(type) {
     case WS_EVT_CONNECT:
-      DBG_OUTPUT_PORT.printf("ws[%s][%u] connect\n", server->url(), client->id());
+      // we connected, print debug message //
+      {
+        IPAddress ip = client->remoteIP();
+        DBG_OUTPUT_PORT.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", client->id(), ip[0], ip[1], ip[2], ip[3], server->url());
+      }
       // send success message to client //
       client->printf("Connected: %u", client->id());
       client->ping();
@@ -199,7 +203,7 @@ void onWSEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
       if(info->final && info->index == 0 && info->len == len) {
         if(info->opcode == WS_TEXT) {
           data[len] = 0;
-          DBG_OUTPUT_PORT.printf("[%u] get Text: %s\n", client->id(), data);
+          //DBG_OUTPUT_PORT.printf("[%u] command: %s\n", client->id(), data);
           {
             enterState(STATE_DRIVING_WITH_TIMEOUT);
   
@@ -216,7 +220,7 @@ void onWSEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 // used for heartbeat to client app       //
 void webSocketMessage(String msg) {
   if(!_activeClient) return;
-  DBG_OUTPUT_PORT.printf("[%u] send message: %s\n", _activeClient->id(), msg.c_str());
+  //DBG_OUTPUT_PORT.printf("[%u] send message: %s\n", _activeClient->id(), msg.c_str());
   _activeClient->text(msg.c_str());
 }
 
@@ -241,9 +245,6 @@ void webSocketMessage(String msg) {
 #define ESC_MAX_USEC    1800
 
 Servo weaponESC;
-
-// drive command timeout //
-long _lastCommandMillis;
 
 // configure the hardware //
 void setupHardware() {
