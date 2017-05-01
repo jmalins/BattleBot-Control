@@ -134,26 +134,31 @@ void setupWiFi() {
  *  Respond to REST interface from the client.                                  *
  ********************************************************************************/
  
-/*void handleControlPut(AsyncWebServerRequest *request) {
-  enterState(STATE_DRIVING);
-  
-  String body = 
-  //DBG_OUTPUT_PORT.println("handleControlPut: " + body);
+void handleControlPut(AsyncWebServerRequest *request) {
+  // should have a POST body //
+  if(request->hasParam("body", true)) {
+    enterState(STATE_DRIVING_WITH_TIMEOUT);
+    
+    String body = request->getParam("body", true)->value();
+    //DBG_OUTPUT_PORT.println("handleControlPut: " + body);
 
-  int index = body.indexOf(":"), index2 = body.indexOf(":", index + 1);
-  int i = body.substring(0, index).toInt();
-  int j = (index2 >= 0)? 
-    body.substring(index + 1, index2).toInt(): 
-    body.substring(index + 1).toInt();  
-  int k = (index2 >= 0)? 
-    body.substring(index2 + 1).toInt(): 
-    0;
+    int index = body.indexOf(":"), index2 = body.indexOf(":", index + 1);
+    int i = body.substring(0, index).toInt();
+    int j = (index2 >= 0)? 
+      body.substring(index + 1, index2).toInt(): 
+      body.substring(index + 1).toInt();  
+    int k = (index2 >= 0)? 
+      body.substring(index2 + 1).toInt(): 
+      0;
   
-  setWheelPower(i, j);
-  setWeaponPower(k);
-  
-  request->send(200, "text/plain", "");
-}*/
+    setWheelPower(i, j);
+    setWeaponPower(k);
+      
+    request->send(200, "text/plain", "ok");
+  } else {
+    request->send(400);
+  }  
+}
 
 /********************************************************************************
  * WebSocket Event Handler                                                      *
@@ -173,7 +178,7 @@ void onWSEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
       client->ping();
       // enable driving //
       _activeClient = client;
-      enterState(STATE_DRIVING);
+      enterState(STATE_DRIVING_WITH_TIMEOUT);
       setWheelPower(0, 0);
       setWeaponPower(0);
       break;
@@ -196,6 +201,8 @@ void onWSEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
           data[len] = 0;
           DBG_OUTPUT_PORT.printf("[%u] get Text: %s\n", client->id(), data);
           {
+            enterState(STATE_DRIVING_WITH_TIMEOUT);
+  
             String cmd((char *) data);
             updateHardware(cmd);
           }
@@ -225,10 +232,15 @@ void webSocketMessage(String msg) {
 #define PIN_L_PWM   PIN_PWM_B   // B is left       //
 #define PIN_L_DIR   PIN_DIR_B   // high is forward //
 
-// use SD2 for WIFI override //
+// use D5 for WIFI override //
 #define PIN_WIFI_AP_MODE  PIN_D5
 
-Servo weaponESC, servo;
+// use D6 for weapon ESC //
+#define PIN_WEAPON_ESC  PIN_D6
+#define ESC_MIN_USEC    900
+#define ESC_MAX_USEC    1800
+
+Servo weaponESC;
 
 // drive command timeout //
 long _lastCommandMillis;
@@ -248,11 +260,8 @@ void setupHardware() {
   // WiFi override //
   pinMode(PIN_WIFI_AP_MODE, INPUT_PULLUP);
 
-  weaponESC.attach(PIN_D6);
-  weaponESC.writeMicroseconds(900);
-  
-  servo.attach(PIN_D7);
-  servo.write(90);
+  weaponESC.attach(PIN_WEAPON_ESC);
+  weaponESC.writeMicroseconds(ESC_MIN_USEC);
 }
 
 // get the debugging LED //
@@ -283,10 +292,8 @@ void setWheelPower(int left, int right) {
 }
 
 // set the weapon power //
-void setWeaponPower(int power) {
-  power = constrain(power, 0, 1023);
-  
-  int usec = 900 + (power * 900) / 1024;
+void setWeaponPower(int power) {  
+  int usec = map(power, 0, 1023, ESC_MIN_USEC, ESC_MAX_USEC);
   weaponESC.writeMicroseconds(usec);
 }
 
@@ -420,11 +427,11 @@ void setup(void){
   server.addHandler(&ws);
 
   // attach REST interface //
-  //server.on("/control", HTTP_PUT, handleControlPut)
+  server.on("/control", HTTP_PUT, handleControlPut);
 
   // serve static file system //
   server
-     .serveStatic("/", SPIFFS, "/")
+    .serveStatic("/", SPIFFS, "/")
     .setDefaultFile("index.html");
   
   // file system editor //
