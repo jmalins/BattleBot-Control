@@ -1,6 +1,9 @@
 #! /bin/sh
+FPATH="data"
 if [ -n "$1" ]; then
-  for file in `find data/$1 -type f`; do curl -v -F "file=@$PWD/$file" battlebot.local/edit; done
-else 
-  for file in `find data -type f`; do curl -v -F "file=@$PWD/$file" battlebot.local/edit; done
+  FPATH="data/$1"
 fi
+for file in $(find $FPATH -type f); do \
+  XFILE=${file#*/}
+  curl -v -F "file=@$file;filename=/$XFILE" -F "path=/$XFILE" -X PUT 192.168.0.143/edit; \
+done
