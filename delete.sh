@@ -1,6 +1,7 @@
 #! /bin/sh
+BB_SERVER="${BB_SERVER:-battlebot.local}"
 if [ -n "$1" ]; then
-  curl -X DELETE -v "http://battlebot.local/edit" -F "path=/$1"
+  curl -v -X DELETE -v  -F "path=/$1" http://$BB_SERVER/edit
 else 
   echo "ERROR: specify a file name to delete"
 fi
