@@ -15,7 +15,7 @@ well-documented: Arduino, HTML5 and javascript. The hope is to leverage common m
   
 The goal is to keep the cost of a base "kit" to under 20USD.
 
- #### Reference CAD ####
+ #### Reference CAD: ####
  To aid in ideation and your designs, reference CAD files are provided for standard Kit of Parts hardware and a handful of reference designs:
  
   * [Kit of Parts CAD](https://cad.onshape.com/documents/d5d1b32c4a18b4ebb4a5470a/w/1e2f7e3ea05ba14674303259/e/ee521e100952e2dbed4188e8) - High-fidelity models of the motors, MCU + motor shield and various battery options.
