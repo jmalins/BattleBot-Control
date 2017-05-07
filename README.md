@@ -11,9 +11,16 @@ well-documented: Arduino, HTML5 and javascript. The hope is to leverage common m
     [here](https://www.aliexpress.com/item/1X-for-Arduino-Smart-Car-Robot-Plastic-Tire-Wheel-with-DC-3-6V-Gear-Motor-New/32693010819.html).
  3. Arduino core libraries for the [ESP8266](http://esp8266.github.io/Arduino/versions/2.3.0/doc/libraries.html#mdns-and-dns-sd-responder-esp8266mdns-library). 
  4. Control over WiFi from a mobile device or computer via a browser-based user interface.
- 5. Cardboard robot body, ranging from a simple box, to a laser cut design from CAD. OnShape files for the parts, and a sample robot body for the ["(BOX) Factory of Sadness"](https://cad.onshape.com/documents/e8cde76fb8fa97701da61992/w/c29f61e2e364ccd29e25da63/e/e3f6378e05fc7aa48f5b6eb2) robot make a good starting point.
- 
+ 5. Cardboard robot body, ranging from a simple box, to a laser cut design from CAD. 
+  
 The goal is to keep the cost of a base "kit" to under 20USD.
+
+ #### Reference CAD ####
+ To aid in ideation and your designs, reference CAD files are provided for standard Kit of Parts hardware and a handful of reference designs:
+ 
+  * [Kit of Parts CAD](https://cad.onshape.com/documents/d5d1b32c4a18b4ebb4a5470a/w/1e2f7e3ea05ba14674303259/e/ee521e100952e2dbed4188e8) - High-fidelity models of the motors, MCU + motor shield and various battery options.
+  * [Cardboard NewBot](https://cad.onshape.com/documents/f0340e1790b5a8dc21cf42b3/w/84b5d7791762dae47618e688/e/1b6152b64cf9e13c0b862c89) - A simple rectangular "box" robot made with tab and slot construction.
+  * ["(BOX) Factory of Sadness"](https://cad.onshape.com/documents/e8cde76fb8fa97701da61992/w/c29f61e2e364ccd29e25da63/e/e3f6378e05fc7aa48f5b6eb2) - A wedge-bot design with kill saw and 3D printed parts.
 
 ## Basic Setup ##
 This section describes the minimum steps needed to load this firmware onto your NodeMCU. The firmware should work out of the box
