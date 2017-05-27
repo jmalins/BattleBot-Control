@@ -1,0 +1,25 @@
+{
+  "name": "combatbot-bot-client",
+  "version": "0.5.0",
+  "description": "Cardboard combat robot web client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmalins/BattleBot-Control.git"
+  },
+  "keywords": [
+    "esp8266",
+    "robot",
+    "html5",
+    "touch-ui"
+  ],
+  "author": "Jeff Malins <jmalins@gmail.com>",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/jmalins/BattleBot-Control/issues"
+  },
+  "homepage": "https://github.com/jmalins/BattleBot-Control#readme"
+}
