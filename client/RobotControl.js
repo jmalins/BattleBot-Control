@@ -23,8 +23,10 @@
  *    getPower() : returns the current motor powers as a { left, right } object
  **/
 (function() {
-  var _state, _updateRate = 0;
+  var _state, _stateMachineInterval;
   var _leftPower = 0, _rightPower = 0, _weaponPower = 0;
+  var _deadBandLeft = 0, _deadBandRight = 0;
+  var _socket, _lastError, _lastHeartbeat = Date.now();
 
   // handle state change //
   function setState(state) {
@@ -38,79 +40,108 @@
     }
   }
 
+  // state machine monitoring, run on an interval //
+  function runStateMachine() {
+    switch(_state) {
+      case RobotControl.CONNECTED:
+        // if we haven't gotten a heartbeat in 1 second, we're disconnected // 
+        const elapsed = Date.now() - _lastHeartbeat;
+        if(elapsed > 2000) {
+          console.log('watchdog time out', elapsed)
+          setState(RobotControl.DISCONNECTED);
+        }
+        break;
+      case RobotControl.DISCONNECTED:
+      case RobotControl.ERROR:
+        // attempt to reconnect //
+        //connect();
+        break;
+    }
+  }
+
   // build a packet from current values //
   function getPacketValue() {
     return _leftPower + ':' + _rightPower + ':' + Math.round(_weaponPower * 1023);
   }
 
-  // send a control packet to the robot   //
-  // takes an (err, value) style callback //
-  function sendUpdate(value, callback) {
-    var xhr = new XMLHttpRequest();
+  function connect() {
+    if(_state === RobotControl.CONNECTING) return;
 
-    // suppress update when debugging locally //
-    if(document.location.protocol === 'file:') return;
+    setState(RobotControl.CONNECTING);
+    const host = (document.location.protocol === 'file:')?
+      'battlebot.local': document.location.hostname
 
-    xhr.open('PUT', '/control', true);
-    xhr.onload = function(e) {
-      var res = { text: xhr.responseText, status: xhr.status };
-      callback((res.status != 200)? res.text: null, res);
+  	_socket = new WebSocket('ws://' + host + '/ws', ['arduino']);
+	  _socket.onopen = function() { 
+      _lastHeartbeat = Date.now();
+      setState(RobotControl.CONNECTED);
     };
-    xhr.onerror = function(e) {
-      callback(e.type, e);
+	  _socket.onerror = function(error) {
+      _lastError = error;
+      console.error('Error', error);
+      setState(RobotControl.ERROR);
     };
-    xhr.timeout   = RobotControl.timeout;
-    xhr.ontimeout = xhr.onerror;
-
-    xhr.send(value);
+	  _socket.onmessage = function(e) {  
+      if(e.data === 'heartbeat') {
+        _lastHeartbeat = Date.now();
+      } else {
+  		  console.log('Message', e.data);
+      }
+	  };
+	  _socket.onclose = function(e) {
+		  console.log('Close', e.data);
+      if(_state !== RobotControl.ERROR && _state !== RobotControl.STOPPED) {
+        setState(RobotControl.DISCONNECTED);
+      }
+	  };
   }
 
-  // start the polling loop //
-  function pollRobot() {
-    var pollStart = new Date();
-    sendUpdate(getPacketValue(), function(err, res) {
-      //console.log('packet received', err, res);
-
-      // was the loop terminated? //
-      _lastError = err;
-      if(_state === RobotControl.STOPPED) {
-        _updateRate = 0;
-        return;
+  function disconnect() {
+    if(_socket) {
+      if(_socket.readyState === WebSocket.OPEN) {
+        _socket.close();
       }
+      _socket = null;
+    }
+  }
 
-      // handle errors //
-      if(_lastError) {
+  function update() {
+    if(_socket && _state === RobotControl.CONNECTED) {
+      if(_socket.readyState !== WebSocket.OPEN) {
+        _lastError = 'Invalid state: ' +
+          (_socket.readyState === WebSocket.CONNECTING)? 'CONNECTING':
+          (_socket.readyState === WebSocket.CLOSING)? 'CLOSING':
+          (_socket.readyState === WebSocket.CLOSED)?  'CLOSED':
+          'UNKNOWN';
         setState(RobotControl.ERROR);
-      } else if(_state !== RobotControl.CONNECTED) {
-        setState(RobotControl.CONNECTED);
+        return;
+      } 
+      try {
+        _socket.send(getPacketValue());
+      } catch(e) {
+        _lastError = e;
+        setState(RobotControl.ERROR);
       }
-
-      // poll again //
-      var pollMs = (_state === RobotControl.ERROR)? 1000: 1; // back off if error //
-      setTimeout(pollRobot, pollMs);
-      
-      // compute update rate //
-      var delayMs = new Date().getTime() - pollStart.getTime();
-      if(delayMs > 0) {
-        _updateRate = Math.floor(1000 * 100 / delayMs) / 100;
-      }
-    });
+    }
   }
 
   window.RobotControl = {
     start: function() {
-      setState(RobotControl.CONNECTING);
-      pollRobot();
+      connect();
+      _stateMachineInterval = window.setInterval(runStateMachine, 2000);
     },
     stop: function() {
       setState(RobotControl.STOPPED);
+      disconnect();
+      window.clearInterval(_stateMachineInterval);
     },
 
     // state management //
-    STOPPED:    'stopped',
-    CONNECTING: 'connecting',
-    CONNECTED:  'connected',
-    ERROR:      'error',
+    STOPPED:      'stopped',
+    CONNECTING:   'connecting',
+    CONNECTED:    'connected',
+    ERROR:        'error',
+    DISCONNECTED: 'disconnected',
     getState: function() {
       return _state;
     },
@@ -118,13 +149,26 @@
     getLastError: function() {
       return _lastError;
     },
-    getUpdateRate: function() {
-      return _updateRate;
+
+    // set deadband //
+    setDeadBand(left, right) {
+      _deadBandLeft  = left;
+      _deadBandRight = right;
     },
-    timeout: 250, // 250ms //
 
     // control motor power //
     setPower: function(left, right) {
+      left = (
+        (left > 0)?  _deadBandLeft + left:
+        (left < 0)? -_deadBandLeft + left:
+        left
+      )
+      right = (
+        (right > 0)?  _deadBandRight + right:
+        (right < 0)? -_deadBandRight + right:
+        right
+      )
+
       _leftPower = (
         (left >  1023)? 1023:
         (left < -1023)? -1023:
@@ -135,6 +179,7 @@
         (right < -1023)? -1023:
         Math.round(right)
       );
+      update()
     },
     getPower: function() {
       return { left: _leftPower, right: _rightPower };

@@ -24,6 +24,9 @@ for a basic robot setup. Subsequent sections describe the development environmen
  1. Download and install the [Arduino IDE](https://www.arduino.cc/en/Main/Software). 
  2. Install the ESP8266 devtools add-on. Directions [here](http://www.instructables.com/id/Programming-the-ESP8266-12E-using-Arduino-software/?ALLSTEPS). TODO: include custom directions that also explain the quirks of getting to work on OS X, Linux.
  3. Install the ESP8266FS file system upload add-on. Directions [here](http://esp8266.github.io/Arduino/versions/2.3.0/doc/filesystem.html).
+ 4. Install Arduino networking libraries. Currently, these are not available in the Library Manager and must be installed manually. Directions for installing Arduino libraries are available [here](https://www.arduino.cc/en/guide/libraries).
+   * [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP)
+   * [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
 
 #### Loading the firmware: ####
 
