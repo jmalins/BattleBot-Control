@@ -1,10 +1,16 @@
 import buble from 'rollup-plugin-buble'
+import cleanup from 'rollup-plugin-cleanup'
 
 export default {
-  entry: 'src/index.js',
+  entry: 'lib/index.js',
   format: 'cjs',
-  plugins: [ buble() ],
+  treeshake: false,
+  plugins: [ buble(), cleanup() ],
   dest: 'dist/bundle.js',
   // comments for generated bundle //
-  banner: '/*** machine generated, do not edit ***/'
+  banner: [
+    '/** machine generated, do not edit **/',
+    '',
+    '/* eslint-disable */'
+  ].join('\n')
 }
