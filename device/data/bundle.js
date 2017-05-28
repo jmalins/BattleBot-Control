@@ -300,10 +300,9 @@ function doAdd (touch) {
   if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
   for (var controlName in TouchManager.controls) {
     var control = TouchManager.controls[controlName];
-    touch = convertTouch(touch)
     if (control.matchesTouch(touch)) {
       _touchOwners[touch.identifier] = control
-      control.touch = touch
+      control.touch = convertTouch(touch)
       break
     }
   }
