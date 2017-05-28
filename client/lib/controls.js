@@ -4,6 +4,7 @@
  *
  * @module controls
  */
+import { constrain } from './utils'
 import { Errors, SETUP } from './error'
 
 /**************************************************************
@@ -112,12 +113,6 @@ export const TouchManager = {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    ctx.strokeStyle = '#ffffff'
-    ctx.lineWidth = 1
-    ctx.fillStyle = 'white'
-
-    ctx.fillText('test ' + new Date(), 10, 10)
-
     // loop through controls //
     for (const controlName in controls) {
       const control = controls[controlName]
@@ -185,7 +180,6 @@ function convertToPixels (dim, value) {
 export class Control {
   constructor (name) {
     this.name = name || `control${++Control.count}`
-    this.position = { }
 
     this.touch = null
     this.pixelCache = null
@@ -198,16 +192,6 @@ export class Control {
    */
   matchesTouch (touch) {
     return false
-  }
-
-  /**
-   * Overridden by subclasses to add dimensions to be translated
-   * into pixels.
-   *
-   * Don't forget to include 'super.dimensions'
-   */
-  getDimensions () {
-    return { x: this.position.x, y: this.position.y }
   }
 
   /**
@@ -227,9 +211,13 @@ export class Control {
 }
 Control.count = 0
 
+/**
+ * A joystick
+ */
 export class Joystick extends Control {
   constructor (name) {
     super(name)
+    this.position = { x: 0, y: 0 }
     this.radius = 10
     this.sticky = false
     this.style = 'white'
@@ -248,7 +236,7 @@ export class Joystick extends Control {
   }
 
   getDimensions () {
-    return { ...super.getDimensions(), r: this.radius }
+    return { x: this.position.x, y: this.position.y, r: this.radius }
   }
 
   matchesTouch (touch) {
@@ -293,9 +281,13 @@ export class Joystick extends Control {
   }
 }
 
+/**
+ * A button
+ */
 export class Button extends Control {
   constructor (name) {
     super(name)
+    this.position = { x: 0, y: 0 }
     this.radius = 10
     this.sticky = false
     this.style = 'white'
@@ -306,7 +298,7 @@ export class Button extends Control {
   }
 
   getDimensions () {
-    return { ...super.getDimensions(), r: this.radius }
+    return { x: this.position.x, y: this.position.y, r: this.radius }
   }
 
   matchesTouch (touch) {
@@ -323,6 +315,7 @@ export class Button extends Control {
 
     ctx.beginPath()
     ctx.strokeStyle = this.style
+    ctx.fillStyle = this.style
     ctx.lineWidth = 6
     ctx.arc(x, y, r, 0, Math.PI * 2, true)
     if (this.pressed) {
@@ -332,3 +325,114 @@ export class Button extends Control {
     }
   }
 }
+
+/**
+ *  A slider. This is really shoddy algorithm design, and it only
+ *  support strictly horizontal or vertical sliders. Major FIXME
+ *  to come back and due to proper computation geometry.
+ */
+export class Slider extends Control {
+  constructor (name) {
+    super(name)
+    this.position = { x: 0, y: 0 }
+    this.radius = 10
+    this.length = 30
+    this.type = Slider.VERTICAL
+    this.sticky = true
+    this.style = 'white'
+  }
+
+  getDimensions () {
+    return {
+      x: this.position.x,
+      y: this.position.y,
+      r: this.radius,
+      l: this.length
+    }
+  }
+
+  getHelperDimensions () {
+    const { x, y, r, l } = this.getPixelDimensions()
+    if (this.type === Slider.HORIZONTAL) {
+      return {
+        x1: x,
+        x2: x + l,
+        xa: x + l,
+        y1: y - r,
+        y2: y + r,
+        ya: y
+      }
+    } else {
+      return {
+        x1: x - r,
+        x2: x + r,
+        xa: x,
+        y1: y,
+        y2: y + l,
+        ya: y + l
+      }
+    }
+  }
+
+  matchesTouch (touch) {
+    const { clientX, clientY } = touch
+    const { x, y, r } = this.getPixelDimensions()
+    const { x1, y1, x2, y2, xa, ya } = this.getHelperDimensions()
+
+    // check if in the end circles //
+    const dx = (x - clientX)
+    const dy = (y - clientY)
+    if (Math.sqrt(dx * dx + dy * dy) <= r) return true
+    const dxa = (xa - clientX)
+    const dya = (ya - clientY)
+    if (Math.sqrt(dxa * dxa + dya * dya) <= r) return true
+    console.log(clientX, xa, dxa, clientY, ya, dya)
+
+    // check if in the rectangle //
+    return (clientX >= x1) && (clientX <= x2) && (clientY >= y1) && (clientY <= y2)
+  }
+
+  draw (ctx) {
+    const { x, y, r } = this.getPixelDimensions()
+    const { x1, y1, x2, y2, xa, ya } = this.getHelperDimensions()
+
+    ctx.beginPath()
+    ctx.strokeStyle = this.style
+    ctx.lineWidth = 2
+    if (this.type === Slider.HORIZONTAL) {
+      ctx.moveTo(x1, y1)
+      ctx.lineTo(x2, y1)
+      ctx.arc(xa, ya, r, Math.PI * 3 / 2, Math.PI / 2, false)
+      ctx.moveTo(x2, y2)
+      ctx.lineTo(x1, y2)
+      ctx.arc(x, y, r, Math.PI / 2, Math.PI * 3 / 2, false)
+    } else {
+      ctx.arc(x, y, r, Math.PI, Math.PI * 2, false)
+      ctx.moveTo(x2, y1)
+      ctx.lineTo(x2, y2)
+      ctx.arc(xa, ya, r, 0, Math.PI, false)
+      ctx.moveTo(x1, y2)
+      ctx.lineTo(x1, y1)
+    }
+    ctx.stroke()
+
+    // ctx.arc(x, y, 3, 0, Math.PI * 2, true)
+    // ctx.arc(xa, ya, 3, 0, Math.PI * 2, true)
+    // ctx.stroke()
+
+    // paint the current touch //
+    if (this.touch) {
+      const { clientX, clientY } = this.touch
+      ctx.beginPath()
+      if (this.type === Slider.HORIZONTAL) {
+        ctx.arc(constrain(clientX, x, xa), y, r - 4, 0, Math.PI * 2, true)
+      } else {
+        ctx.arc(x, constrain(clientY, y, ya), r - 4, 0, Math.PI * 2, true)
+      }
+      ctx.strokeStyle = this.style
+      ctx.stroke()
+    }
+  }
+}
+Slider.HORIZONTAL = 'HORIZONTAL'
+Slider.VERTICAL = 'VERTICAL'

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { Hardware, Motor, Servo, DigitalOutput, DigitalInput } from './hardware'
 import { TankDrive, ArcadeDrive } from './drive'
-import { Joystick, Button, TouchManager } from './controls'
+import { Joystick, Button, Slider, TouchManager } from './controls'
 
 // set the default hardware configuration    //
 // you can call Hardware.configure() in your //

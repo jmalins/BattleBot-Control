@@ -20,10 +20,19 @@ function setup () {
 
   // create the weapon button //
   weaponButton = new Button('weapon')
-  weaponButton.position.x = 80
+  weaponButton.position.x = 60
   weaponButton.position.y = 50
   weaponButton.radius = 10
-  weaponButton.mode = Button.TOGGLE
+  weaponButton.sticky = true
+  weaponButton.style = 'blue'
+
+  var slider = new Slider('slider')
+  slider.position.x = 85
+  slider.position.y = 20
+  slider.radius = 5
+  slider.length = 30
+  slider.type = Slider.VERTICAL
+  slider.style = 'red'
 }
 
 // this is run at update rate //
