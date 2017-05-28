@@ -9,7 +9,7 @@ export default {
     buble({ objectAssign: 'Object.assign' }),
     cleanup()
   ],
-  dest: 'dist/bundle.js',
+  dest: 'build/bundle.js',
   sourceMap: true,
   // comments for generated bundle //
   banner: [

@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "rollup -c",
+    "postbuild": "cp web/* build",
     "watch": "rollup -c -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
