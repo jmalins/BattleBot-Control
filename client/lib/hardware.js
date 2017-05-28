@@ -4,11 +4,10 @@
 import { constrain, map } from './utils'
 import { Errors, SETUP, DATA } from './error'
 
-/***************************************************************
+/**************************************************************
  * Hardware Configuration                                      *
  ***************************************************************/
 
-const _devices = { }
 const _configs = { }
 
 /**
@@ -38,6 +37,8 @@ export const DriverOptions = {
  *  Hardware manager
  */
 export const Hardware = {
+  devices: { },
+
   configure (config) {
     // process all device names in the setup //
     for (const deviceName in config) {
@@ -60,20 +61,20 @@ export const Hardware = {
       let errors = false
       for (const optName in driverOpts) {
         if (!options[optName] && driverOpts[optName]) {
-          Errors.add(SETUP, `Driver for '${driverName}' requires option: ${optName}`)
+          Errors.add(SETUP, `Driver '${deviceName}.${driverName}' requires option: ${optName}`)
           errors = true
         }
       }
       // make sure no extra options declared and format is an integer //
       for (const optName in options) {
-        if (!driverOpts[optName]) {
-          Errors.add(SETUP, `Driver for '${driverName}' has unsupported option: ${optName}`)
+        if (typeof driverOpts[optName] === 'undefined') {
+          Errors.add(SETUP, `Driver '${deviceName}.${driverName}' has unsupported option: ${optName}`)
           errors = true
           continue
         }
         const value = options[optName]
         if (!Number.isInteger(value)) {
-          Errors.add(SETUP, `Driver for '${driverName}' has invalid option '${optName}': ${value}`)
+          Errors.add(SETUP, `Driver option '${deviceName}.${driverName}.${optName}' has invalid value: ${value}`)
           errors = true
         }
       }
@@ -88,7 +89,7 @@ export const Hardware = {
 
   getConfigurationJSON () {
     // validate all devices are configured //
-    for (const deviceName in _devices) {
+    for (const deviceName in Hardware.devices) {
       const config = _configs[deviceName]
       if (!config) {
         Errors.add(SETUP, `Device is not configured: ${deviceName}`)
@@ -100,8 +101,8 @@ export const Hardware = {
   getRequestJSON () {
     const packet = { }
     // get device outputs //
-    for (const deviceName in _devices) {
-      const device = _devices[deviceName]
+    for (const deviceName in Hardware.devices) {
+      const device = Hardware.devices[deviceName]
       if (device.getOutput) {
         packet[deviceName] = device.getOutput()
       }
@@ -114,7 +115,7 @@ export const Hardware = {
       const data = JSON.parse(json)
       // write inputs to devices //
       for (const deviceName in data) {
-        const device = _devices[deviceName]
+        const device = Hardware.devices[deviceName]
         if (device && device.setInput) {
           device.setInput(data[deviceName])
         }
@@ -125,12 +126,12 @@ export const Hardware = {
   }
 }
 
-function _addDevice (name, device) {
-  if (_devices[name]) {
+function addDevice (name, device) {
+  if (Hardware.devices[name]) {
     Errors.add(SETUP, `Device already exists: ${name}`)
     return
   }
-  _devices[name] = device
+  Hardware.devices[name] = device
 }
 
 /***************************************************************
@@ -139,30 +140,48 @@ function _addDevice (name, device) {
 
 /**
  * Generic device base class.
+ *
  */
 export class Device {
+  /**
+   * Constructor
+   * @param {string} name - name of the device
+   */
   constructor (name) {
     this.name = name
-    _addDevice(name, this)
     this.value = 0
+    addDevice(name, this)
   }
 
   set (value) {
     this.value = value
   }
 
+  /**
+   * Get the value of the device.
+   *
+   * For output devices, this reads back the last call to 'set()', for
+   * input devices, it returns the last value read from the controller.
+   *
+   * @return {number} current value of the device
+   */
   get () {
     return this.value
   }
 }
 
 /**
- * Motor
+ * @class Motor
  *
  * Controls a motor, which is presumed to support both forward
  * reverse movement with values of -1.0 to 1.0.
  */
 export class Motor extends Device {
+  /**
+   * Constructor
+   * @constructor
+   * @param {string} name - name of the motor
+   */
   constructor (name) {
     super(name)
     this.reversed = false
