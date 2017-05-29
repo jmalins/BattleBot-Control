@@ -17,10 +17,10 @@ export class TwoWheelDrive {
   /**
    * Constructor
    */
-  constructor () {
+  constructor (leftMotor, rightMotor) {
     this.motors = [
-      new Motor('leftMotor'),
-      new Motor('rightMotor')
+      leftMotor || new Motor('leftMotor'),
+      rightMotor || new Motor('rightMotor')
     ]
     this.swapMotors = false
   }
