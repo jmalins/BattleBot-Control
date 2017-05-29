@@ -16,6 +16,7 @@
       "params": {
         "pwmPin": 1,
         "dirPin": 3
+      }
     },
     "weaponMotor": {
       "driver": "PWM",
