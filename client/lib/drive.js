@@ -29,7 +29,7 @@ export class TwoWheelDrive {
     return this.motors[this.swapMotors ? 1 : 0]
   }
   get rightMotor () {
-    return this.motors[this.swapMotors ? 1 : 0]
+    return this.motors[this.swapMotors ? 0 : 1]
   }
 
   set reverseLeftMotor (value) {
