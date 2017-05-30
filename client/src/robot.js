@@ -2,13 +2,12 @@
 
 // define devices and controls //
 var arcadeDrive, motorMotor;
-var driveStick, weaponButton, weaponButton2;
+var driveStick, weaponSlider, forwardButton, reverseButton;
 
 // this is run once //
 function setup () {
   // setup hardware interface //
   arcadeDrive = new ArcadeDrive()
-  
   weaponMotor = new Motor('weaponMotor')
 
   // create the drive joystick //
@@ -17,32 +16,33 @@ function setup () {
   driveStick.position.y = 50
   driveStick.radius = 15
 
-  // create the weapon button //
-  weaponButton = new Button('weapon1')
-  weaponButton.position.x = 60
-  weaponButton.position.y = 30
-  weaponButton.radius = 5
-  weaponButton.sticky = true
-  weaponButton.style = 'blue'
-  weaponButton.groupName = 'weaponGroup'
+  // weapon power //
+  weaponSlider = new Slider('weapon')
+  weaponSlider.position.x = 85
+  weaponSlider.position.y = 20
+  weaponSlider.radius = 5
+  weaponSlider.length = 30
+  weaponSlider.type = Slider.VERTICAL
+  weaponSlider.sticky = true
+  weaponSlider.style = 'red'
 
-  weaponButton2 = new Button('weapon2')
-  weaponButton2.position.x = 60
-  weaponButton2.position.y = 70
-  weaponButton2.radius = 5
-  weaponButton2.sticky = true
-  weaponButton2.style = 'blue'
-  weaponButton2.groupName = 'weaponGroup'
-  weaponButton2.pressed = true
+  // drive direction buttons //
+  reverseButton = new Button('reverse')
+  reverseButton.position.x = 60
+  reverseButton.position.y = 30
+  reverseButton.radius = 5
+  reverseButton.sticky = true
+  reverseButton.style = 'blue'
+  reverseButton.groupName = 'weaponGroup'
 
-  var slider = new Slider('slider')
-  slider.position.x = 85
-  slider.position.y = 20
-  slider.radius = 5
-  slider.length = 30
-  slider.type = Slider.VERTICAL
-  slider.sticky = true
-  slider.style = 'red'
+  forwardButton = new Button('forward')
+  forwardButton.position.x = 60
+  forwardButton.position.y = 70
+  forwardButton.radius = 5
+  forwardButton.sticky = true
+  forwardButton.style = 'blue'
+  forwardButton.groupName = 'weaponGroup'
+  forwardButton.pressed = true
 }
 
 // this is run at update rate //
@@ -53,10 +53,17 @@ function loop () {
   arcadeDrive.setSpeedAndRotation(speed, rotation)
   
   // handle weapon control //
-  if (weaponButton.pressed) {
-    weaponMotor.set(1.0)
+  weaponMotor.set(weaponSlider.value)
+
+  // handle driving reverse //
+  if (reverseButton.pressed) {
+    arcadeDrive.leftMotor.reversed = true
+    arcadeDrive.rightMotor.reversed = true
+    arcadeDrive.swapMotors = true
   } else {
-    weaponMotor.set(0)
+    arcadeDrive.leftMotor.reversed = false
+    arcadeDrive.rightMotor.reversed = false
+    arcadeDrive.swapMotors = false
   }
 }
 
