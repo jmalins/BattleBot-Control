@@ -8,7 +8,7 @@ import { constrain } from './utils'
 import { Errors, SETUP } from './error'
 
 /**************************************************************
- * TouchManager Implementation                                *
+ * ControlManager Implementation                              *
  **************************************************************/
 
 const _touchOwners = { }
@@ -16,8 +16,8 @@ const _touchOwners = { }
 function convertTouch (touch) {
   return {
     identifier: touch.identifier,
-    clientX: Math.round(touch.clientX - TouchManager.canvas.offsetLeft),
-    clientY: Math.round(touch.clientY - TouchManager.canvas.offsetTop),
+    clientX: Math.round(touch.clientX - ControlManager.canvas.offsetLeft),
+    clientY: Math.round(touch.clientY - ControlManager.canvas.offsetTop),
     force: touch.force
   }
 }
@@ -26,11 +26,12 @@ function doAdd (touch) {
   if (typeof touch.identifier === 'undefined') touch.identifier = 'mouse'
 
   // loop through controls and see if one captures the touch //
-  for (const controlName in TouchManager.controls) {
-    const control = TouchManager.controls[controlName]
+  for (const controlName in ControlManager.controls) {
+    const control = ControlManager.controls[controlName]
     if (control.matchesTouch(touch)) {
       _touchOwners[touch.identifier] = control
       control.touch = convertTouch(touch)
+      ControlManager.update()
       break
     }
   }
@@ -44,6 +45,7 @@ function doUpdate (touch) {
   if (!control) return
   control.touch = convertTouch(touch)
   console.log('touchMove', touch, touch.identifier)
+  ControlManager.update()
 }
 
 function doRemove (touch) {
@@ -53,16 +55,18 @@ function doRemove (touch) {
   control.touch = null
   delete _touchOwners[touch.identifier]
   console.log('touchEnd', touch, touch.identifier)
+  ControlManager.update()
 }
 
 const FRAME_RATE = 35
 let _oldWidth
 let _oldHeight
-export const TouchManager = {
+export const ControlManager = {
   canvas: null,
   ctx: null,
   intervalID: null,
   controls: { },
+  onupdate: null,
 
   setCanvas (canvas) {
     function handleTouches (e, handler) {
@@ -84,25 +88,32 @@ export const TouchManager = {
     canvas.addEventListener('mousemove', doUpdate, false)
     canvas.addEventListener('mouseup', doRemove, false)
 
-    TouchManager.canvas = canvas
-    TouchManager.ctx = canvas.getContext('2d')
+    ControlManager.canvas = canvas
+    ControlManager.ctx = canvas.getContext('2d')
   },
 
   start () {
-    TouchManager.intervalID = setInterval(
-      () => TouchManager.update(),
+    ControlManager.intervalID = setInterval(
+      () => ControlManager.draw(),
       1000 / FRAME_RATE
     )
   },
 
   stop () {
-    if (TouchManager.intervalID) {
-      clearInterval(TouchManager.intervalID)
+    if (ControlManager.intervalID) {
+      clearInterval(ControlManager.intervalID)
     }
   },
 
   update () {
-    const { canvas, ctx, controls } = TouchManager
+    const { onupdate } = ControlManager
+    if (typeof onupdate === 'function') {
+      onupdate()
+    }
+  },
+
+  draw () {
+    const { canvas, ctx, controls } = ControlManager
 
     // check for canvas resize //
     const resized = (canvas.width !== _oldWidth || canvas.height !== _oldHeight)
@@ -123,11 +134,11 @@ export const TouchManager = {
 }
 
 function addControl (name, control) {
-  if (TouchManager.controls[name]) {
+  if (ControlManager.controls[name]) {
     Errors.add(SETUP, `Control already exists: ${name}`)
     return
   }
-  TouchManager.controls[name] = control
+  ControlManager.controls[name] = control
 }
 
 function convertToPixels (dim, value) {
@@ -136,10 +147,10 @@ function convertToPixels (dim, value) {
   switch (dim) {
     case 'y':
     case 'height':
-      reference = TouchManager.canvas.height
+      reference = ControlManager.canvas.height
       break
     default:
-      reference = TouchManager.canvas.width
+      reference = ControlManager.canvas.width
       break
   }
 
