@@ -11,9 +11,17 @@ well-documented: Arduino, HTML5 and javascript. The hope is to leverage common m
     [here](https://www.aliexpress.com/item/1X-for-Arduino-Smart-Car-Robot-Plastic-Tire-Wheel-with-DC-3-6V-Gear-Motor-New/32693010819.html).
  3. Arduino core libraries for the [ESP8266](http://esp8266.github.io/Arduino/versions/2.3.0/doc/libraries.html#mdns-and-dns-sd-responder-esp8266mdns-library). 
  4. Control over WiFi from a mobile device or computer via a browser-based user interface.
- 5. Cardboard robot body, ranging from a simple box, to a laser cut design from CAD. OnShape files for the parts, and a sample robot body for the ["(BOX) Factory of Sadness"](https://cad.onshape.com/documents/e8cde76fb8fa97701da61992/w/c29f61e2e364ccd29e25da63/e/e3f6378e05fc7aa48f5b6eb2) robot make a good starting point.
- 
+ 5. Cardboard robot body, ranging from a simple box, to a laser cut design from CAD. 
+  
 The goal is to keep the cost of a base "kit" to under 20USD.
+
+ #### Reference CAD: ####
+ To aid in ideation and your designs, reference CAD files are provided for standard Kit of Parts hardware and a handful of reference designs:
+ 
+  * [Kit of Parts CAD](https://cad.onshape.com/documents/d5d1b32c4a18b4ebb4a5470a/w/1e2f7e3ea05ba14674303259/e/ee521e100952e2dbed4188e8) - High-fidelity models of the motors, MCU + motor shield and various battery options.
+  * [Cardboard NewBot 2.0](https://cad.onshape.com/documents/af9a7cdc337296dac2031b55/w/f0c41006ebab68369c4ddb37/e/c21df5e57a729a578fc1df88) A revised, simpler NewBot designed for a workshop at the Bay Area Maker Faire. 
+  * [Cardboard NewBot 1.0](https://cad.onshape.com/documents/f0340e1790b5a8dc21cf42b3/w/84b5d7791762dae47618e688/e/1b6152b64cf9e13c0b862c89) - A rectangular "box" robot made with tab and slot construction. Upon testing with actual kids (of many ages), this bot was discovered to be too hard to assemble.
+  * ["(BOX) Factory of Sadness"](https://cad.onshape.com/documents/e8cde76fb8fa97701da61992/w/c29f61e2e364ccd29e25da63/e/e3f6378e05fc7aa48f5b6eb2) - A wedge-bot design with kill saw and 3D printed parts.
 
 ## Basic Setup ##
 This section describes the minimum steps needed to load this firmware onto your NodeMCU. The firmware should work out of the box
@@ -22,7 +30,7 @@ for a basic robot setup. Subsequent sections describe the development environmen
 #### Installation steps: ####
 
  1. Download and install the [Arduino IDE](https://www.arduino.cc/en/Main/Software). 
- 2. Install the ESP8266 devtools add-on. Directions [here](http://www.instructables.com/id/Programming-the-ESP8266-12E-using-Arduino-software/?ALLSTEPS). TODO: include custom directions that also explain the quirks of getting to work on OS X, Linux.
+ 2. Install the ESP8266 devtools add-on. Directions [here](http://www.instructables.com/id/Programming-the-ESP8266-12E-using-Arduino-software/?ALLSTEPS). OS X users must install serial port drivers. The NodeMCU typically has an CP210x usb to serial chip, but to save money the manufacturer might have used a CH340 or CH341 chip. Identify the chip on your board by looking at the markings on the chip. The chip should can be just in front of the usb port. CH340 and CH341 driver [here] (https://blog.sengotta.net/signed-mac-os-driver-for-winchiphead-ch340-serial-bridge/) CP210x driver [here](https://www.silabs.com/products/mcu/Pages/USBtoUARTBridgeVCPDrivers.aspx#mac).
  3. Install the ESP8266FS file system upload add-on. Directions [here](http://esp8266.github.io/Arduino/versions/2.3.0/doc/filesystem.html).
  4. Install Arduino networking libraries. Currently, these are not available in the Library Manager and must be installed manually. Directions for installing Arduino libraries are available [here](https://www.arduino.cc/en/guide/libraries).
    * [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP)
