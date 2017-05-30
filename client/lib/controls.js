@@ -5,7 +5,6 @@
  * @module controls
  */
 import { constrain } from './utils'
-import { Errors, SETUP } from './error'
 
 /**************************************************************
  * ControlManager Implementation                              *
@@ -135,8 +134,7 @@ export const ControlManager = {
 
 function addControl (name, control) {
   if (ControlManager.controls[name]) {
-    Errors.add(SETUP, `Control already exists: ${name}`)
-    return
+    throw new Error(`Control already exists: ${name}`)
   }
   ControlManager.controls[name] = control
 }

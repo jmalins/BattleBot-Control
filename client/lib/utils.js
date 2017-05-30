@@ -62,7 +62,7 @@ export function ajax (method, url, data, timeout, callback) {
     if (xhr.status >= 200 && xhr.status < 300) {
       callback(null, getResponse(xhr, xhr.responseText))
     } else {
-      callback(new Error('bad request'), getResponse(xhr))
+      callback(new Error(`${xhr.status} - ${xhr.statusText}`), getResponse(xhr))
     }
   })
   xhr.addEventListener('error', () => callback(new Error('request error'), getResponse(xhr)))

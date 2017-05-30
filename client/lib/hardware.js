@@ -1,137 +1,101 @@
 /**
+ * Hardware interface layer used by end-user code. Allows for creation of
+ * logical devices, such as motors and servos, separate from their physical
+ * config. This lets the same code be used across different robots and frees
+ * novices of having to deal with hardware configuration for "kit" robots.
+ *
  * @module hardware
  */
 import { constrain, map } from './utils'
-import { Errors, SETUP, DATA } from './error'
 
 /**************************************************************
- * Hardware Configuration                                      *
- ***************************************************************/
-
-const _configs = { }
-
-/**
- * All supported drivers and their allowed options. Options are marked
- * as true if required and false if optional.
- */
-export const DriverOptions = {
-  DigitalInput: {
-    pin: true
-  },
-  DigitalOutput: {
-    pin: true
-  },
-  PWM_HBridge: {
-    pwmPin: true,
-    dirPin: true,
-    reverse: false
-  },
-  PWM: {
-    pwmPin: true,
-    minMicroseconds: false,
-    maxMicroseconds: false
-  }
-}
+ * HardwareManager Implementation                             *
+ **************************************************************/
 
 /**
  *  Hardware manager
  */
-export const Hardware = {
+export const HardwareManager = {
   devices: { },
+  config: null,
 
-  configure (config) {
-    // process all device names in the setup //
-    for (const deviceName in config) {
-      const device = config[deviceName]
-      // must have only one driver under the device //
-      const keys = Object.keys(device)
-      if (keys.length !== 1) {
-        Errors.add(SETUP, `Driver not defined for device: ${deviceName}`)
-        continue
-      }
-      const driverName = keys[0]
-      const options = device[driverName]
-      // validate driver options //
-      const driverOpts = DriverOptions[driverName]
-      if (!driverOpts) {
-        Errors.add(SETUP, `Unknown driver name: ${driverName}`)
-        continue
-      }
-      // check require options //
-      let errors = false
-      for (const optName in driverOpts) {
-        if (!options[optName] && driverOpts[optName]) {
-          Errors.add(SETUP, `Driver '${deviceName}.${driverName}' requires option: ${optName}`)
-          errors = true
-        }
-      }
-      // make sure no extra options declared and format is an integer //
-      for (const optName in options) {
-        if (typeof driverOpts[optName] === 'undefined') {
-          Errors.add(SETUP, `Driver '${deviceName}.${driverName}' has unsupported option: ${optName}`)
-          errors = true
-          continue
-        }
-        const value = options[optName]
-        if (!Number.isInteger(value)) {
-          Errors.add(SETUP, `Driver option '${deviceName}.${driverName}.${optName}' has invalid value: ${value}`)
-          errors = true
-        }
-      }
-      if (errors) return
+  /**
+   * Validate the hardware configuration. Returns an array of any errors.
+   * This method makes sure the robot only defines logical devices that are
+   * configured in the hardware.
+   *
+   * @return {array} - any errors in configuration, or null if no errors
+   */
+  validateConfig () {
+    // error collection //
+    const errors = [ ]
+    const addError = (message) => errors.push({ type: 'HARDWARE', message })
 
-      _configs[deviceName] = {
-        driver: driverName,
-        options
+    // configuration must be set //
+    if (!HardwareManager.config) {
+      addError('Hardware configuration not set')
+    } else if (!HardwareManager.config.devices) {
+      addError('Hardware configuration is missing devices')
+    }
+    if (errors.length) return errors
+
+    // validate all logical devices are configured //
+    for (const deviceName in HardwareManager.devices) {
+      const device = HardwareManager.devices[deviceName]
+      const config = HardwareManager.config.devices[deviceName]
+      if (config) {
+        // make sure the driver is known //
+        const driverName = config.driver
+        if (!device.supportsDriver(driverName)) {
+          errors.push(`Device ${deviceName} has invalid driver: ${driverName}`)
+        }
+      } else {
+        // logical device name has no configuration onboard robot //
+        addError(`Device has no configuration: ${deviceName}`)
       }
     }
+
+    return (errors.length) ? errors : null
   },
 
-  getConfigurationJSON () {
-    // validate all devices are configured //
-    for (const deviceName in Hardware.devices) {
-      const config = _configs[deviceName]
-      if (!config) {
-        Errors.add(SETUP, `Device is not configured: ${deviceName}`)
-      }
-    }
-    return JSON.stringify(_configs)
-  },
-
-  getRequestJSON () {
+  /**
+   *
+   * @return {object} - values for all output devices
+   */
+  getOutputs () {
     const packet = { }
     // get device outputs //
-    for (const deviceName in Hardware.devices) {
-      const device = Hardware.devices[deviceName]
+    for (const deviceName in HardwareManager.devices) {
+      const device = HardwareManager.devices[deviceName]
       if (device.getOutput) {
         packet[deviceName] = device.getOutput()
       }
     }
-    return JSON.stringify(packet)
+    return packet
   },
 
-  setResponseJSON (json) {
-    try {
-      const data = JSON.parse(json)
-      // write inputs to devices //
-      for (const deviceName in data) {
-        const device = Hardware.devices[deviceName]
-        if (device && device.setInput) {
-          device.setInput(data[deviceName])
-        }
+  /**
+   * Set the values of named input devices. This method is called
+   * with raw values received from the robot.
+   *
+   * @param {object} values - values of all input devices
+   */
+  setInputs (values) {
+    // write inputs to devices //
+    for (const deviceName in values) {
+      const device = HardwareManager.devices[deviceName]
+      if (device && device.setInput) {
+        device.setInput(values[deviceName])
       }
-    } catch (err) {
-      Errors.add(DATA, `Invalid response JSON: '${json}'`)
     }
   }
 }
 
 function addDevice (name, device) {
-  if (Hardware.devices[name]) {
-    Errors.add(SETUP, `Device already exists: ${name}`)
-    return
+  if (HardwareManager.devices[name]) {
+    throw new Error(`Device already exists: ${name}`)
   }
-  Hardware.devices[name] = device
+  HardwareManager.devices[name] = device
 }
 
 /***************************************************************
@@ -168,6 +132,13 @@ export class Device {
   get () {
     return this.value
   }
+
+  /**
+   * Tests whether a device supports the specified driver.
+   */
+  supportsDriver (driverName) {
+    return false
+  }
 }
 
 /**
@@ -194,6 +165,10 @@ export class Motor extends Device {
 
   getOutput () {
     return Math.round(this.get() * 1023).toString()
+  }
+
+  supportsDriver (driverName) {
+    return [ 'PWM_HBRIDGE', 'PWM' ].indexOf(driverName) !== -1
   }
 }
 
@@ -223,6 +198,10 @@ export class Servo extends Device {
   getOutput () {
     return Math.round(this.get() * 1023).toString()
   }
+
+  supportsDriver (driverName) {
+    return [ 'PWM' ].indexOf(driverName) !== -1
+  }
 }
 
 /**
@@ -245,6 +224,10 @@ export class DigitalOutput extends Device {
   getOutput () {
     return this.get().toString()
   }
+
+  supportsDriver (driverName) {
+    return [ 'DIGITAL_OUT' ].indexOf(driverName) !== -1
+  }
 }
 
 /**
@@ -264,5 +247,9 @@ export class DigitalInput extends Device {
 
   setInput (value) {
     this.value = !!value
+  }
+
+  supportsDriver (driverName) {
+    return [ 'DIGITAL_IN' ].indexOf(driverName) !== -1
   }
 }

@@ -55,17 +55,23 @@ body {
 }
 
 #error-box {
+  box-sizing: border-box;
   position: absolute;
   z-index: 10;
-  left: 2.5vh;
-  top: 15vh;
-  padding: 3vh;
+  left: 2.5vw;
+  top: 10vh;
+  width: 95vw;
+  padding: 3vh 6vw;
   border: 3pt solid #990000;
   border-radius: 3pt;
   background-color: #111133;
 }
 #error-box:empty {
   display: none;
+}
+#error-box span.type {
+  display: inline-block;
+  width: 20vw;
 }
 
 #touch-canvas {
