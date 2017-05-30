@@ -149,7 +149,8 @@ export class WebSocketConnection extends Connection {
    */
   constructor (hostName) {
     super()
-    this.hostName = hostName || document.location.hostname
+    const { hostname, port } = document.location
+    this.hostName = hostName || (port !== 80) ? `${hostname}:${port}` : hostname
     this.socket = null
   }
 
@@ -166,15 +167,13 @@ export class WebSocketConnection extends Connection {
       this.setState(Connection.ERROR)
     }
     this.socket.onmessage = (event) => {
-      if (event.data === 'heartbeat') {
-        this.lastHeartbeat = new Date()
-      } else {
-        this.setResponseData(event.data)
-      }
+      this.setResponseData(event.data)
     }
     this.socket.onclose = (event) => {
       if (this.state !== Connection.ERROR) {
-        this.setState(Connection.DISCONNECTED)
+        this.lastError = new Error('Connection lost')
+        this.setState(Connection.ERROR)
+        this.socket = null
       }
     }
   }
@@ -197,7 +196,7 @@ export class WebSocketConnection extends Connection {
     if (this.socket && this.state === Connection.CONNECTED) {
       // verify WebSocket state //
       if (this.socket.readyState !== WebSocket.OPEN) {
-        this.lastError = (`Invalid socket state: ${
+        this.lastError = new Error(`Invalid socket state: ${
             (this.socket.readyState === WebSocket.CONNECTING) ? 'CONNECTING'
           : (this.socket.readyState === WebSocket.CLOSING) ? 'CLOSING'
           : (this.socket.readyState === WebSocket.CLOSED) ? 'CLOSED'
