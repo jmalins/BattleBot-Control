@@ -8,15 +8,14 @@ var driveStick, weaponButton;
 function setup () {
   // setup hardware interface //
   arcadeDrive = new ArcadeDrive()
-  arcadeDrive.leftMotor.reversed = true
   
   weaponMotor = new Motor('weaponMotor')
 
   // create the drive joystick //
   driveStick = new Joystick('drive')
-  driveStick.position.x = 25  // positions + sizes in % of screen size //
+  driveStick.position.x = 20  // positions + sizes in % of screen size //
   driveStick.position.y = 50
-  driveStick.radius = 20
+  driveStick.radius = 15
 
   // create the weapon button //
   weaponButton = new Button('weapon')
