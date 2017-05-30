@@ -65,8 +65,8 @@ export function ajax (method, url, data, timeout, callback) {
       callback(new Error(`${xhr.status} - ${xhr.statusText}`), getResponse(xhr))
     }
   })
-  xhr.addEventListener('error', () => callback(new Error('request error'), getResponse(xhr)))
-  xhr.addEventListener('timeout', () => callback(new Error('request timeout'), getResponse(xhr)))
+  xhr.addEventListener('error', (e) => callback(new Error('Request failed'), getResponse(xhr)))
+  xhr.addEventListener('timeout', () => callback(new Error('Request timeout'), getResponse(xhr)))
 
   if (data) {
     xhr.send(typeof data !== 'string' ? JSON.stringify(data) : data)
