@@ -28,7 +28,7 @@ body {
   height: 100%;
 }
 #heading {
-  border-bottom: 1pt solid #cccccc;
+  border-bottom: 0.5vh solid #cccccc;
   padding-left: 2.5vh;
   height: 10vh;
   font-size: 7.5vh;

@@ -144,7 +144,9 @@ Promise.all([ getHardwareConfig, waitForLoad ])
       _connection.setRobotData(request)
     }
   })
-  .catch(err => console.error('Error loading', err))
+  .catch(err => {
+    addError({ type: 'SCRIPT', message: err.message })
+  })
 
 // FIXME: get the ghetto-packet for legacy firmware //
 function getPacket (json) {
