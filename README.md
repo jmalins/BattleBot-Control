@@ -19,7 +19,8 @@ The goal is to keep the cost of a base "kit" to under 20USD.
  To aid in ideation and your designs, reference CAD files are provided for standard Kit of Parts hardware and a handful of reference designs:
  
   * [Kit of Parts CAD](https://cad.onshape.com/documents/d5d1b32c4a18b4ebb4a5470a/w/1e2f7e3ea05ba14674303259/e/ee521e100952e2dbed4188e8) - High-fidelity models of the motors, MCU + motor shield and various battery options.
-  * [Cardboard NewBot](https://cad.onshape.com/documents/f0340e1790b5a8dc21cf42b3/w/84b5d7791762dae47618e688/e/1b6152b64cf9e13c0b862c89) - A simple rectangular "box" robot made with tab and slot construction.
+  * [Cardboard NewBot 2.0](https://cad.onshape.com/documents/af9a7cdc337296dac2031b55/w/f0c41006ebab68369c4ddb37/e/c21df5e57a729a578fc1df88) A revised, simpler NewBot designed for a workshop at the Bay Area Maker Faire. 
+  * [Cardboard NewBot 1.0](https://cad.onshape.com/documents/f0340e1790b5a8dc21cf42b3/w/84b5d7791762dae47618e688/e/1b6152b64cf9e13c0b862c89) - A rectangular "box" robot made with tab and slot construction. Upon testing with actual kids (of many ages), this bot was discovered to be too hard to assemble.
   * ["(BOX) Factory of Sadness"](https://cad.onshape.com/documents/e8cde76fb8fa97701da61992/w/c29f61e2e364ccd29e25da63/e/e3f6378e05fc7aa48f5b6eb2) - A wedge-bot design with kill saw and 3D printed parts.
 
 ## Basic Setup ##
