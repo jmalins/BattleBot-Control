@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rollup -c",
     "postbuild": "cp web/* build && cp src/* build",
-    "deploy": "npm run build && cp build/* ../device/data",
+    "deploy": "npm run build && cp build/* ../data",
     "watch": "rollup -c -w",
     "serve": "rollup --format=cjs -e http,express,body-parser,ws tools/server.js | buble --no modules | PORT=8080 node",
     "test": "echo \"Error: no test specified\" && exit 1"
