@@ -23,6 +23,7 @@ export class Connection {
     // response information //
     this.lastError = null
     this.responseData = null
+    this.pingTimeMs = null
     // event handlers //
     this.onstatechange = null
     this.onresponsedata = null
@@ -60,7 +61,9 @@ export class Connection {
 
   setResponseData (data) {
     this.responseData = data
-
+    if (!data) {
+      this.pingTimeMs = null
+    }
     // notify listener //
     if (typeof this.onresponsedata === 'function') {
       this.onresponsedata(data)
@@ -93,12 +96,12 @@ export class AjaxConnection extends Connection {
    *  Poll the robot in a continuous loop.
    */
   poll () {
-    const pollStart = new Date()
+    const pollStartMs = new Date().getTime()
     ajaxPut('/control?body=' + this.dataPacket, this.dataPacket, this.timeoutMillis, (err, res) => {
       // was the loop terminated? //
       this.lastError = err
       if (this.state === Connection.DISCONNECTED) {
-        this.updateRate = 0
+        this.setResponseData(null)
         return
       }
 
@@ -107,20 +110,16 @@ export class AjaxConnection extends Connection {
         if (this.state !== Connection.CONNECTED) {
           this.setState(Connection.CONNECTED)
         }
+        this.pingTimeMs = new Date().getTime() - pollStartMs
         this.setResponseData(res.data)
       } else {
         this.setState(Connection.ERROR)
+        this.setResponseData(null)
       }
 
       // poll again //
       const pollMs = (this.state === Connection.ERROR) ? 1000 : 50 // back off if error //
       this.timerId = setTimeout(this.poll.bind(this), pollMs)
-
-      // compute update rate //
-      var delayMs = new Date().getTime() - pollStart.getTime()
-      if (delayMs > 0) {
-        this.updateRate = Math.floor(1000 / delayMs)
-      }
     })
   }
 
@@ -134,6 +133,7 @@ export class AjaxConnection extends Connection {
     if (this.timerId) clearTimeout(this.timerId)
     super.stop()
     this.setState(Connection.DISCONNECTED)
+    this.setResponseData(null)
   }
 }
 
@@ -152,12 +152,14 @@ export class WebSocketConnection extends Connection {
     const { hostname, port } = document.location
     this.hostName = hostName || (port !== 80) ? `${hostname}:${port}` : hostname
     this.socket = null
+    this.startTimeMs = null
   }
 
   start () {
     this.setState(Connection.CONNECTING)
     super.start()
 
+    this.startTimeMs = new Date().getTime()
     this.socket = new WebSocket(`ws://${this.hostName}/ws`, [ 'arduino' ])
     this.socket.onopen = () => {
       this.setState(Connection.CONNECTED)
@@ -165,14 +167,19 @@ export class WebSocketConnection extends Connection {
     this.socket.onerror = (err) => {
       this.lastError = err
       this.setState(Connection.ERROR)
+      this.setResponseData(null)
     }
     this.socket.onmessage = (event) => {
+      // compute update rate //
+      this.pingTimeMs = new Date().getTime() - this.startTimeMs
+
       this.setResponseData(event.data)
     }
     this.socket.onclose = (event) => {
       if (this.state !== Connection.ERROR) {
         this.lastError = new Error('Connection lost')
         this.setState(Connection.ERROR)
+        this.setResponseData(null)
         this.socket = null
       }
     }
@@ -183,6 +190,7 @@ export class WebSocketConnection extends Connection {
       if (this.socket.readyState === WebSocket.OPEN) {
         this.socket.close()
       }
+      this.setResponseData(null)
       this.socket = null
     }
     super.stop()
@@ -206,10 +214,12 @@ export class WebSocketConnection extends Connection {
         return
       }
       try {
+        this.startTimeMs = new Date().getTime()
         this.socket.send(this.dataPacket)
       } catch (err) {
         this.lastError = err
         this.setState(Connection.ERROR)
+        this.setResponseData(null)
       }
     }
   }

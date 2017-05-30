@@ -23,13 +23,16 @@ app.put('/control', (req, res) => {
   setTimeout(() => res.send('Hello world'), 50)
 })
 
+let _connectionId = 0
 wss.on('connection', function connection (ws, req) {
-  console.log('connect!')
   ws.on('message', function incoming (message) {
     console.log('received: %s', message)
+    setTimeout(() => ws.send('ok'), 5)
   })
 
-  ws.send('something')
+  const resp = `Connected: ${_connectionId++}`
+  console.log(resp)
+  ws.send(resp)
 })
 
 // start the listener //

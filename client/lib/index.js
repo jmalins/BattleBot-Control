@@ -9,6 +9,7 @@ import { ajaxGet } from './utils'
 const heading = document.getElementById('heading')
 const statusIcon = document.getElementById('status-box')
 const statusText = document.getElementById('status-text')
+const infoBox = document.getElementById('info-box')
 const errorBox = document.getElementById('error-box')
 const canvas = document.getElementById('touch-canvas')
 
@@ -68,6 +69,12 @@ function setConnectionState (state) {
   statusText.innerText = state
 }
 
+function setConnectionInfo (conn) {
+  infoBox.innerText = `Ping: ${
+    (conn.pingTimeMs !== null) ? `${conn.pingTimeMs} ms` : '----'
+  }`
+}
+
 // initialize the application //
 const getHardwareConfig = new Promise((resolve, reject) =>
   ajaxGet('./hardware.json', (err, resp) => {
@@ -119,6 +126,7 @@ Promise.all([ getHardwareConfig, waitForLoad ])
     }
     _connection.onresponsedata = (data) => {
       HardwareManager.setInputs(data)
+      setConnectionInfo(_connection)
     }
     // initialize UI //
     setConnectionState(_connection.state)
