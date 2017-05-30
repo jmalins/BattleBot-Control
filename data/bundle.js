@@ -456,7 +456,7 @@ var Joystick = (function (Control) {
     var ref = this.getPixelDimensions();
     var x = ref.x;
     var r = ref.r;
-    return (this.touch.clientX - x) / r
+    return (x - this.touch.clientX) / r
   };
   prototypeAccessors.y.get = function () {
     if (!this.touch) { return 0.0 }
@@ -722,7 +722,7 @@ Connection.ERROR = 'Error'
 var AjaxConnection = (function (Connection) {
   function AjaxConnection (timeoutMillis) {
     Connection.call(this)
-    this.timeoutMillis = timeoutMillis || 250
+    this.timeoutMillis = timeoutMillis || 500
     this.timerId = null
   }
   if ( Connection ) AjaxConnection.__proto__ = Connection;
@@ -731,7 +731,7 @@ var AjaxConnection = (function (Connection) {
   AjaxConnection.prototype.poll = function poll () {
     var this$1 = this;
     var pollStart = new Date();
-    ajaxPut('/control', this.dataPacket, this.timeoutMillis, function (err, res) {
+    ajaxPut('/control?body=' + this.dataPacket, this.dataPacket, this.timeoutMillis, function (err, res) {
       this$1.lastError = err
       if (this$1.state === Connection.DISCONNECTED) {
         this$1.updateRate = 0
@@ -745,7 +745,7 @@ var AjaxConnection = (function (Connection) {
       } else {
         this$1.setState(Connection.ERROR)
       }
-      var pollMs = (this$1.state === Connection.ERROR) ? 1000 : 1;
+      var pollMs = (this$1.state === Connection.ERROR) ? 1000 : 50;
       this$1.timerId = setTimeout(this$1.poll.bind(this$1), pollMs)
       var delayMs = new Date().getTime() - pollStart.getTime();
       if (delayMs > 0) {
@@ -838,8 +838,8 @@ var statusText = document.getElementById('status-text');
 var errorBox = document.getElementById('error-box');
 var canvas = document.getElementById('touch-canvas');
 var resizeCanvas = function () {
-  canvas.width = window.outerWidth
-  canvas.height = window.outerHeight - heading.clientHeight - 1
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight - heading.clientHeight - 1
   window.scrollTo(0, 0)
 };
 window.addEventListener('orientationchange', resizeCanvas)
@@ -896,7 +896,7 @@ var waitForLoad = new Promise(function (resolve, reject) {
     resolve()
   })
 });
-var WEBSOCKET = false;
+var WEBSOCKET = true;
 var _runLoop = true;
 var _connection = null;
 Promise.all([ getHardwareConfig, waitForLoad ])
@@ -931,8 +931,8 @@ Promise.all([ getHardwareConfig, waitForLoad ])
       HardwareManager.setInputs(data)
     }
     setConnectionState(_connection.state)
-    _connection.start()
     _connection.setRobotData(getPacket(HardwareManager.getOutputs()))
+    _connection.start()
     ControlManager.start()
     ControlManager.onupdate = function () {
       if (!_runLoop) { return }
