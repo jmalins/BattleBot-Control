@@ -235,7 +235,7 @@ export class Joystick extends Control {
   get x () {
     if (!this.touch) return 0.0
     const { x, r } = this.getPixelDimensions()
-    return (this.touch.clientX - x) / r
+    return (x - this.touch.clientX) / r
   }
 
   get y () {
