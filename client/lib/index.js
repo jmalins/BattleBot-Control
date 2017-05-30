@@ -14,8 +14,8 @@ const canvas = document.getElementById('touch-canvas')
 
 // configure the ControlManager HTML5 canvas //
 const resizeCanvas = () => {
-  canvas.width = window.outerWidth
-  canvas.height = window.outerHeight - heading.clientHeight - 1
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight - heading.clientHeight - 1
 
   window.scrollTo(0, 0)
 }
@@ -82,7 +82,7 @@ const waitForLoad = new Promise((resolve, reject) => {
   })
 })
 
-const WEBSOCKET = false
+const WEBSOCKET = true
 let _runLoop = true
 let _connection = null
 Promise.all([ getHardwareConfig, waitForLoad ])
@@ -120,12 +120,11 @@ Promise.all([ getHardwareConfig, waitForLoad ])
     _connection.onresponsedata = (data) => {
       HardwareManager.setInputs(data)
     }
-
+    // initialize UI //
     setConnectionState(_connection.state)
-    _connection.start()
-
-    // set initial data //
+    // initialize control data //
     _connection.setRobotData(getPacket(HardwareManager.getOutputs()))
+    _connection.start()
 
     // start the UI control loop //
     ControlManager.start()

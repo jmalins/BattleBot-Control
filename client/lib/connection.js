@@ -85,7 +85,7 @@ export class AjaxConnection extends Connection {
    */
   constructor (timeoutMillis) {
     super()
-    this.timeoutMillis = timeoutMillis || 250
+    this.timeoutMillis = timeoutMillis || 500
     this.timerId = null
   }
 
@@ -94,7 +94,7 @@ export class AjaxConnection extends Connection {
    */
   poll () {
     const pollStart = new Date()
-    ajaxPut('/control', this.dataPacket, this.timeoutMillis, (err, res) => {
+    ajaxPut('/control?body=' + this.dataPacket, this.dataPacket, this.timeoutMillis, (err, res) => {
       // was the loop terminated? //
       this.lastError = err
       if (this.state === Connection.DISCONNECTED) {
@@ -113,7 +113,7 @@ export class AjaxConnection extends Connection {
       }
 
       // poll again //
-      const pollMs = (this.state === Connection.ERROR) ? 1000 : 1 // back off if error //
+      const pollMs = (this.state === Connection.ERROR) ? 1000 : 50 // back off if error //
       this.timerId = setTimeout(this.poll.bind(this), pollMs)
 
       // compute update rate //
