@@ -51,14 +51,51 @@ body {
   font-size: 3vh;
   padding-top: 1vh;
 }
+
+#settings-toggle {
+  display: none;
+  visibility: hidden;
+}
+#settings-label {
+  float: right;
+  margin-top: 0.75vh;
+  margin-right: 1.5vh;
+  padding: 0.5vh;
+}
+#settings-toggle:checked + #settings-label {
+  background-color: #771111;
+  padding: 0;
+  border: 0.5vh solid #cccccc;
+  border-left: 0px;
+  border-top-right-radius: 1.5vh;
+  border-bottom-right-radius: 1.5vh;
+  height: 7.4vh;
+}
+#settings-toggle:checked ~ #settings {
+  display: block;
+}
 #settings-img {
   width: 7.5vh;
   height: 7.5vh;
-  float: right;
-  margin-top: 1.25vh;
-  margin-right: 2vh;
+  margin-right: 0.1vw;
   cursor: pointer;
   filter: invert(100%)
+}
+#settings {
+  box-sizing: border-box;
+  padding: 1vh;
+  display: none;
+  position: absolute;
+  z-index: 11;
+  border: 0.5vh solid #cccccc;
+  border-top-left-radius: 1.5vh;
+  border-bottom-left-radius: 1.5vh;
+  border-bottom-right-radius: 1.5vh;
+  background-color: #111133;
+  width: 70vw;
+  height: 95vh;
+  top: 0.75vh;
+  right: 9.4vh;
 }
 
 #error-box {
@@ -83,6 +120,7 @@ body {
 }
 
 #touch-canvas {
+  z-index: 9;
   background-color: #000000;
   display: block; 
   position: absolute; 
