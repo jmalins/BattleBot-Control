@@ -2,7 +2,7 @@
 import { HardwareManager, Motor, Servo, DigitalOutput, DigitalInput } from './hardware'
 import { TankDrive, ArcadeDrive } from './drive'
 import { Joystick, Button, Slider, ControlManager } from './controls'
-import { AjaxConnection, Connection } from './connection'
+import { AjaxConnection, WebSocketConnection, Connection } from './connection'
 import { ajaxGet } from './utils'
 
 // get HTML elements //
@@ -27,6 +27,7 @@ ControlManager.setCanvas(canvas)
 // add an error to error box //
 function addError ({ type, message }) {
   const eline = document.createElement('li')
+  eline.className = type
   // error type //
   const tspan = document.createElement('span')
   tspan.className = 'type'
@@ -38,6 +39,15 @@ function addError ({ type, message }) {
   mspan.innerText = message
   eline.appendChild(mspan)
   errorBox.appendChild(eline)
+}
+
+function clearErrors (type) {
+  const els = type
+    ? errorBox.getElementsByClassName(type)
+    : errorBox.getElementByTagName('ul')
+  for (let i = 0; i < els.length; i++) {
+    els[i].remove()
+  }
 }
 
 // set UI connection state //
@@ -72,6 +82,7 @@ const waitForLoad = new Promise((resolve, reject) => {
   })
 })
 
+const WEBSOCKET = false
 let _runLoop = true
 let _connection = null
 Promise.all([ getHardwareConfig, waitForLoad ])
@@ -96,12 +107,14 @@ Promise.all([ getHardwareConfig, waitForLoad ])
     }
 
     // establish connection //
-    _connection = new AjaxConnection()
-    _connection.onstatechange = (newState) => {
+    _connection = WEBSOCKET ? new WebSocketConnection() : new AjaxConnection()
+    _connection.onstatechange = (newState, oldState) => {
       setConnectionState(newState)
       if (newState === Connection.ERROR) {
         console.log(_connection.lastError)
         addError({ type: 'CONNECTION', message: _connection.lastError.message })
+      } else if (oldState === Connection.ERROR) {
+        clearErrors('CONNECTION')
       }
     }
     _connection.onresponsedata = (data) => {
@@ -110,6 +123,9 @@ Promise.all([ getHardwareConfig, waitForLoad ])
 
     setConnectionState(_connection.state)
     _connection.start()
+
+    // set initial data //
+    _connection.setRobotData(getPacket(HardwareManager.getOutputs()))
 
     // start the UI control loop //
     ControlManager.start()
@@ -124,9 +140,14 @@ Promise.all([ getHardwareConfig, waitForLoad ])
           addError({ type: 'LOOP', message: error.message })
         }
       }
-      const request = HardwareManager.getOutputs()
-      console.log('request', request)
+      const request = getPacket(HardwareManager.getOutputs())
+      // console.log('request', request)
       _connection.setRobotData(request)
     }
   })
   .catch(err => console.error('Error loading', err))
+
+// FIXME: get the ghetto-packet for legacy firmware //
+function getPacket (json) {
+  return `${json.leftMotor}:${json.rightMotor}:${json.weaponMotor}`
+}
