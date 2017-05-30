@@ -2,7 +2,7 @@
 
 // define devices and controls //
 var arcadeDrive, motorMotor;
-var driveStick, weaponButton;
+var driveStick, weaponButton, weaponButton2;
 
 // this is run once //
 function setup () {
@@ -18,12 +18,22 @@ function setup () {
   driveStick.radius = 15
 
   // create the weapon button //
-  weaponButton = new Button('weapon')
+  weaponButton = new Button('weapon1')
   weaponButton.position.x = 60
-  weaponButton.position.y = 50
-  weaponButton.radius = 10
+  weaponButton.position.y = 30
+  weaponButton.radius = 5
   weaponButton.sticky = true
   weaponButton.style = 'blue'
+  weaponButton.groupName = 'weaponGroup'
+
+  weaponButton2 = new Button('weapon2')
+  weaponButton2.position.x = 60
+  weaponButton2.position.y = 70
+  weaponButton2.radius = 5
+  weaponButton2.sticky = true
+  weaponButton2.style = 'blue'
+  weaponButton2.groupName = 'weaponGroup'
+  weaponButton2.pressed = true
 
   var slider = new Slider('slider')
   slider.position.x = 85
@@ -31,6 +41,7 @@ function setup () {
   slider.radius = 5
   slider.length = 30
   slider.type = Slider.VERTICAL
+  slider.sticky = true
   slider.style = 'red'
 }
 

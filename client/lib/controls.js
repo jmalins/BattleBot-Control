@@ -23,27 +23,27 @@ function convertTouch (touch) {
 
 function doAdd (touch) {
   if (typeof touch.identifier === 'undefined') touch.identifier = 'mouse'
+  touch = convertTouch(touch)
 
   // loop through controls and see if one captures the touch //
   for (const controlName in ControlManager.controls) {
     const control = ControlManager.controls[controlName]
     if (control.matchesTouch(touch)) {
       _touchOwners[touch.identifier] = control
-      control.touch = convertTouch(touch)
+      control.setTouch(touch)
       ControlManager.update()
       break
     }
   }
-
-  console.log('touchStart', touch, touch.identifier)
+  // console.log('touchStart', touch, touch.identifier)
 }
 
 function doUpdate (touch) {
   if (typeof touch.identifier === 'undefined') touch.identifier = 'mouse'
   const control = _touchOwners[touch.identifier]
   if (!control) return
-  control.touch = convertTouch(touch)
-  console.log('touchMove', touch, touch.identifier)
+  control.setTouch(convertTouch(touch))
+  // console.log('touchMove', touch, touch.identifier)
   ControlManager.update()
 }
 
@@ -51,9 +51,9 @@ function doRemove (touch) {
   if (typeof touch.identifier === 'undefined') touch.identifier = 'mouse'
   const control = _touchOwners[touch.identifier]
   if (!control) return
-  control.touch = null
+  control.setTouch(null)
   delete _touchOwners[touch.identifier]
-  console.log('touchEnd', touch, touch.identifier)
+  // console.log('touchEnd', touch, touch.identifier)
   ControlManager.update()
 }
 
@@ -69,10 +69,8 @@ export const ControlManager = {
 
   setCanvas (canvas) {
     function handleTouches (e, handler) {
-      // prevent scrolling on update //
-      if (handler === doUpdate) {
-        e.preventDefault()
-      }
+      // prevent scrolling and mouse fallthrough on desktop //
+      e.preventDefault()
       // loop through touches //
       for (let i = 0; i < e.changedTouches.length; i++) {
         handler(e.changedTouches[i])
@@ -92,6 +90,28 @@ export const ControlManager = {
   },
 
   start () {
+    // handle default values of button groups //
+    const buttonGroups = { }
+    for (const controlName in ControlManager.controls) {
+      const control = ControlManager.controls[controlName]
+      if (control instanceof Button && control.groupName) {
+        const { groupName } = control
+        if (buttonGroups[groupName]) {
+          buttonGroups[groupName].push(control)
+        } else {
+          buttonGroups[groupName] = [ control ]
+        }
+      }
+    }
+    for (const groupName in buttonGroups) {
+      const buttons = buttonGroups[groupName]
+      // if user has not set a default pressed button, select first //
+      if (!buttons.some(button => button.pressed)) {
+        buttons[0].pressed = true
+      }
+    }
+
+    // start painting //
     ControlManager.intervalID = setInterval(
       () => ControlManager.draw(),
       1000 / FRAME_RATE
@@ -204,6 +224,13 @@ export class Control {
   }
 
   /**
+   * Update the touch captured by this control.
+   */
+  setTouch (touch) {
+    this.touch = touch
+  }
+
+  /**
    * Get the control dimensions converted to pixels relative
    * to the current canvas size. This cached for performance reasons.
    */
@@ -214,7 +241,6 @@ export class Control {
     for (const dimName in dimensions) {
       pixels[dimName] = convertToPixels(dimName, dimensions[dimName])
     }
-    console.log(this.name, pixels)
     return (this.pixelCache = pixels)
   }
 }
@@ -230,18 +256,9 @@ export class Joystick extends Control {
     this.radius = 10
     this.sticky = false
     this.style = 'white'
-  }
-
-  get x () {
-    if (!this.touch) return 0.0
-    const { x, r } = this.getPixelDimensions()
-    return (x - this.touch.clientX) / r
-  }
-
-  get y () {
-    if (!this.touch) return 0.0
-    const { y, r } = this.getPixelDimensions()
-    return (y - this.touch.clientY) / r
+    // initial values //
+    this.x = 0
+    this.y = 0
   }
 
   getDimensions () {
@@ -257,13 +274,26 @@ export class Joystick extends Control {
     return Math.sqrt(dx * dx + dy * dy) <= r
   }
 
+  setTouch (touch) {
+    super.setTouch(touch)
+    if (touch) {
+      const { x, y, r } = this.getPixelDimensions()
+      this.x = constrain((x - touch.clientX) / r, -1.0, 1.0)
+      this.y = constrain((y - touch.clientY) / r, -1.0, 1.0)
+    } else if (!this.sticky) {
+      this.x = 0.0
+      this.y = 0.0
+    }
+  }
+
   draw (ctx) {
     const { x, y, r } = this.getPixelDimensions()
+    const ir = Math.round(r / 3)
 
     ctx.beginPath()
     ctx.strokeStyle = (this.touch && this.touchedStyle) || this.style
-    ctx.lineWidth = 6
-    ctx.arc(x, y, 40, 0, Math.PI * 2, true)
+    ctx.lineWidth = 5
+    ctx.arc(x, y, ir, 0, Math.PI * 2, true)
     ctx.stroke()
 
     ctx.beginPath()
@@ -273,19 +303,16 @@ export class Joystick extends Control {
     ctx.stroke()
 
     // paint the current touch //
-    if (this.touch) {
-      const { clientX, clientY } = this.touch
-      ctx.beginPath()
-      ctx.strokeStyle = this.style
-      ctx.arc(clientX, clientY, 40, 0, Math.PI * 2, true)
-      ctx.stroke()
-    }
+    ctx.beginPath()
+    ctx.strokeStyle = this.style
+    ctx.arc(x - this.x * r, y - this.y * r, ir, 0, Math.PI * 2, true)
+    ctx.stroke()
 
     ctx.beginPath()
     ctx.fillStyle = 'white'
     ctx.fillText(
-      `joystick: ${this.name}, x: ${this.x.toFixed(3)}, y: ${this.y.toFixed(3)}`,
-      x - 50, y + 75
+      `${this.name}, x: ${this.x.toFixed(3)}, y: ${this.y.toFixed(3)}`,
+      x - 50, y + r + 15
     )
   }
 }
@@ -299,11 +326,10 @@ export class Button extends Control {
     this.position = { x: 0, y: 0 }
     this.radius = 10
     this.sticky = false
+    this.groupName = null
     this.style = 'white'
-  }
-
-  get pressed () {
-    return !!this.touch
+    // initial value //
+    this.pressed = false
   }
 
   getDimensions () {
@@ -317,6 +343,36 @@ export class Button extends Control {
     const dx = (x - clientX)
     const dy = (y - clientY)
     return Math.sqrt(dx * dx + dy * dy) <= r
+  }
+
+  setTouch (touch) {
+    const lastState = !!this.touch
+    console.log(this.sticky, this.touch, lastState, touch, this.pressed)
+    super.setTouch(touch)
+    if (this.sticky) {
+      // only react to touchStart //
+      if (touch && !lastState) {
+        // are we part of a group //
+        if (this.groupName) {
+          // only react to changed values //
+          if (!this.pressed) {
+            // clear all others in group //
+            for (const controlName in ControlManager.controls) {
+              const control = ControlManager.controls[controlName]
+              if (control instanceof Button && control.groupName === this.groupName) {
+                control.pressed = false
+              }
+            }
+            this.pressed = true
+          }
+        } else {
+          // just toggle this button //
+          this.pressed = !!(this.pressed ^ true)
+        }
+      }
+    } else {
+      this.pressed = !!touch
+    }
   }
 
   draw (ctx) {
@@ -332,6 +388,13 @@ export class Button extends Control {
     } else {
       ctx.stroke()
     }
+
+    ctx.beginPath()
+    ctx.fillStyle = 'white'
+    ctx.fillText(
+      `${this.name}, pressed: ${this.pressed}`,
+      x - 50, y + r + 15
+    )
   }
 }
 
@@ -349,6 +412,8 @@ export class Slider extends Control {
     this.type = Slider.VERTICAL
     this.sticky = true
     this.style = 'white'
+    // initial value //
+    this.value = 0
   }
 
   getDimensions () {
@@ -360,33 +425,54 @@ export class Slider extends Control {
     }
   }
 
+  setTouch (touch) {
+    super.setTouch(touch)
+    if (touch) {
+      const { l, xa, ya } = this.getHelperDimensions()
+      if (this.type === Slider.HORIZONTAL) {
+        this.value = constrain((xa - touch.clientX) / l, 0.0, 1.0)
+      } else {
+        this.value = constrain((ya - touch.clientY) / l, 0.0, 1.0)
+      }
+    } else if (!this.sticky) {
+      this.value = 0
+    }
+  }
+
   getHelperDimensions () {
     const { x, y, r, l } = this.getPixelDimensions()
     if (this.type === Slider.HORIZONTAL) {
       return {
+        x,
         x1: x,
         x2: x + l,
         xa: x + l,
+        y,
         y1: y - r,
         y2: y + r,
-        ya: y
+        ya: y,
+        r,
+        l
       }
     } else {
       return {
+        x,
         x1: x - r,
         x2: x + r,
         xa: x,
+        y,
         y1: y,
         y2: y + l,
-        ya: y + l
+        ya: y + l,
+        r,
+        l
       }
     }
   }
 
   matchesTouch (touch) {
     const { clientX, clientY } = touch
-    const { x, y, r } = this.getPixelDimensions()
-    const { x1, y1, x2, y2, xa, ya } = this.getHelperDimensions()
+    const { x, y, r, x1, y1, x2, y2, xa, ya } = this.getHelperDimensions()
 
     // check if in the end circles //
     const dx = (x - clientX)
@@ -395,15 +481,13 @@ export class Slider extends Control {
     const dxa = (xa - clientX)
     const dya = (ya - clientY)
     if (Math.sqrt(dxa * dxa + dya * dya) <= r) return true
-    console.log(clientX, xa, dxa, clientY, ya, dya)
 
     // check if in the rectangle //
     return (clientX >= x1) && (clientX <= x2) && (clientY >= y1) && (clientY <= y2)
   }
 
   draw (ctx) {
-    const { x, y, r } = this.getPixelDimensions()
-    const { x1, y1, x2, y2, xa, ya } = this.getHelperDimensions()
+    const { x, y, r, l, x1, y1, x2, y2, xa, ya } = this.getHelperDimensions()
 
     ctx.beginPath()
     ctx.strokeStyle = this.style
@@ -425,23 +509,24 @@ export class Slider extends Control {
     }
     ctx.stroke()
 
-    // ctx.arc(x, y, 3, 0, Math.PI * 2, true)
-    // ctx.arc(xa, ya, 3, 0, Math.PI * 2, true)
-    // ctx.stroke()
-
-    // paint the current touch //
-    if (this.touch) {
-      const { clientX, clientY } = this.touch
-      ctx.beginPath()
-      if (this.type === Slider.HORIZONTAL) {
-        ctx.arc(constrain(clientX, x, xa), y, r - 4, 0, Math.PI * 2, true)
-      } else {
-        ctx.arc(x, constrain(clientY, y, ya), r - 4, 0, Math.PI * 2, true)
-      }
-      ctx.strokeStyle = this.style
-      ctx.stroke()
+    // paint the current value //
+    ctx.beginPath()
+    if (this.type === Slider.HORIZONTAL) {
+      ctx.arc(xa - (this.value * l), y, r - 4, 0, Math.PI * 2, true)
+    } else {
+      ctx.arc(x, ya - (this.value * l), r - 4, 0, Math.PI * 2, true)
     }
+    ctx.strokeStyle = this.style
+    ctx.stroke()
+
+    // paint debug text //
+    ctx.beginPath()
+    ctx.fillStyle = 'white'
+    ctx.fillText(
+      `${this.name}, value: ${this.value.toFixed(3)}`,
+      xa - 50, ya + r + 15
+    )
   }
 }
-Slider.HORIZONTAL = 'HORIZONTAL'
-Slider.VERTICAL = 'VERTICAL'
+Slider.HORIZONTAL = 'Horizontal'
+Slider.VERTICAL = 'Vertical'
