@@ -65,6 +65,7 @@ body {
   border: 3pt solid #990000;
   border-radius: 3pt;
   background-color: #111133;
+  font-size: 4vh;
 }
 #error-box:empty {
   display: none;
