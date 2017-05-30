@@ -28,14 +28,14 @@ body {
   height: 100%;
 }
 #heading {
-  border-bottom: 1px solid #cccccc;
+  border-bottom: 1pt solid #cccccc;
   padding-left: 2.5vh;
   height: 10vh;
   font-size: 7.5vh;
 }
 #status-box {
   display: inline-block;
-  background-color: green;
+  background-color: red;
   width: 7vh;
   height: 7vh;
   border-radius: 3.5vh;
@@ -52,6 +52,26 @@ body {
   margin-right: 2vh;
   cursor: pointer;
   filter: invert(100%)
+}
+
+#error-box {
+  box-sizing: border-box;
+  position: absolute;
+  z-index: 10;
+  left: 2.5vw;
+  top: 10vh;
+  width: 95vw;
+  padding: 3vh 6vw;
+  border: 3pt solid #990000;
+  border-radius: 3pt;
+  background-color: #111133;
+}
+#error-box:empty {
+  display: none;
+}
+#error-box span.type {
+  display: inline-block;
+  width: 20vw;
 }
 
 #touch-canvas {

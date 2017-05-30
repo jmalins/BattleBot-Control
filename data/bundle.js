@@ -11,116 +11,92 @@ function constrain (value, min, max) {
 function map (value, inputMin, inputMax, outputMin, outputMax) {
   return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin
 }
-
-var SETUP = 'SETUP';
-var DATA = 'DATA';
-var Errors = {
-  add: function add (type, message) {
-    console.error(type, message)
+function ajax (method, url, data, timeout, callback) {
+  if (typeof timeout === 'function') {
+    callback = timeout
+    timeout = undefined
   }
-};
-
-var _configs = { };
-var DriverOptions = {
-  DigitalInput: {
-    pin: true
-  },
-  DigitalOutput: {
-    pin: true
-  },
-  PWM_HBridge: {
-    pwmPin: true,
-    dirPin: true,
-    reverse: false
-  },
-  PWM: {
-    pwmPin: true,
-    minMicroseconds: false,
-    maxMicroseconds: false
+  var getResponse = function (xhr, data) { return ({
+    status: xhr.status,
+    statusText: xhr.statusText,
+    data: data,
+    xhr: xhr
+  }); };
+  var xhr = new XMLHttpRequest();
+  xhr.open(method, url, true)
+  xhr.timeout = timeout
+  xhr.addEventListener('load', function () {
+    if (xhr.status >= 200 && xhr.status < 300) {
+      callback(null, getResponse(xhr, xhr.responseText))
+    } else {
+      callback(new Error(((xhr.status) + " - " + (xhr.statusText))), getResponse(xhr))
+    }
+  })
+  xhr.addEventListener('error', function (e) { return callback(new Error('Request failed'), getResponse(xhr)); })
+  xhr.addEventListener('timeout', function () { return callback(new Error('Request timeout'), getResponse(xhr)); })
+  if (data) {
+    xhr.send(typeof data !== 'string' ? JSON.stringify(data) : data)
+  } else {
+    xhr.send()
   }
-};
-var Hardware = {
+}
+function ajaxGet (url, timeout, callback) {
+  return ajax('GET', url, null, timeout, callback)
+}
+function ajaxPut (url, data, timeout, callback) {
+  return ajax('PUT', url, data, timeout, callback)
+}
+
+var HardwareManager = {
   devices: { },
-  configure: function configure (config) {
-    for (var deviceName in config) {
-      var device = config[deviceName];
-      var keys = Object.keys(device);
-      if (keys.length !== 1) {
-        Errors.add(SETUP, ("Driver not defined for device: " + deviceName))
-        continue
-      }
-      var driverName = keys[0];
-      var options = device[driverName];
-      var driverOpts = DriverOptions[driverName];
-      if (!driverOpts) {
-        Errors.add(SETUP, ("Unknown driver name: " + driverName))
-        continue
-      }
-      var errors = false;
-      for (var optName in driverOpts) {
-        if (!options[optName] && driverOpts[optName]) {
-          Errors.add(SETUP, ("Driver '" + deviceName + "." + driverName + "' requires option: " + optName))
-          errors = true
+  config: null,
+  validateConfig: function validateConfig () {
+    var errors = [ ];
+    var addError = function (message) { return errors.push({ type: 'HARDWARE', message: message }); };
+    if (!HardwareManager.config) {
+      addError('Hardware configuration not set')
+    } else if (!HardwareManager.config.devices) {
+      addError('Hardware configuration is missing devices')
+    }
+    if (errors.length) { return errors }
+    for (var deviceName in HardwareManager.devices) {
+      var device = HardwareManager.devices[deviceName];
+      var config = HardwareManager.config.devices[deviceName];
+      if (config) {
+        var driverName = config.driver;
+        if (!device.supportsDriver(driverName)) {
+          errors.push(("Device " + deviceName + " has invalid driver: " + driverName))
         }
-      }
-      for (var optName$1 in options) {
-        if (typeof driverOpts[optName$1] === 'undefined') {
-          Errors.add(SETUP, ("Driver '" + deviceName + "." + driverName + "' has unsupported option: " + optName$1))
-          errors = true
-          continue
-        }
-        var value = options[optName$1];
-        if (!Number.isInteger(value)) {
-          Errors.add(SETUP, ("Driver option '" + deviceName + "." + driverName + "." + optName$1 + "' has invalid value: " + value))
-          errors = true
-        }
-      }
-      if (errors) { return }
-      _configs[deviceName] = {
-        driver: driverName,
-        options: options
+      } else {
+        addError(("Device has no configuration: " + deviceName))
       }
     }
+    return (errors.length) ? errors : null
   },
-  getConfigurationJSON: function getConfigurationJSON () {
-    for (var deviceName in Hardware.devices) {
-      var config = _configs[deviceName];
-      if (!config) {
-        Errors.add(SETUP, ("Device is not configured: " + deviceName))
-      }
-    }
-    return JSON.stringify(_configs)
-  },
-  getRequestJSON: function getRequestJSON () {
+  getOutputs: function getOutputs () {
     var packet = { };
-    for (var deviceName in Hardware.devices) {
-      var device = Hardware.devices[deviceName];
+    for (var deviceName in HardwareManager.devices) {
+      var device = HardwareManager.devices[deviceName];
       if (device.getOutput) {
         packet[deviceName] = device.getOutput()
       }
     }
-    return JSON.stringify(packet)
+    return packet
   },
-  setResponseJSON: function setResponseJSON (json) {
-    try {
-      var data = JSON.parse(json);
-      for (var deviceName in data) {
-        var device = Hardware.devices[deviceName];
-        if (device && device.setInput) {
-          device.setInput(data[deviceName])
-        }
+  setInputs: function setInputs (values) {
+    for (var deviceName in values) {
+      var device = HardwareManager.devices[deviceName];
+      if (device && device.setInput) {
+        device.setInput(values[deviceName])
       }
-    } catch (err) {
-      Errors.add(DATA, ("Invalid response JSON: '" + json + "'"))
     }
   }
 };
 function addDevice (name, device) {
-  if (Hardware.devices[name]) {
-    Errors.add(SETUP, ("Device already exists: " + name))
-    return
+  if (HardwareManager.devices[name]) {
+    throw new Error(("Device already exists: " + name))
   }
-  Hardware.devices[name] = device
+  HardwareManager.devices[name] = device
 }
 var Device = function Device (name) {
   this.name = name
@@ -132,6 +108,9 @@ Device.prototype.set = function set (value) {
 };
 Device.prototype.get = function get () {
   return this.value
+};
+Device.prototype.supportsDriver = function supportsDriver (driverName) {
+  return false
 };
 var Motor = (function (Device) {
   function Motor (name) {
@@ -147,6 +126,9 @@ var Motor = (function (Device) {
   };
   Motor.prototype.getOutput = function getOutput () {
     return Math.round(this.get() * 1023).toString()
+  };
+  Motor.prototype.supportsDriver = function supportsDriver (driverName) {
+    return [ 'PWM_HBRIDGE', 'PWM' ].indexOf(driverName) !== -1
   };
   return Motor;
 }(Device));
@@ -171,6 +153,9 @@ var Servo = (function (Device) {
   Servo.prototype.getOutput = function getOutput () {
     return Math.round(this.get() * 1023).toString()
   };
+  Servo.prototype.supportsDriver = function supportsDriver (driverName) {
+    return [ 'PWM' ].indexOf(driverName) !== -1
+  };
   return Servo;
 }(Device));
 var DigitalOutput = (function (Device) {
@@ -188,6 +173,9 @@ var DigitalOutput = (function (Device) {
   DigitalOutput.prototype.getOutput = function getOutput () {
     return this.get().toString()
   };
+  DigitalOutput.prototype.supportsDriver = function supportsDriver (driverName) {
+    return [ 'DIGITAL_OUT' ].indexOf(driverName) !== -1
+  };
   return DigitalOutput;
 }(Device));
 var DigitalInput = (function (Device) {
@@ -204,13 +192,16 @@ var DigitalInput = (function (Device) {
   DigitalInput.prototype.setInput = function setInput (value) {
     this.value = !!value
   };
+  DigitalInput.prototype.supportsDriver = function supportsDriver (driverName) {
+    return [ 'DIGITAL_IN' ].indexOf(driverName) !== -1
+  };
   return DigitalInput;
 }(Device));
 
-var TwoWheelDrive = function TwoWheelDrive () {
+var TwoWheelDrive = function TwoWheelDrive (leftMotor, rightMotor) {
   this.motors = [
-    new Motor('leftMotor'),
-    new Motor('rightMotor')
+    leftMotor || new Motor('leftMotor'),
+    rightMotor || new Motor('rightMotor')
   ]
   this.swapMotors = false
 };
@@ -219,7 +210,7 @@ prototypeAccessors.leftMotor.get = function () {
   return this.motors[this.swapMotors ? 1 : 0]
 };
 prototypeAccessors.rightMotor.get = function () {
-  return this.motors[this.swapMotors ? 1 : 0]
+  return this.motors[this.swapMotors ? 0 : 1]
 };
 prototypeAccessors.reverseLeftMotor.set = function (value) {
   this.leftMotor.reversed = value
@@ -291,18 +282,19 @@ var _touchOwners = { };
 function convertTouch (touch) {
   return {
     identifier: touch.identifier,
-    clientX: Math.round(touch.clientX - TouchManager.canvas.offsetLeft),
-    clientY: Math.round(touch.clientY - TouchManager.canvas.offsetTop),
+    clientX: Math.round(touch.clientX - ControlManager.canvas.offsetLeft),
+    clientY: Math.round(touch.clientY - ControlManager.canvas.offsetTop),
     force: touch.force
   }
 }
 function doAdd (touch) {
   if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
-  for (var controlName in TouchManager.controls) {
-    var control = TouchManager.controls[controlName];
+  for (var controlName in ControlManager.controls) {
+    var control = ControlManager.controls[controlName];
     if (control.matchesTouch(touch)) {
       _touchOwners[touch.identifier] = control
       control.touch = convertTouch(touch)
+      ControlManager.update()
       break
     }
   }
@@ -314,6 +306,7 @@ function doUpdate (touch) {
   if (!control) { return }
   control.touch = convertTouch(touch)
   console.log('touchMove', touch, touch.identifier)
+  ControlManager.update()
 }
 function doRemove (touch) {
   if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
@@ -322,15 +315,17 @@ function doRemove (touch) {
   control.touch = null
   delete _touchOwners[touch.identifier]
   console.log('touchEnd', touch, touch.identifier)
+  ControlManager.update()
 }
 var FRAME_RATE = 35;
 var _oldWidth;
 var _oldHeight;
-var TouchManager = {
+var ControlManager = {
   canvas: null,
   ctx: null,
   intervalID: null,
   controls: { },
+  onupdate: null,
   setCanvas: function setCanvas (canvas) {
     function handleTouches (e, handler) {
       if (handler === doUpdate) {
@@ -346,24 +341,30 @@ var TouchManager = {
     canvas.addEventListener('mousedown', doAdd, false)
     canvas.addEventListener('mousemove', doUpdate, false)
     canvas.addEventListener('mouseup', doRemove, false)
-    TouchManager.canvas = canvas
-    TouchManager.ctx = canvas.getContext('2d')
+    ControlManager.canvas = canvas
+    ControlManager.ctx = canvas.getContext('2d')
   },
   start: function start () {
-    TouchManager.intervalID = setInterval(
-      function () { return TouchManager.update(); },
+    ControlManager.intervalID = setInterval(
+      function () { return ControlManager.draw(); },
       1000 / FRAME_RATE
     )
   },
   stop: function stop () {
-    if (TouchManager.intervalID) {
-      clearInterval(TouchManager.intervalID)
+    if (ControlManager.intervalID) {
+      clearInterval(ControlManager.intervalID)
     }
   },
   update: function update () {
-    var canvas = TouchManager.canvas;
-    var ctx = TouchManager.ctx;
-    var controls = TouchManager.controls;
+    var onupdate = ControlManager.onupdate;
+    if (typeof onupdate === 'function') {
+      onupdate()
+    }
+  },
+  draw: function draw () {
+    var canvas = ControlManager.canvas;
+    var ctx = ControlManager.ctx;
+    var controls = ControlManager.controls;
     var resized = (canvas.width !== _oldWidth || canvas.height !== _oldHeight);
     if (resized) {
       _oldWidth = canvas.width
@@ -378,21 +379,20 @@ var TouchManager = {
   }
 };
 function addControl (name, control) {
-  if (TouchManager.controls[name]) {
-    Errors.add(SETUP, ("Control already exists: " + name))
-    return
+  if (ControlManager.controls[name]) {
+    throw new Error(("Control already exists: " + name))
   }
-  TouchManager.controls[name] = control
+  ControlManager.controls[name] = control
 }
 function convertToPixels (dim, value) {
   var reference;
   switch (dim) {
     case 'y':
     case 'height':
-      reference = TouchManager.canvas.height
+      reference = ControlManager.canvas.height
       break
     default:
-      reference = TouchManager.canvas.width
+      reference = ControlManager.canvas.width
       break
   }
   switch (typeof value) {
@@ -681,43 +681,274 @@ var Slider = (function (Control) {
 Slider.HORIZONTAL = 'HORIZONTAL'
 Slider.VERTICAL = 'VERTICAL'
 
-var defaultConfig = {
-  rightMotor: {
-    PWM_HBridge: { pwmPin: 1, dirPin: 3 }
-  },
-  leftMotor: {
-    PWM_HBridge: { pwmPin: 2, dirPin: 4 }
-  },
-  weaponMotor: {
-    PWM: { pwmPin: 6, minMicroseconds: 900, maxMicroseconds: 1800 }
-  },
-  servo1: {
-    PWM: { pwmPin: 7 }
-  },
-  servo2: {
-    PWM: { pwmPin: 8 }
+var Connection = function Connection () {
+  this.state = Connection.DISCONNECTED
+  this.enabled = false
+  this.lastError = null
+  this.responseData = null
+  this.onstatechange = null
+  this.onresponsedata = null
+};
+Connection.prototype.start = function start () {
+  this.enabled = true
+};
+Connection.prototype.stop = function stop () {
+  this.enabled = false
+};
+Connection.prototype.setState = function setState (newState) {
+  if (newState === this.state) { return }
+  var oldState = this.state;
+  this.state = newState
+  if (typeof this.onstatechange === 'function') {
+    this.onstatechange(newState, oldState)
   }
-}
+};
+Connection.prototype.setRobotData = function setRobotData (data) {
+  this.dataPacket = (typeof data === 'string') ? data : JSON.stringify(data)
+};
+Connection.prototype.getResponseData = function getResponseData () {
+  return this.responseData
+};
+Connection.prototype.setResponseData = function setResponseData (data) {
+  this.responseData = data
+  if (typeof this.onresponsedata === 'function') {
+    this.onresponsedata(data)
+  }
+};
+Connection.CONNECTED = 'Connected'
+Connection.CONNECTING = 'Connecting'
+Connection.DISCONNECTED = 'Disconnected'
+Connection.ERROR = 'Error'
+var AjaxConnection = (function (Connection) {
+  function AjaxConnection (timeoutMillis) {
+    Connection.call(this)
+    this.timeoutMillis = timeoutMillis || 250
+    this.timerId = null
+  }
+  if ( Connection ) AjaxConnection.__proto__ = Connection;
+  AjaxConnection.prototype = Object.create( Connection && Connection.prototype );
+  AjaxConnection.prototype.constructor = AjaxConnection;
+  AjaxConnection.prototype.poll = function poll () {
+    var this$1 = this;
+    var pollStart = new Date();
+    ajaxPut('/control', this.dataPacket, this.timeoutMillis, function (err, res) {
+      this$1.lastError = err
+      if (this$1.state === Connection.DISCONNECTED) {
+        this$1.updateRate = 0
+        return
+      }
+      if (!this$1.lastError) {
+        if (this$1.state !== Connection.CONNECTED) {
+          this$1.setState(Connection.CONNECTED)
+        }
+        this$1.setResponseData(res.data)
+      } else {
+        this$1.setState(Connection.ERROR)
+      }
+      var pollMs = (this$1.state === Connection.ERROR) ? 1000 : 1;
+      this$1.timerId = setTimeout(this$1.poll.bind(this$1), pollMs)
+      var delayMs = new Date().getTime() - pollStart.getTime();
+      if (delayMs > 0) {
+        this$1.updateRate = Math.floor(1000 / delayMs)
+      }
+    })
+  };
+  AjaxConnection.prototype.start = function start () {
+    this.setState(Connection.CONNECTING)
+    Connection.prototype.start.call(this)
+    this.poll()
+  };
+  AjaxConnection.prototype.stop = function stop () {
+    if (this.timerId) { clearTimeout(this.timerId) }
+    Connection.prototype.stop.call(this)
+    this.setState(Connection.DISCONNECTED)
+  };
+  return AjaxConnection;
+}(Connection));
+var WebSocketConnection = (function (Connection) {
+  function WebSocketConnection (hostName) {
+    Connection.call(this)
+    var ref = document.location;
+    var hostname = ref.hostname;
+    var port = ref.port;
+    this.hostName = hostName || (port !== 80) ? (hostname + ":" + port) : hostname
+    this.socket = null
+  }
+  if ( Connection ) WebSocketConnection.__proto__ = Connection;
+  WebSocketConnection.prototype = Object.create( Connection && Connection.prototype );
+  WebSocketConnection.prototype.constructor = WebSocketConnection;
+  WebSocketConnection.prototype.start = function start () {
+    var this$1 = this;
+    this.setState(Connection.CONNECTING)
+    Connection.prototype.start.call(this)
+    this.socket = new WebSocket(("ws://" + (this.hostName) + "/ws"), [ 'arduino' ])
+    this.socket.onopen = function () {
+      this$1.setState(Connection.CONNECTED)
+    }
+    this.socket.onerror = function (err) {
+      this$1.lastError = err
+      this$1.setState(Connection.ERROR)
+    }
+    this.socket.onmessage = function (event) {
+      this$1.setResponseData(event.data)
+    }
+    this.socket.onclose = function (event) {
+      if (this$1.state !== Connection.ERROR) {
+        this$1.lastError = new Error('Connection lost')
+        this$1.setState(Connection.ERROR)
+        this$1.socket = null
+      }
+    }
+  };
+  WebSocketConnection.prototype.stop = function stop () {
+    if (this.socket) {
+      if (this.socket.readyState === WebSocket.OPEN) {
+        this.socket.close()
+      }
+      this.socket = null
+    }
+    Connection.prototype.stop.call(this)
+    this.setState(Connection.DISCONNECTED)
+  };
+  WebSocketConnection.prototype.setRobotData = function setRobotData (data) {
+    Connection.prototype.setRobotData.call(this, data)
+    if (this.socket && this.state === Connection.CONNECTED) {
+      if (this.socket.readyState !== WebSocket.OPEN) {
+        this.lastError = new Error(("Invalid socket state: " + ((this.socket.readyState === WebSocket.CONNECTING) ? 'CONNECTING'
+          : (this.socket.readyState === WebSocket.CLOSING) ? 'CLOSING'
+          : (this.socket.readyState === WebSocket.CLOSED) ? 'CLOSED'
+          : 'UNKNOWN')))
+        this.setState(Connection.ERROR)
+        return
+      }
+      try {
+        this.socket.send(this.dataPacket)
+      } catch (err) {
+        this.lastError = err
+        this.setState(Connection.ERROR)
+      }
+    }
+  };
+  return WebSocketConnection;
+}(Connection));
 
-Hardware.configure(defaultConfig)
 var heading = document.getElementById('heading');
+var statusIcon = document.getElementById('status-box');
+var statusText = document.getElementById('status-text');
+var errorBox = document.getElementById('error-box');
 var canvas = document.getElementById('touch-canvas');
-function resizeCanvas () {
+var resizeCanvas = function () {
   canvas.width = window.outerWidth
   canvas.height = window.outerHeight - heading.clientHeight - 1
   window.scrollTo(0, 0)
-}
+};
 window.addEventListener('orientationchange', resizeCanvas)
 window.addEventListener('resize', resizeCanvas)
 resizeCanvas()
-TouchManager.setCanvas(canvas)
-window.addEventListener('load', function (e) {
-  console.log('Loaded')
-  if (window.setup) {
-    console.log('Running setup...')
-    window.setup()
+ControlManager.setCanvas(canvas)
+function addError (ref) {
+  var type = ref.type;
+  var message = ref.message;
+  var eline = document.createElement('li');
+  eline.className = type
+  var tspan = document.createElement('span');
+  tspan.className = 'type'
+  tspan.innerText = type
+  eline.appendChild(tspan)
+  var mspan = document.createElement('span');
+  mspan.className = 'message'
+  mspan.innerText = message
+  eline.appendChild(mspan)
+  errorBox.appendChild(eline)
+}
+function clearErrors (type) {
+  var els = type
+    ? errorBox.getElementsByClassName(type)
+    : errorBox.getElementByTagName('ul');
+  for (var i = 0; i < els.length; i++) {
+    els[i].remove()
   }
-  console.log(JSON.parse(Hardware.getConfigurationJSON()), Hardware.devices)
-  TouchManager.start()
-})
+}
+function setConnectionState (state) {
+  console.log('Connection state:', state)
+  switch (state) {
+    case Connection.DISCONNECTED:
+    case Connection.CONNECTING:
+      statusIcon.style.backgroundColor = 'yellow'
+      break
+    case Connection.CONNECTED:
+      statusIcon.style.backgroundColor = 'green'
+      break
+    default:
+      statusIcon.style.backgroundColor = 'red'
+      break
+  }
+  statusText.innerText = state
+}
+var getHardwareConfig = new Promise(function (resolve, reject) { return ajaxGet('./hardware.json', function (err, resp) {
+    if (err) { return reject(err) }
+    resolve(JSON.parse(resp.data))
+  }); }
+);
+var waitForLoad = new Promise(function (resolve, reject) {
+  window.addEventListener('load', function () {
+    console.log('Page loaded')
+    resolve()
+  })
+});
+var WEBSOCKET = false;
+var _runLoop = true;
+var _connection = null;
+Promise.all([ getHardwareConfig, waitForLoad ])
+  .then(function (ref) {
+    var config = ref[0];
+    HardwareManager.config = config
+    if (window.setup) {
+      console.log('Running robot setup...')
+      try {
+        window.setup()
+      } catch (error) {
+        addError({ type: 'SETUP', message: error.message })
+      }
+    }
+    var hwErrors = HardwareManager.validateConfig();
+    if (hwErrors) {
+      for (var i = 0; i < hwErrors.length; i++) {
+        addError(hwErrors[i])
+      }
+    }
+    _connection = WEBSOCKET ? new WebSocketConnection() : new AjaxConnection()
+    _connection.onstatechange = function (newState, oldState) {
+      setConnectionState(newState)
+      if (newState === Connection.ERROR) {
+        console.log(_connection.lastError)
+        addError({ type: 'CONNECTION', message: _connection.lastError.message })
+      } else if (oldState === Connection.ERROR) {
+        clearErrors('CONNECTION')
+      }
+    }
+    _connection.onresponsedata = function (data) {
+      HardwareManager.setInputs(data)
+    }
+    setConnectionState(_connection.state)
+    _connection.start()
+    _connection.setRobotData(getPacket(HardwareManager.getOutputs()))
+    ControlManager.start()
+    ControlManager.onupdate = function () {
+      if (!_runLoop) { return }
+      if (window.loop) {
+        try {
+          window.loop()
+        } catch (error) {
+          addError({ type: 'LOOP', message: error.message })
+        }
+      }
+      var request = getPacket(HardwareManager.getOutputs());
+      _connection.setRobotData(request)
+    }
+  })
+  .catch(function (err) { return console.error('Error loading', err); })
+function getPacket (json) {
+  return ((json.leftMotor) + ":" + (json.rightMotor) + ":" + (json.weaponMotor))
+}
 //# sourceMappingURL=bundle.js.map
