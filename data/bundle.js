@@ -289,32 +289,30 @@ function convertTouch (touch) {
 }
 function doAdd (touch) {
   if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
+  touch = convertTouch(touch)
   for (var controlName in ControlManager.controls) {
     var control = ControlManager.controls[controlName];
     if (control.matchesTouch(touch)) {
       _touchOwners[touch.identifier] = control
-      control.touch = convertTouch(touch)
+      control.setTouch(touch)
       ControlManager.update()
       break
     }
   }
-  console.log('touchStart', touch, touch.identifier)
 }
 function doUpdate (touch) {
   if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
   var control = _touchOwners[touch.identifier];
   if (!control) { return }
-  control.touch = convertTouch(touch)
-  console.log('touchMove', touch, touch.identifier)
+  control.setTouch(convertTouch(touch))
   ControlManager.update()
 }
 function doRemove (touch) {
   if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
   var control = _touchOwners[touch.identifier];
   if (!control) { return }
-  control.touch = null
+  control.setTouch(null)
   delete _touchOwners[touch.identifier]
-  console.log('touchEnd', touch, touch.identifier)
   ControlManager.update()
 }
 var FRAME_RATE = 35;
@@ -328,9 +326,7 @@ var ControlManager = {
   onupdate: null,
   setCanvas: function setCanvas (canvas) {
     function handleTouches (e, handler) {
-      if (handler === doUpdate) {
-        e.preventDefault()
-      }
+      e.preventDefault()
       for (var i = 0; i < e.changedTouches.length; i++) {
         handler(e.changedTouches[i])
       }
@@ -345,6 +341,24 @@ var ControlManager = {
     ControlManager.ctx = canvas.getContext('2d')
   },
   start: function start () {
+    var buttonGroups = { };
+    for (var controlName in ControlManager.controls) {
+      var control = ControlManager.controls[controlName];
+      if (control instanceof Button && control.groupName) {
+        var groupName = control.groupName;
+        if (buttonGroups[groupName]) {
+          buttonGroups[groupName].push(control)
+        } else {
+          buttonGroups[groupName] = [ control ]
+        }
+      }
+    }
+    for (var groupName$1 in buttonGroups) {
+      var buttons = buttonGroups[groupName$1];
+      if (!buttons.some(function (button) { return button.pressed; })) {
+        buttons[0].pressed = true
+      }
+    }
     ControlManager.intervalID = setInterval(
       function () { return ControlManager.draw(); },
       1000 / FRAME_RATE
@@ -428,6 +442,9 @@ var Control = function Control (name) {
 Control.prototype.matchesTouch = function matchesTouch (touch) {
   return false
 };
+Control.prototype.setTouch = function setTouch (touch) {
+  this.touch = touch
+};
 Control.prototype.getPixelDimensions = function getPixelDimensions () {
   if (this.pixelCache) { return this.pixelCache }
   var dimensions = this.getDimensions();
@@ -435,7 +452,6 @@ Control.prototype.getPixelDimensions = function getPixelDimensions () {
   for (var dimName in dimensions) {
     pixels[dimName] = convertToPixels(dimName, dimensions[dimName])
   }
-  console.log(this.name, pixels)
   return (this.pixelCache = pixels)
 };
 Control.count = 0
@@ -446,25 +462,12 @@ var Joystick = (function (Control) {
     this.radius = 10
     this.sticky = false
     this.style = 'white'
+    this.x = 0
+    this.y = 0
   }
   if ( Control ) Joystick.__proto__ = Control;
   Joystick.prototype = Object.create( Control && Control.prototype );
   Joystick.prototype.constructor = Joystick;
-  var prototypeAccessors = { x: {},y: {} };
-  prototypeAccessors.x.get = function () {
-    if (!this.touch) { return 0.0 }
-    var ref = this.getPixelDimensions();
-    var x = ref.x;
-    var r = ref.r;
-    return (x - this.touch.clientX) / r
-  };
-  prototypeAccessors.y.get = function () {
-    if (!this.touch) { return 0.0 }
-    var ref = this.getPixelDimensions();
-    var y = ref.y;
-    var r = ref.r;
-    return (y - this.touch.clientY) / r
-  };
   Joystick.prototype.getDimensions = function getDimensions () {
     return { x: this.position.x, y: this.position.y, r: this.radius }
   };
@@ -479,38 +482,47 @@ var Joystick = (function (Control) {
     var dy = (y - clientY);
     return Math.sqrt(dx * dx + dy * dy) <= r
   };
+  Joystick.prototype.setTouch = function setTouch (touch) {
+    Control.prototype.setTouch.call(this, touch)
+    if (touch) {
+      var ref = this.getPixelDimensions();
+      var x = ref.x;
+      var y = ref.y;
+      var r = ref.r;
+      this.x = constrain((x - touch.clientX) / r, -1.0, 1.0)
+      this.y = constrain((y - touch.clientY) / r, -1.0, 1.0)
+    } else if (!this.sticky) {
+      this.x = 0.0
+      this.y = 0.0
+    }
+  };
   Joystick.prototype.draw = function draw (ctx) {
     var ref = this.getPixelDimensions();
     var x = ref.x;
     var y = ref.y;
     var r = ref.r;
+    var ir = Math.round(r / 3);
     ctx.beginPath()
     ctx.strokeStyle = (this.touch && this.touchedStyle) || this.style
-    ctx.lineWidth = 6
-    ctx.arc(x, y, 40, 0, Math.PI * 2, true)
+    ctx.lineWidth = 5
+    ctx.arc(x, y, ir, 0, Math.PI * 2, true)
     ctx.stroke()
     ctx.beginPath()
     ctx.strokeStyle = (this.touch && this.touchedStyle) || this.style
     ctx.lineWidth = 2
     ctx.arc(x, y, r, 0, Math.PI * 2, true)
     ctx.stroke()
-    if (this.touch) {
-      var ref$1 = this.touch;
-      var clientX = ref$1.clientX;
-      var clientY = ref$1.clientY;
-      ctx.beginPath()
-      ctx.strokeStyle = this.style
-      ctx.arc(clientX, clientY, 40, 0, Math.PI * 2, true)
-      ctx.stroke()
-    }
+    ctx.beginPath()
+    ctx.strokeStyle = this.style
+    ctx.arc(x - this.x * r, y - this.y * r, ir, 0, Math.PI * 2, true)
+    ctx.stroke()
     ctx.beginPath()
     ctx.fillStyle = 'white'
     ctx.fillText(
-      ("joystick: " + (this.name) + ", x: " + (this.x.toFixed(3)) + ", y: " + (this.y.toFixed(3))),
-      x - 50, y + 75
+      ((this.name) + ", x: " + (this.x.toFixed(3)) + ", y: " + (this.y.toFixed(3))),
+      x - 50, y + r + 15
     )
   };
-  Object.defineProperties( Joystick.prototype, prototypeAccessors );
   return Joystick;
 }(Control));
 var Button = (function (Control) {
@@ -519,15 +531,13 @@ var Button = (function (Control) {
     this.position = { x: 0, y: 0 }
     this.radius = 10
     this.sticky = false
+    this.groupName = null
     this.style = 'white'
+    this.pressed = false
   }
   if ( Control ) Button.__proto__ = Control;
   Button.prototype = Object.create( Control && Control.prototype );
   Button.prototype.constructor = Button;
-  var prototypeAccessors$1 = { pressed: {} };
-  prototypeAccessors$1.pressed.get = function () {
-    return !!this.touch
-  };
   Button.prototype.getDimensions = function getDimensions () {
     return { x: this.position.x, y: this.position.y, r: this.radius }
   };
@@ -541,6 +551,31 @@ var Button = (function (Control) {
     var dx = (x - clientX);
     var dy = (y - clientY);
     return Math.sqrt(dx * dx + dy * dy) <= r
+  };
+  Button.prototype.setTouch = function setTouch (touch) {
+    var this$1 = this;
+    var lastState = !!this.touch;
+    console.log(this.sticky, this.touch, lastState, touch, this.pressed)
+    Control.prototype.setTouch.call(this, touch)
+    if (this.sticky) {
+      if (touch && !lastState) {
+        if (this.groupName) {
+          if (!this.pressed) {
+            for (var controlName in ControlManager.controls) {
+              var control = ControlManager.controls[controlName];
+              if (control instanceof Button && control.groupName === this$1.groupName) {
+                control.pressed = false
+              }
+            }
+            this.pressed = true
+          }
+        } else {
+          this.pressed = !!(this.pressed ^ true)
+        }
+      }
+    } else {
+      this.pressed = !!touch
+    }
   };
   Button.prototype.draw = function draw (ctx) {
     var ref = this.getPixelDimensions();
@@ -557,8 +592,13 @@ var Button = (function (Control) {
     } else {
       ctx.stroke()
     }
+    ctx.beginPath()
+    ctx.fillStyle = 'white'
+    ctx.fillText(
+      ((this.name) + ", pressed: " + (this.pressed)),
+      x - 50, y + r + 15
+    )
   };
-  Object.defineProperties( Button.prototype, prototypeAccessors$1 );
   return Button;
 }(Control));
 var Slider = (function (Control) {
@@ -570,6 +610,7 @@ var Slider = (function (Control) {
     this.type = Slider.VERTICAL
     this.sticky = true
     this.style = 'white'
+    this.value = 0
   }
   if ( Control ) Slider.__proto__ = Control;
   Slider.prototype = Object.create( Control && Control.prototype );
@@ -582,6 +623,22 @@ var Slider = (function (Control) {
       l: this.length
     }
   };
+  Slider.prototype.setTouch = function setTouch (touch) {
+    Control.prototype.setTouch.call(this, touch)
+    if (touch) {
+      var ref = this.getHelperDimensions();
+      var l = ref.l;
+      var xa = ref.xa;
+      var ya = ref.ya;
+      if (this.type === Slider.HORIZONTAL) {
+        this.value = constrain((xa - touch.clientX) / l, 0.0, 1.0)
+      } else {
+        this.value = constrain((ya - touch.clientY) / l, 0.0, 1.0)
+      }
+    } else if (!this.sticky) {
+      this.value = 0
+    }
+  };
   Slider.prototype.getHelperDimensions = function getHelperDimensions () {
     var ref = this.getPixelDimensions();
     var x = ref.x;
@@ -590,59 +647,65 @@ var Slider = (function (Control) {
     var l = ref.l;
     if (this.type === Slider.HORIZONTAL) {
       return {
+        x: x,
         x1: x,
         x2: x + l,
         xa: x + l,
+        y: y,
         y1: y - r,
         y2: y + r,
-        ya: y
+        ya: y,
+        r: r,
+        l: l
       }
     } else {
       return {
+        x: x,
         x1: x - r,
         x2: x + r,
         xa: x,
+        y: y,
         y1: y,
         y2: y + l,
-        ya: y + l
+        ya: y + l,
+        r: r,
+        l: l
       }
     }
   };
   Slider.prototype.matchesTouch = function matchesTouch (touch) {
     var clientX = touch.clientX;
     var clientY = touch.clientY;
-    var ref = this.getPixelDimensions();
+    var ref = this.getHelperDimensions();
     var x = ref.x;
     var y = ref.y;
     var r = ref.r;
-    var ref$1 = this.getHelperDimensions();
-    var x1 = ref$1.x1;
-    var y1 = ref$1.y1;
-    var x2 = ref$1.x2;
-    var y2 = ref$1.y2;
-    var xa = ref$1.xa;
-    var ya = ref$1.ya;
+    var x1 = ref.x1;
+    var y1 = ref.y1;
+    var x2 = ref.x2;
+    var y2 = ref.y2;
+    var xa = ref.xa;
+    var ya = ref.ya;
     var dx = (x - clientX);
     var dy = (y - clientY);
     if (Math.sqrt(dx * dx + dy * dy) <= r) { return true }
     var dxa = (xa - clientX);
     var dya = (ya - clientY);
     if (Math.sqrt(dxa * dxa + dya * dya) <= r) { return true }
-    console.log(clientX, xa, dxa, clientY, ya, dya)
     return (clientX >= x1) && (clientX <= x2) && (clientY >= y1) && (clientY <= y2)
   };
   Slider.prototype.draw = function draw (ctx) {
-    var ref = this.getPixelDimensions();
+    var ref = this.getHelperDimensions();
     var x = ref.x;
     var y = ref.y;
     var r = ref.r;
-    var ref$1 = this.getHelperDimensions();
-    var x1 = ref$1.x1;
-    var y1 = ref$1.y1;
-    var x2 = ref$1.x2;
-    var y2 = ref$1.y2;
-    var xa = ref$1.xa;
-    var ya = ref$1.ya;
+    var l = ref.l;
+    var x1 = ref.x1;
+    var y1 = ref.y1;
+    var x2 = ref.x2;
+    var y2 = ref.y2;
+    var xa = ref.xa;
+    var ya = ref.ya;
     ctx.beginPath()
     ctx.strokeStyle = this.style
     ctx.lineWidth = 2
@@ -662,24 +725,25 @@ var Slider = (function (Control) {
       ctx.lineTo(x1, y1)
     }
     ctx.stroke()
-    if (this.touch) {
-      var ref$2 = this.touch;
-      var clientX = ref$2.clientX;
-      var clientY = ref$2.clientY;
-      ctx.beginPath()
-      if (this.type === Slider.HORIZONTAL) {
-        ctx.arc(constrain(clientX, x, xa), y, r - 4, 0, Math.PI * 2, true)
-      } else {
-        ctx.arc(x, constrain(clientY, y, ya), r - 4, 0, Math.PI * 2, true)
-      }
-      ctx.strokeStyle = this.style
-      ctx.stroke()
+    ctx.beginPath()
+    if (this.type === Slider.HORIZONTAL) {
+      ctx.arc(xa - (this.value * l), y, r - 4, 0, Math.PI * 2, true)
+    } else {
+      ctx.arc(x, ya - (this.value * l), r - 4, 0, Math.PI * 2, true)
     }
+    ctx.strokeStyle = this.style
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.fillStyle = 'white'
+    ctx.fillText(
+      ((this.name) + ", value: " + (this.value.toFixed(3))),
+      xa - 50, ya + r + 15
+    )
   };
   return Slider;
 }(Control));
-Slider.HORIZONTAL = 'HORIZONTAL'
-Slider.VERTICAL = 'VERTICAL'
+Slider.HORIZONTAL = 'Horizontal'
+Slider.VERTICAL = 'Vertical'
 
 var Connection = function Connection () {
   this.state = Connection.DISCONNECTED
@@ -947,7 +1011,9 @@ Promise.all([ getHardwareConfig, waitForLoad ])
       _connection.setRobotData(request)
     }
   })
-  .catch(function (err) { return console.error('Error loading', err); })
+  .catch(function (err) {
+    addError({ type: 'SCRIPT', message: err.message })
+  })
 function getPacket (json) {
   return ((json.leftMotor) + ":" + (json.rightMotor) + ":" + (json.weaponMotor))
 }
