@@ -44,6 +44,13 @@ body {
 #status-text {
   vertical-align: middle;
 }
+#info-box {
+  position: absolute;
+  left: 60vw;
+  margin-left: 20vw;
+  font-size: 3vh;
+  padding-top: 1vh;
+}
 #settings-img {
   width: 7.5vh;
   height: 7.5vh;

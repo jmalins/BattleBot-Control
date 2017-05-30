@@ -750,6 +750,7 @@ var Connection = function Connection () {
   this.enabled = false
   this.lastError = null
   this.responseData = null
+  this.pingTimeMs = null
   this.onstatechange = null
   this.onresponsedata = null
 };
@@ -775,6 +776,9 @@ Connection.prototype.getResponseData = function getResponseData () {
 };
 Connection.prototype.setResponseData = function setResponseData (data) {
   this.responseData = data
+  if (!data) {
+    this.pingTimeMs = null
+  }
   if (typeof this.onresponsedata === 'function') {
     this.onresponsedata(data)
   }
@@ -794,27 +798,25 @@ var AjaxConnection = (function (Connection) {
   AjaxConnection.prototype.constructor = AjaxConnection;
   AjaxConnection.prototype.poll = function poll () {
     var this$1 = this;
-    var pollStart = new Date();
+    var pollStartMs = new Date().getTime();
     ajaxPut('/control?body=' + this.dataPacket, this.dataPacket, this.timeoutMillis, function (err, res) {
       this$1.lastError = err
       if (this$1.state === Connection.DISCONNECTED) {
-        this$1.updateRate = 0
+        this$1.setResponseData(null)
         return
       }
       if (!this$1.lastError) {
         if (this$1.state !== Connection.CONNECTED) {
           this$1.setState(Connection.CONNECTED)
         }
+        this$1.pingTimeMs = new Date().getTime() - pollStartMs
         this$1.setResponseData(res.data)
       } else {
         this$1.setState(Connection.ERROR)
+        this$1.setResponseData(null)
       }
       var pollMs = (this$1.state === Connection.ERROR) ? 1000 : 50;
       this$1.timerId = setTimeout(this$1.poll.bind(this$1), pollMs)
-      var delayMs = new Date().getTime() - pollStart.getTime();
-      if (delayMs > 0) {
-        this$1.updateRate = Math.floor(1000 / delayMs)
-      }
     })
   };
   AjaxConnection.prototype.start = function start () {
@@ -826,6 +828,7 @@ var AjaxConnection = (function (Connection) {
     if (this.timerId) { clearTimeout(this.timerId) }
     Connection.prototype.stop.call(this)
     this.setState(Connection.DISCONNECTED)
+    this.setResponseData(null)
   };
   return AjaxConnection;
 }(Connection));
@@ -837,6 +840,7 @@ var WebSocketConnection = (function (Connection) {
     var port = ref.port;
     this.hostName = hostName || (port !== 80) ? (hostname + ":" + port) : hostname
     this.socket = null
+    this.startTimeMs = null
   }
   if ( Connection ) WebSocketConnection.__proto__ = Connection;
   WebSocketConnection.prototype = Object.create( Connection && Connection.prototype );
@@ -845,6 +849,7 @@ var WebSocketConnection = (function (Connection) {
     var this$1 = this;
     this.setState(Connection.CONNECTING)
     Connection.prototype.start.call(this)
+    this.startTimeMs = new Date().getTime()
     this.socket = new WebSocket(("ws://" + (this.hostName) + "/ws"), [ 'arduino' ])
     this.socket.onopen = function () {
       this$1.setState(Connection.CONNECTED)
@@ -852,14 +857,17 @@ var WebSocketConnection = (function (Connection) {
     this.socket.onerror = function (err) {
       this$1.lastError = err
       this$1.setState(Connection.ERROR)
+      this$1.setResponseData(null)
     }
     this.socket.onmessage = function (event) {
+      this$1.pingTimeMs = new Date().getTime() - this$1.startTimeMs
       this$1.setResponseData(event.data)
     }
     this.socket.onclose = function (event) {
       if (this$1.state !== Connection.ERROR) {
         this$1.lastError = new Error('Connection lost')
         this$1.setState(Connection.ERROR)
+        this$1.setResponseData(null)
         this$1.socket = null
       }
     }
@@ -869,6 +877,7 @@ var WebSocketConnection = (function (Connection) {
       if (this.socket.readyState === WebSocket.OPEN) {
         this.socket.close()
       }
+      this.setResponseData(null)
       this.socket = null
     }
     Connection.prototype.stop.call(this)
@@ -886,10 +895,12 @@ var WebSocketConnection = (function (Connection) {
         return
       }
       try {
+        this.startTimeMs = new Date().getTime()
         this.socket.send(this.dataPacket)
       } catch (err) {
         this.lastError = err
         this.setState(Connection.ERROR)
+        this.setResponseData(null)
       }
     }
   };
@@ -899,6 +910,7 @@ var WebSocketConnection = (function (Connection) {
 var heading = document.getElementById('heading');
 var statusIcon = document.getElementById('status-box');
 var statusText = document.getElementById('status-text');
+var infoBox = document.getElementById('info-box');
 var errorBox = document.getElementById('error-box');
 var canvas = document.getElementById('touch-canvas');
 var resizeCanvas = function () {
@@ -949,6 +961,9 @@ function setConnectionState (state) {
   }
   statusText.innerText = state
 }
+function setConnectionInfo (conn) {
+  infoBox.innerText = "Ping: " + ((conn.pingTimeMs !== null) ? ((conn.pingTimeMs) + " ms") : '----')
+}
 var getHardwareConfig = new Promise(function (resolve, reject) { return ajaxGet('./hardware.json', function (err, resp) {
     if (err) { return reject(err) }
     resolve(JSON.parse(resp.data))
@@ -993,6 +1008,7 @@ Promise.all([ getHardwareConfig, waitForLoad ])
     }
     _connection.onresponsedata = function (data) {
       HardwareManager.setInputs(data)
+      setConnectionInfo(_connection)
     }
     setConnectionState(_connection.state)
     _connection.setRobotData(getPacket(HardwareManager.getOutputs()))
