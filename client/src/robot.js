@@ -44,9 +44,9 @@ function loop () {
   
   // handle weapon control //
   if (weaponButton.pressed) {
-    motorMotor.set(1.0)
+    weaponMotor.set(1.0)
   } else {
-    motorMotor.set(0)
+    weaponMotor.set(0)
   }
 }
 
