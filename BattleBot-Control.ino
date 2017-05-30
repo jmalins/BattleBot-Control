@@ -135,11 +135,19 @@ void setupWiFi() {
  ********************************************************************************/
  
 void handleControlPut(AsyncWebServerRequest *request) {
+  /*DBG_OUTPUT_PORT.println("START control put");
+  int parms = request->params();
+  for(int i = 0; i < parms; i++) {
+    AsyncWebParameter* p = request->getParam(i);
+    DBG_OUTPUT_PORT.println("  param: " + p->name() + " " + p->value());
+  }
+  DBG_OUTPUT_PORT.println("END control put");*/
+  
   // should have a POST body //
-  if(request->hasParam("body", true)) {
+  if(request->hasParam("body")) {
     enterState(STATE_DRIVING_WITH_TIMEOUT);
     
-    String body = request->getParam("body", true)->value();
+    String body = request->getParam("body")->value();
     //DBG_OUTPUT_PORT.println("handleControlPut: " + body);
 
     int index = body.indexOf(":"), index2 = body.indexOf(":", index + 1);
