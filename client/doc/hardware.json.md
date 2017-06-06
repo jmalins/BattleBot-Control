@@ -1,4 +1,7 @@
 # hardware.json Specification #
+
+*note:* This functionality is still being implemented. The current robot is hard-coded to three devices 'leftMotor', 'rightMotor' and 'weaponMotor'.
+
 The `hardware.json` configuration file is installed on the robot to apply settings such as pin numbers, input/output direction, etc. to device drivers on the robot.
 
 If your robot is part of a kit, this file will be installed with a default configuration, so no customization is needed unless additional hardware is installed.
