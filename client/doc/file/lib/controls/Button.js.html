@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">lib/controls/Button.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/jmalins/BattleBot-Control" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-constrain">constrain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-map">map</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">connection</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/AjaxConnection.js~AjaxConnection.html">AjaxConnection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/Connection.js~Connection.html">Connection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/WebSocketConnection.js~WebSocketConnection.html">WebSocketConnection</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">controls</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Button.js~Button.html">Button</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Control.js~Control.html">Control</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/ControlManager.js~ControlManager.html">ControlManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Joystick.js~Joystick.html">Joystick</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Slider.js~Slider.html">Slider</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-Position">Position</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-TouchEvent">TouchEvent</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">drive</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/ArcadeDrive.js~ArcadeDrive.html">ArcadeDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TankDrive.js~TankDrive.html">TankDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TwoWheelDrive.js~TwoWheelDrive.html">TwoWheelDrive</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">hardware</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Device.js~Device.html">Device</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalInput.js~DigitalInput.html">DigitalInput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalOutput.js~DigitalOutput.html">DigitalOutput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/HardwareManager.js~HardwareManager.html">HardwareManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Motor.js~Motor.html">Motor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Servo.js~Servo.html">Servo</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">lib/controls/Button.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import ControlManager from &apos;./ControlManager&apos;
+import Control from &apos;./Control&apos;
+
+/**
+ * Button for on-off control or selecting amongs discrete choices.
+ *
+ * This class can operate in multiple modes.
+ *
+ * ## Momentary mode ##
+ * In this mode, the button will only register as pressed if it is actively
+ * being touched. Once the touch ends, the button is no longer pressed. Physically,
+ * this corresponds to spring loaded button. This is the default mode.
+ *
+ * ```javascript
+ * // not actually needed, this is the default mode
+ * myButton.sticky = false;
+ * ```
+ *
+ * ## Toggle mode ##
+ * In this mode, the button will flip between being pressed and unpressed every
+ * time it is touched and released. Physically, this corresponds to a click-on, click-off
+ * button.
+ *
+ * To set this mode, set sticky to `true`.
+ * ```javascript
+ * myButton.sticky = true;
+ * ```
+ *
+ * ## Group (radio button) mode ##
+ * In this mode, buttons are placed into a mutually-exclusive group where only one can
+ * be pressed at a time. Physicially, this corresponds to spring-loaded buttons on
+ * antique devices such as radios and tape decks.
+ *
+ * Using this mode requires that the set of buttons be placed in a group. This is done
+ * by assigning the same `groupName` property to multiple buttons. Buttons in a group
+ * are automatically sticky, so the `sticky` property is ignored.
+ * ```javascript
+ * myButton1 = new Button(&apos;button1&apos;);
+ * myButton1.groupName = &apos;myButtons&apos;;
+ * myButton2 = new Button(&apos;button2&apos;);
+ * myButton2.groupName = &apos;myButtons&apos;;
+ * ```
+ * By default, the first button that is assigned to a group starts as the initial
+ * selected Button. In the example above, this would be `myButton1`. You can change
+ * this behavior by manually setting the initial Button to pressed. To make `myButton2`
+ * start pressed, do the follow:
+ * ```javascript
+ * myButton2.pressed = true;
+ * ```
+ */
+export default class Button extends Control {
+  /**
+   * Constructor. Create a Button and add it to the canvas.
+   * @override
+   * @param {!string} name - the joystick name
+   * @throws {Error} control already exists with specified name
+   */
+  constructor (name) {
+    super(name)
+    /**
+     * The placement of the Button on the canvas. For dimension values,
+     * see {@link ControlManager.convertToPixels}.
+     *
+     * @example &lt;caption&gt;Set individually&lt;/caption&gt;
+     * myButton.position.x = 10;
+     * myButton.position.y = 20;
+     *
+     * @example &lt;caption&gt;Set as an Object literal&lt;/caption&gt;
+     * myButton.position = { x: 10, y: 20 };
+     *
+     * @type {Position}
+     */
+    this.position = { x: 0, y: 0 }
+    /**
+     * The radius of the Button. Bigger buttons are easier to push, but
+     * the take up more space. In other news, the sky is blue.
+     *
+     * @example
+     * myJoystick.radius = 10;
+     *
+     * @type {number}
+     */
+    this.radius = 10
+    /**
+     * Should the button stay pressed until touched again to turn off. This value
+     * is ignored if the button is part of a group.
+     *
+     * Defaults to `false`.
+     *
+     * @type {boolean}
+     */
+    this.sticky = false
+    /**
+     * Set this property to the same value on multiple Buttons to make them part of
+     * a group. Buttons in a group are mutually exclusive, only one can be pressed
+     * at a time.
+     * @type {?string}
+     */
+    this.groupName = null
+    /**
+     * Style to draw.
+     * @type {string}
+     */
+    this.style = &apos;white&apos;
+    /**
+     * *Output* - True if the Button is pressed.
+     * @type {boolean}
+     */
+    this.pressed = false
+  }
+
+  /**
+   * Get Button dimensions.
+   *
+   * @protected
+   * @return {Map&lt;string,number|string&gt;} named dimension collection, in raw form
+   * @property {!(number|string)} x - the x coordinate
+   * @property {!(number|string)} y - the y coordinate
+   * @property {!(number|string)} r - the radius
+   */
+  getDimensions () {
+    return { x: this.position.x, y: this.position.y, r: this.radius }
+  }
+
+  /**
+   * Is the specified touch inside the Button.
+   *
+   * This method is called by the framework, so need not be used directly.
+   *
+   * @override
+   * @protected
+   * @param {!TouchEvent} touch - the TouchEvent to test
+   * @return {boolean} - true if the control matches the event
+   */
+  matchesTouch (touch) {
+    const { clientX, clientY } = touch
+    const { x, y, r } = this.getPixelDimensions()
+
+    const dx = (x - clientX)
+    const dy = (y - clientY)
+    return Math.sqrt(dx * dx + dy * dy) &lt;= r
+  }
+
+  /**
+   * A touch tracked by the Button has been updated. Buttons only respond
+   * to first instance of a TouchEvent (start) and the call where the TouchEvent
+   * is cleared to null (end). The exact behavior depends on the setting of
+   * {@link Button#sticky} and {@link Button#groupName}.
+   *
+   * This method is called by the framework, so need not be used directly.
+   *
+   * @override
+   * @protected
+   * @param {?TouchEvent} touch - the TouchEvent to test
+   */
+  setTouch (touch) {
+    const lastState = !!this.touch
+    console.log(this.sticky, this.touch, lastState, touch, this.pressed)
+    super.setTouch(touch)
+    if (this.sticky || this.groupName) {
+      // only react to touchStart //
+      if (touch &amp;&amp; !lastState) {
+        // are we part of a group //
+        if (this.groupName) {
+          // only react to changed values //
+          if (!this.pressed) {
+            // clear all others in group //
+            for (const controlName in ControlManager.controls) {
+              const control = ControlManager.controls[controlName]
+              if (control instanceof Button &amp;&amp; control.groupName === this.groupName) {
+                control.pressed = false
+              }
+            }
+            this.pressed = true
+          }
+        } else {
+          // just toggle this button //
+          this.pressed = !!(this.pressed ^ true)
+        }
+      }
+    } else {
+      this.pressed = !!touch
+    }
+  }
+
+  /**
+   * Draw the Button on the canvas.
+   *
+   * This method is called by the framework, so need not be used directly.
+   *
+   * @protected
+   * @param {!CanvasRenderingContext2D} ctx - the 2D drawing context
+   */
+  draw (ctx) {
+    const { x, y, r } = this.getPixelDimensions()
+
+    ctx.beginPath()
+    ctx.strokeStyle = this.style
+    ctx.fillStyle = this.style
+    ctx.lineWidth = 6
+    ctx.arc(x, y, r, 0, Math.PI * 2, true)
+    if (this.pressed) {
+      ctx.fill()
+    } else {
+      ctx.stroke()
+    }
+
+    ctx.beginPath()
+    ctx.fillStyle = &apos;white&apos;
+    ctx.fillText(
+      `${this.name}, pressed: ${this.pressed}`,
+      x - 50, y + r + 15
+    )
+  }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
