@@ -6,4 +6,14 @@ The end user can customize both the user interface and control scheme by editing
 
 ## System Architecture ##
 This diagram describes the eesibot architecture.
+
 ![eesibot Architecture](/client/doc/eesibot-architecture.png)
+
+Defining a full-feature robot only requires editing, at most, two files:
+ 1. `robot.js` - code that defines the robot setup, user interface and control loop (documentation [here](./robot.js.md))
+ 2. `hardware.json` - driver configuration file that sets the configuration of the underlying hardware (documentation [here](./hardware.js.md)
+
+## API Documentation ##
+The API documentation for the JavaScript library can be found here:
+
+[API Documentation](https://raw.githack.com/jmalins/BattleBot-Control/new-ui/client/doc/esdoc/index.html)
