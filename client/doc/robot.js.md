@@ -27,7 +27,7 @@ In `robot.js`, the user must implement two JavaScript functions `setup()` and `l
 ## setup() ##
 The setup function is run once when the robot is started. In this function you create hardware (drives, motors, servos, etc.) and user interface controls (joysticks, buttons, sliders, etc.) that will be used to control the robot. In general, these objects should be assigned to variables so they can be used later in the `loop()` function.
 
-For a complete reference of the available objects, see the [API Documentation](https://raw.githack.com/jmalins/BattleBot-Control/new-ui/client/doc/index.html).
+For a complete reference of the available objects, see the [API Documentation](https://raw.githack.com/jmalins/BattleBot-Control/new-ui/client/doc/esdoc/index.html).
 
 ## loop() ##
 The loop function is run repeatly when the robot is operating. In this function you read the user interface controls (or sensors) you created previously and use their values to set the outputs of motors and other hardware.
