@@ -8,9 +8,13 @@
 /**
  * Constrain input to a given range.
  *
+ * Identical to the Arduino library function with the same name.
+ * @see https://www.arduino.cc/en/Reference/Constrain
+ *
  * @param {number} value - input value
  * @param {number} min - minimum value
  * @param {number} max - maximum value
+ * @return {number}
  */
 export function constrain (value, min, max) {
   if (value < min) return min
@@ -21,11 +25,15 @@ export function constrain (value, min, max) {
 /**
  * Map a value from an input range to an output range.
  *
- * @param {number} value - input value
- * @param {number} inputMin - input range low value
- * @param {number} inputMax - input range high value
- * @param {number} outputMin - output range low value
- * @param {number} outputMax - output range high value
+ * Identical to the Arduino library function with the same name.
+ * @see https://www.arduino.cc/en/Reference/Map
+ *
+ * @param {number} value input value
+ * @param {number} inputMin input range low value
+ * @param {number} inputMax input range high value
+ * @param {number} outputMin output range low value
+ * @param {number} outputMax output range high value
+ * @return {number}
  */
 export function map (value, inputMin, inputMax, outputMin, outputMax) {
   return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin
@@ -33,12 +41,13 @@ export function map (value, inputMin, inputMax, outputMin, outputMax) {
 
 /**
  * General AJAX call.
+ * @private
  *
- * @param {string} method - HTTP method
- * @param {string} url - url to call
- * @param {string|object} data - data to send, will be stringified if JSON
- * @param {number?} timeout - timeout in milliseconds
- * @param {string} callback - (err, data)
+ * @param {string} method HTTP method
+ * @param {string} url url to call
+ * @param {?string|Object} data data to send, will be stringified to JSON if object
+ * @param {?number} timeout timeout in milliseconds
+ * @param {Function} callback (err, data)
  */
 export function ajax (method, url, data, timeout, callback) {
   if (typeof timeout === 'function') {
@@ -77,18 +86,24 @@ export function ajax (method, url, data, timeout, callback) {
 
 /**
  * XHR wrapper to simplify AJAX GET calls.
+ * @private
  *
- * @param {string} url - url to call
- * @param {string} callback - (err, data)
+ * @param {string} url url to call
+ * @param {?number} timeoutMs connection timeout in milliseconds
+ * @param {Function} callback - (err, data)
  */
-export function ajaxGet (url, timeout, callback) {
-  return ajax('GET', url, null, timeout, callback)
+export function ajaxGet (url, timeoutMs, callback) {
+  return ajax('GET', url, null, timeoutMs, callback)
 }
 
 /**
  * XHR wrapper to simplify AJAX PUT calls.
+ * @private
  *
- *
+ * @param {string} url url to call
+ * @param {?string|Object} data data to send, will be stringified to JSON if object
+ * @param {?number} timeout timeout in milliseconds
+ * @param {Function} callback (err, data)
  */
 export function ajaxPut (url, data, timeout, callback) {
   return ajax('PUT', url, data, timeout, callback)

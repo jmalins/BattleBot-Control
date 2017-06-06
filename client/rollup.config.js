@@ -1,5 +1,6 @@
 import buble from 'rollup-plugin-buble'
 import cleanup from 'rollup-plugin-cleanup'
+import localResolve from 'rollup-plugin-local-resolve'
 import eslint from 'rollup-plugin-eslint'
 import filesize from 'rollup-plugin-filesize'
 
@@ -9,6 +10,7 @@ export default {
   treeshake: false,
   plugins: [
     eslint(),
+    localResolve(),
     buble({ objectAssign: 'Object.assign' }),
     cleanup(),
     filesize()
