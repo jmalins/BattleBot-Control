@@ -3,6 +3,81 @@
 /* eslint-disable */
 'use strict';
 
+var _devices = { };
+var _config = null;
+var HardwareManager = function HardwareManager () {};
+var staticAccessors = { config: {} };
+staticAccessors.config.set = function (value) {
+  _config = value
+};
+HardwareManager.validateConfig = function validateConfig () {
+  var errors = [ ];
+  var addError = function (message) { return errors.push({ type: 'HARDWARE', message: message }); };
+  if (!_config) {
+    addError('Hardware configuration not set')
+  } else if (!_config.devices) {
+    addError('Hardware configuration is missing devices')
+  }
+  if (errors.length) { return errors }
+  for (var deviceName in HardwareManager.devices) {
+    var device = HardwareManager.devices[deviceName];
+    var config = HardwareManager.config.devices[deviceName];
+    if (config) {
+      var driverName = config.driver;
+      if (!device.supportsDriver(driverName)) {
+        errors.push(("Device " + deviceName + " has invalid driver: " + driverName))
+      }
+    } else {
+      addError(("Device has no configuration: " + deviceName))
+    }
+  }
+  return (errors.length) ? errors : null
+};
+HardwareManager.getOutputs = function getOutputs () {
+  var packet = { };
+  for (var deviceName in _devices) {
+    var device = _devices[deviceName];
+    if (device.getOutput) {
+      packet[deviceName] = device.getOutput()
+    }
+  }
+  return packet
+};
+HardwareManager.setInputs = function setInputs (values) {
+  for (var deviceName in values) {
+    var device = _devices[deviceName];
+    if (device && device.setInput) {
+      device.setInput(values[deviceName])
+    }
+  }
+};
+HardwareManager.registerDevice = function registerDevice (device) {
+  var name = device.name;
+  if (_devices[name]) {
+    throw new Error(("Device already exists: " + name))
+  }
+  _devices[name] = device
+};
+Object.defineProperties( HardwareManager, staticAccessors );
+
+var Device = function Device (name) {
+  this.name = name
+  this.value = 0
+  HardwareManager.registerDevice(this)
+};
+Device.prototype.set = function set (value) {
+  this.value = value
+};
+Device.prototype.get = function get () {
+  return this.value
+};
+Device.prototype.getOutput = function getOutput () {
+  return null
+};
+Device.prototype.supportsDriver = function supportsDriver (driverName) {
+  return false
+};
+
 function constrain (value, min, max) {
   if (value < min) { return min }
   if (value > max) { return max }
@@ -40,89 +115,25 @@ function ajax (method, url, data, timeout, callback) {
     xhr.send()
   }
 }
-function ajaxGet (url, timeout, callback) {
-  return ajax('GET', url, null, timeout, callback)
+function ajaxGet (url, timeoutMs, callback) {
+  return ajax('GET', url, null, timeoutMs, callback)
 }
 function ajaxPut (url, data, timeout, callback) {
   return ajax('PUT', url, data, timeout, callback)
 }
 
-var HardwareManager = {
-  devices: { },
-  config: null,
-  validateConfig: function validateConfig () {
-    var errors = [ ];
-    var addError = function (message) { return errors.push({ type: 'HARDWARE', message: message }); };
-    if (!HardwareManager.config) {
-      addError('Hardware configuration not set')
-    } else if (!HardwareManager.config.devices) {
-      addError('Hardware configuration is missing devices')
-    }
-    if (errors.length) { return errors }
-    for (var deviceName in HardwareManager.devices) {
-      var device = HardwareManager.devices[deviceName];
-      var config = HardwareManager.config.devices[deviceName];
-      if (config) {
-        var driverName = config.driver;
-        if (!device.supportsDriver(driverName)) {
-          errors.push(("Device " + deviceName + " has invalid driver: " + driverName))
-        }
-      } else {
-        addError(("Device has no configuration: " + deviceName))
-      }
-    }
-    return (errors.length) ? errors : null
-  },
-  getOutputs: function getOutputs () {
-    var packet = { };
-    for (var deviceName in HardwareManager.devices) {
-      var device = HardwareManager.devices[deviceName];
-      if (device.getOutput) {
-        packet[deviceName] = device.getOutput()
-      }
-    }
-    return packet
-  },
-  setInputs: function setInputs (values) {
-    for (var deviceName in values) {
-      var device = HardwareManager.devices[deviceName];
-      if (device && device.setInput) {
-        device.setInput(values[deviceName])
-      }
-    }
-  }
-};
-function addDevice (name, device) {
-  if (HardwareManager.devices[name]) {
-    throw new Error(("Device already exists: " + name))
-  }
-  HardwareManager.devices[name] = device
-}
-var Device = function Device (name) {
-  this.name = name
-  this.value = 0
-  addDevice(name, this)
-};
-Device.prototype.set = function set (value) {
-  this.value = value
-};
-Device.prototype.get = function get () {
-  return this.value
-};
-Device.prototype.supportsDriver = function supportsDriver (driverName) {
-  return false
-};
-var Motor = (function (Device) {
+var Motor = (function (Device$$1) {
   function Motor (name) {
-    Device.call(this, name)
+    Device$$1.call(this, name)
     this.reversed = false
     this.set(0)
   }
-  if ( Device ) Motor.__proto__ = Device;
-  Motor.prototype = Object.create( Device && Device.prototype );
+  if ( Device$$1 ) Motor.__proto__ = Device$$1;
+  Motor.prototype = Object.create( Device$$1 && Device$$1.prototype );
   Motor.prototype.constructor = Motor;
   Motor.prototype.set = function set (value) {
-    Device.prototype.set.call(this, constrain(this.reversed ? -value : value, -1.0, 1.0))
+    if ( value === void 0 ) value = 0;
+    Device$$1.prototype.set.call(this, constrain(this.inverted ? -value : value, -1.0, 1.0))
   };
   Motor.prototype.getOutput = function getOutput () {
     return Math.round(this.get() * 1023).toString()
@@ -132,22 +143,24 @@ var Motor = (function (Device) {
   };
   return Motor;
 }(Device));
-var Servo = (function (Device) {
+
+var Servo = (function (Device$$1) {
   function Servo (name) {
-    Device.call(this, name)
+    Device$$1.call(this, name)
     this.minOutput = 0.0
     this.maxOutput = 1.0
     this.reversed = false
     this.set(0.5)
   }
-  if ( Device ) Servo.__proto__ = Device;
-  Servo.prototype = Object.create( Device && Device.prototype );
+  if ( Device$$1 ) Servo.__proto__ = Device$$1;
+  Servo.prototype = Object.create( Device$$1 && Device$$1.prototype );
   Servo.prototype.constructor = Servo;
   Servo.prototype.set = function set (value) {
+    if ( value === void 0 ) value = 0;
     if (this.reversed) {
-      Device.prototype.set.call(this, map(value, 0.0, 1.0, this.minOutput, this.maxOutput))
+      Device$$1.prototype.set.call(this, map(value, 0.0, 1.0, this.minOutput, this.maxOutput))
     } else {
-      Device.prototype.set.call(this, map(value, 0.0, 1.0, this.maxOutput, this.minOutput))
+      Device$$1.prototype.set.call(this, map(value, 0.0, 1.0, this.maxOutput, this.minOutput))
     }
   };
   Servo.prototype.getOutput = function getOutput () {
@@ -158,17 +171,18 @@ var Servo = (function (Device) {
   };
   return Servo;
 }(Device));
-var DigitalOutput = (function (Device) {
+
+var DigitalOutput = (function (Device$$1) {
   function DigitalOutput (name) {
-    Device.call(this, name)
-    this.reversed = false
+    Device$$1.call(this, name)
+    this.inverted = false
     this.set(false)
   }
-  if ( Device ) DigitalOutput.__proto__ = Device;
-  DigitalOutput.prototype = Object.create( Device && Device.prototype );
+  if ( Device$$1 ) DigitalOutput.__proto__ = Device$$1;
+  DigitalOutput.prototype = Object.create( Device$$1 && Device$$1.prototype );
   DigitalOutput.prototype.constructor = DigitalOutput;
   DigitalOutput.prototype.set = function set (value) {
-    Device.prototype.set.call(this, !!value ^ this.reversed ? 1 : 0)
+    Device$$1.prototype.set.call(this, !!value ^ this.reversed ? 1 : 0)
   };
   DigitalOutput.prototype.getOutput = function getOutput () {
     return this.get().toString()
@@ -178,13 +192,14 @@ var DigitalOutput = (function (Device) {
   };
   return DigitalOutput;
 }(Device));
-var DigitalInput = (function (Device) {
+
+var DigitalInput = (function (Device$$1) {
   function DigitalInput (name) {
-    Device.call(this, name)
+    Device$$1.call(this, name)
     this.value = false
   }
-  if ( Device ) DigitalInput.__proto__ = Device;
-  DigitalInput.prototype = Object.create( Device && Device.prototype );
+  if ( Device$$1 ) DigitalInput.__proto__ = Device$$1;
+  DigitalInput.prototype = Object.create( Device$$1 && Device$$1.prototype );
   DigitalInput.prototype.constructor = DigitalInput;
   DigitalInput.prototype.get = function get () {
     return this.value
@@ -199,52 +214,36 @@ var DigitalInput = (function (Device) {
 }(Device));
 
 var TwoWheelDrive = function TwoWheelDrive (leftMotor, rightMotor) {
+  var getMotor = function (motor) { return typeof motor === 'string' ? new Motor(motor) : motor; };
   this.motors = [
-    leftMotor || new Motor('leftMotor'),
-    rightMotor || new Motor('rightMotor')
+    getMotor(leftMotor) || new Motor('leftMotor'),
+    getMotor(rightMotor) || new Motor('rightMotor')
   ]
   this.swapMotors = false
 };
-var prototypeAccessors = { leftMotor: {},rightMotor: {},reverseLeftMotor: {},reverseRightMotor: {} };
+var prototypeAccessors = { leftMotor: {},rightMotor: {} };
 prototypeAccessors.leftMotor.get = function () {
   return this.motors[this.swapMotors ? 1 : 0]
 };
 prototypeAccessors.rightMotor.get = function () {
   return this.motors[this.swapMotors ? 0 : 1]
 };
-prototypeAccessors.reverseLeftMotor.set = function (value) {
-  this.leftMotor.reversed = value
-};
-prototypeAccessors.reverseRightMotor.set = function (value) {
-  this.rightMotor.reversed = value
-};
 TwoWheelDrive.prototype.setMotorPowers = function setMotorPowers (left, right) {
-  this.leftMotor.set(constrain(left, -1.0, 1.0))
-  this.rightMotor.set(constrain(right, -1.0, 1.0))
+  this.leftMotor.set(constrain(left || 0, -1.0, 1.0))
+  this.rightMotor.set(constrain(right || 0, -1.0, 1.0))
 };
 TwoWheelDrive.prototype.stop = function stop () {
   this.leftMotor.set(0)
   this.rightMotor.set(0)
 };
 Object.defineProperties( TwoWheelDrive.prototype, prototypeAccessors );
-var TankDrive = (function (TwoWheelDrive) {
-  function TankDrive () {
-    TwoWheelDrive.apply(this, arguments);
-  }
-  if ( TwoWheelDrive ) TankDrive.__proto__ = TwoWheelDrive;
-  TankDrive.prototype = Object.create( TwoWheelDrive && TwoWheelDrive.prototype );
-  TankDrive.prototype.constructor = TankDrive;
-  TankDrive.prototype.setLeftAndRightSpeed = function setLeftAndRightSpeed (left, right) {
-    this.setMotorPowers(left, right)
-  };
-  return TankDrive;
-}(TwoWheelDrive));
-var ArcadeDrive = (function (TwoWheelDrive) {
+
+var ArcadeDrive = (function (TwoWheelDrive$$1) {
   function ArcadeDrive () {
-    TwoWheelDrive.apply(this, arguments);
+    TwoWheelDrive$$1.apply(this, arguments);
   }
-  if ( TwoWheelDrive ) ArcadeDrive.__proto__ = TwoWheelDrive;
-  ArcadeDrive.prototype = Object.create( TwoWheelDrive && TwoWheelDrive.prototype );
+  if ( TwoWheelDrive$$1 ) ArcadeDrive.__proto__ = TwoWheelDrive$$1;
+  ArcadeDrive.prototype = Object.create( TwoWheelDrive$$1 && TwoWheelDrive$$1.prototype );
   ArcadeDrive.prototype.constructor = ArcadeDrive;
   ArcadeDrive.prototype.setSpeedAndRotation = function setSpeedAndRotation (speed, rotation) {
     speed = constrain(speed, -1.0, 1.0)
@@ -278,166 +277,25 @@ var ArcadeDrive = (function (TwoWheelDrive) {
   return ArcadeDrive;
 }(TwoWheelDrive));
 
-var _touchOwners = { };
-function convertTouch (touch) {
-  return {
-    identifier: touch.identifier,
-    clientX: Math.round(touch.clientX - ControlManager.canvas.offsetLeft),
-    clientY: Math.round(touch.clientY - ControlManager.canvas.offsetTop),
-    force: touch.force
+var TankDrive = (function (TwoWheelDrive$$1) {
+  function TankDrive () {
+    TwoWheelDrive$$1.apply(this, arguments);
   }
-}
-function doAdd (touch) {
-  if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
-  touch = convertTouch(touch)
-  for (var controlName in ControlManager.controls) {
-    var control = ControlManager.controls[controlName];
-    if (control.matchesTouch(touch)) {
-      _touchOwners[touch.identifier] = control
-      control.setTouch(touch)
-      ControlManager.update()
-      break
-    }
-  }
-}
-function doUpdate (touch) {
-  if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
-  var control = _touchOwners[touch.identifier];
-  if (!control) { return }
-  control.setTouch(convertTouch(touch))
-  ControlManager.update()
-}
-function doRemove (touch) {
-  if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
-  var control = _touchOwners[touch.identifier];
-  if (!control) { return }
-  control.setTouch(null)
-  delete _touchOwners[touch.identifier]
-  ControlManager.update()
-}
-var FRAME_RATE = 35;
-var _oldWidth;
-var _oldHeight;
-var ControlManager = {
-  canvas: null,
-  ctx: null,
-  intervalID: null,
-  controls: { },
-  onupdate: null,
-  setCanvas: function setCanvas (canvas) {
-    function handleTouches (e, handler) {
-      e.preventDefault()
-      for (var i = 0; i < e.changedTouches.length; i++) {
-        handler(e.changedTouches[i])
-      }
-    }
-    canvas.addEventListener('touchstart', function (e) { return handleTouches(e, doAdd); }, false)
-    canvas.addEventListener('touchmove', function (e) { return handleTouches(e, doUpdate); }, false)
-    canvas.addEventListener('touchend', function (e) { return handleTouches(e, doRemove); }, false)
-    canvas.addEventListener('mousedown', doAdd, false)
-    canvas.addEventListener('mousemove', doUpdate, false)
-    canvas.addEventListener('mouseup', doRemove, false)
-    ControlManager.canvas = canvas
-    ControlManager.ctx = canvas.getContext('2d')
-  },
-  start: function start () {
-    var buttonGroups = { };
-    for (var controlName in ControlManager.controls) {
-      var control = ControlManager.controls[controlName];
-      if (control instanceof Button && control.groupName) {
-        var groupName = control.groupName;
-        if (buttonGroups[groupName]) {
-          buttonGroups[groupName].push(control)
-        } else {
-          buttonGroups[groupName] = [ control ]
-        }
-      }
-    }
-    for (var groupName$1 in buttonGroups) {
-      var buttons = buttonGroups[groupName$1];
-      if (!buttons.some(function (button) { return button.pressed; })) {
-        buttons[0].pressed = true
-      }
-    }
-    ControlManager.intervalID = setInterval(
-      function () { return ControlManager.draw(); },
-      1000 / FRAME_RATE
-    )
-  },
-  stop: function stop () {
-    if (ControlManager.intervalID) {
-      clearInterval(ControlManager.intervalID)
-    }
-  },
-  update: function update () {
-    var onupdate = ControlManager.onupdate;
-    if (typeof onupdate === 'function') {
-      onupdate()
-    }
-  },
-  draw: function draw () {
-    var canvas = ControlManager.canvas;
-    var ctx = ControlManager.ctx;
-    var controls = ControlManager.controls;
-    var resized = (canvas.width !== _oldWidth || canvas.height !== _oldHeight);
-    if (resized) {
-      _oldWidth = canvas.width
-      _oldHeight = canvas.height
-    }
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    for (var controlName in controls) {
-      var control = controls[controlName];
-      if (resized) { control.pixelCache = null }
-      control.draw(ctx)
-    }
-  }
-};
-function addControl (name, control) {
-  if (ControlManager.controls[name]) {
-    throw new Error(("Control already exists: " + name))
-  }
-  ControlManager.controls[name] = control
-}
-function convertToPixels (dim, value) {
-  var reference;
-  switch (dim) {
-    case 'y':
-    case 'height':
-      reference = ControlManager.canvas.height
-      break
-    default:
-      reference = ControlManager.canvas.width
-      break
-  }
-  switch (typeof value) {
-    case 'number':
-      if (value > 0 && value < 1.0) {
-        value *= 100
-      }
-      return Math.round(value * reference / 100)
-    case 'string':
-      var matches = value.match(/^([0-9]+)([^0-9]*)$/);
-      if (matches) {
-        var num = matches[1];
-        var unit = matches[2];
-        value = parseInt(num)
-        switch (unit) {
-          case '%':
-          case '':
-            return Math.round(value * reference / 100)
-          case 'px':
-            return value
-        }
-      }
-    default:
-      return null
-  }
-}
+  if ( TwoWheelDrive$$1 ) TankDrive.__proto__ = TwoWheelDrive$$1;
+  TankDrive.prototype = Object.create( TwoWheelDrive$$1 && TwoWheelDrive$$1.prototype );
+  TankDrive.prototype.constructor = TankDrive;
+  TankDrive.prototype.setLeftAndRightSpeed = function setLeftAndRightSpeed (left, right) {
+    this.setMotorPowers(left, right)
+  };
+  return TankDrive;
+}(TwoWheelDrive));
+
+var _controlCount = 0;
 var Control = function Control (name) {
-  this.name = name || ("control" + (++Control.count))
+  this.name = name || ("control" + (++_controlCount))
   this.touch = null
   this.pixelCache = null
-  addControl(name, this)
+  ControlManager.registerControl(this)
 };
 Control.prototype.matchesTouch = function matchesTouch (touch) {
   return false
@@ -445,89 +303,24 @@ Control.prototype.matchesTouch = function matchesTouch (touch) {
 Control.prototype.setTouch = function setTouch (touch) {
   this.touch = touch
 };
+Control.prototype.getDimensions = function getDimensions () {
+  return { }
+};
 Control.prototype.getPixelDimensions = function getPixelDimensions () {
   if (this.pixelCache) { return this.pixelCache }
   var dimensions = this.getDimensions();
   var pixels = {};
   for (var dimName in dimensions) {
-    pixels[dimName] = convertToPixels(dimName, dimensions[dimName])
+    pixels[dimName] = ControlManager.convertToPixels(dimName, dimensions[dimName])
   }
   return (this.pixelCache = pixels)
 };
-Control.count = 0
-var Joystick = (function (Control) {
-  function Joystick (name) {
-    Control.call(this, name)
-    this.position = { x: 0, y: 0 }
-    this.radius = 10
-    this.sticky = false
-    this.style = 'white'
-    this.x = 0
-    this.y = 0
-  }
-  if ( Control ) Joystick.__proto__ = Control;
-  Joystick.prototype = Object.create( Control && Control.prototype );
-  Joystick.prototype.constructor = Joystick;
-  Joystick.prototype.getDimensions = function getDimensions () {
-    return { x: this.position.x, y: this.position.y, r: this.radius }
-  };
-  Joystick.prototype.matchesTouch = function matchesTouch (touch) {
-    var clientX = touch.clientX;
-    var clientY = touch.clientY;
-    var ref = this.getPixelDimensions();
-    var x = ref.x;
-    var y = ref.y;
-    var r = ref.r;
-    var dx = (x - clientX);
-    var dy = (y - clientY);
-    return Math.sqrt(dx * dx + dy * dy) <= r
-  };
-  Joystick.prototype.setTouch = function setTouch (touch) {
-    Control.prototype.setTouch.call(this, touch)
-    if (touch) {
-      var ref = this.getPixelDimensions();
-      var x = ref.x;
-      var y = ref.y;
-      var r = ref.r;
-      this.x = constrain((x - touch.clientX) / r, -1.0, 1.0)
-      this.y = constrain((y - touch.clientY) / r, -1.0, 1.0)
-    } else if (!this.sticky) {
-      this.x = 0.0
-      this.y = 0.0
-    }
-  };
-  Joystick.prototype.draw = function draw (ctx) {
-    var ref = this.getPixelDimensions();
-    var x = ref.x;
-    var y = ref.y;
-    var r = ref.r;
-    var ir = Math.round(r / 3);
-    ctx.beginPath()
-    ctx.strokeStyle = (this.touch && this.touchedStyle) || this.style
-    ctx.lineWidth = 5
-    ctx.arc(x, y, ir, 0, Math.PI * 2, true)
-    ctx.stroke()
-    ctx.beginPath()
-    ctx.strokeStyle = (this.touch && this.touchedStyle) || this.style
-    ctx.lineWidth = 2
-    ctx.arc(x, y, r, 0, Math.PI * 2, true)
-    ctx.stroke()
-    ctx.beginPath()
-    ctx.strokeStyle = this.style
-    ctx.arc(x - this.x * r, y - this.y * r, ir, 0, Math.PI * 2, true)
-    ctx.stroke()
-    ctx.beginPath()
-    ctx.fillStyle = 'white'
-    ctx.fillText(
-      ((this.name) + ", x: " + (this.x.toFixed(3)) + ", y: " + (this.y.toFixed(3))),
-      x - 50, y + r + 15
-    )
-  };
-  return Joystick;
-}(Control));
-var Button = (function (Control) {
+Control.prototype.draw = function draw (ctx) {
+};
+
+var Button = (function (Control$$1) {
   function Button (name) {
-    Control.call(this, name)
+    Control$$1.call(this, name)
     this.position = { x: 0, y: 0 }
     this.radius = 10
     this.sticky = false
@@ -535,8 +328,8 @@ var Button = (function (Control) {
     this.style = 'white'
     this.pressed = false
   }
-  if ( Control ) Button.__proto__ = Control;
-  Button.prototype = Object.create( Control && Control.prototype );
+  if ( Control$$1 ) Button.__proto__ = Control$$1;
+  Button.prototype = Object.create( Control$$1 && Control$$1.prototype );
   Button.prototype.constructor = Button;
   Button.prototype.getDimensions = function getDimensions () {
     return { x: this.position.x, y: this.position.y, r: this.radius }
@@ -556,8 +349,8 @@ var Button = (function (Control) {
     var this$1 = this;
     var lastState = !!this.touch;
     console.log(this.sticky, this.touch, lastState, touch, this.pressed)
-    Control.prototype.setTouch.call(this, touch)
-    if (this.sticky) {
+    Control$$1.prototype.setTouch.call(this, touch)
+    if (this.sticky || this.groupName) {
       if (touch && !lastState) {
         if (this.groupName) {
           if (!this.pressed) {
@@ -601,9 +394,236 @@ var Button = (function (Control) {
   };
   return Button;
 }(Control));
-var Slider = (function (Control) {
+
+var FRAME_RATE = 30;
+var _touchOwners = { };
+var _controls = { };
+var _canvas = null;
+var _context = null;
+var _intervalID = null;
+var _oldWidth = 0;
+var _oldHeight = 0;
+function transformTouch (touch) {
+  return {
+    identifier: touch.identifier,
+    clientX: Math.round(touch.clientX - _canvas.offsetLeft),
+    clientY: Math.round(touch.clientY - _canvas.offsetTop),
+    force: touch.force
+  }
+}
+function doAdd (touch) {
+  if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
+  touch = transformTouch(touch)
+  for (var controlName in ControlManager.controls) {
+    var control = ControlManager.controls[controlName];
+    if (control.matchesTouch(touch)) {
+      _touchOwners[touch.identifier] = control
+      control.setTouch(touch)
+      fireUpdate()
+      break
+    }
+  }
+}
+function doUpdate (touch) {
+  if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
+  var control = _touchOwners[touch.identifier];
+  if (!control) { return }
+  control.setTouch(transformTouch(touch))
+  fireUpdate()
+}
+function doRemove (touch) {
+  if (typeof touch.identifier === 'undefined') { touch.identifier = 'mouse' }
+  var control = _touchOwners[touch.identifier];
+  if (!control) { return }
+  control.setTouch(null)
+  delete _touchOwners[touch.identifier]
+  fireUpdate()
+}
+function fireUpdate () {
+  var onupdate = ControlManager.onupdate;
+  if (typeof onupdate === 'function') {
+    onupdate()
+  }
+}
+function drawControls () {
+  var resized = (_canvas.width !== _oldWidth || _canvas.height !== _oldHeight);
+  if (resized) {
+    _oldWidth = _canvas.width
+    _oldHeight = _canvas.height
+  }
+  _context.clearRect(0, 0, _canvas.width, _canvas.height)
+  for (var controlName in _controls) {
+    var control = _controls[controlName];
+    if (resized) { control.pixelCache = null }
+    control.draw(_context)
+  }
+}
+var ControlManager = function ControlManager () {};
+var staticAccessors$1 = { controls: {} };
+staticAccessors$1.controls.get = function () {
+  return _controls
+};
+ControlManager.setCanvas = function setCanvas (canvas) {
+  function handleTouches (e, handler) {
+    e.preventDefault()
+    for (var i = 0; i < e.changedTouches.length; i++) {
+      handler(e.changedTouches[i])
+    }
+  }
+  canvas.addEventListener('touchstart', function (e) { return handleTouches(e, doAdd); }, false)
+  canvas.addEventListener('touchmove', function (e) { return handleTouches(e, doUpdate); }, false)
+  canvas.addEventListener('touchend', function (e) { return handleTouches(e, doRemove); }, false)
+  canvas.addEventListener('mousedown', doAdd, false)
+  canvas.addEventListener('mousemove', doUpdate, false)
+  canvas.addEventListener('mouseup', doRemove, false)
+  _canvas = canvas
+  _context = canvas.getContext('2d')
+};
+ControlManager.start = function start () {
+  var buttonGroups = { };
+  for (var controlName in _controls) {
+    var control = _controls[controlName];
+    if (control instanceof Button && control.groupName) {
+      var groupName = control.groupName;
+      if (buttonGroups[groupName]) {
+        buttonGroups[groupName].push(control)
+      } else {
+        buttonGroups[groupName] = [ control ]
+      }
+    }
+  }
+  for (var groupName$1 in buttonGroups) {
+    var buttons = buttonGroups[groupName$1];
+    if (!buttons.some(function (button) { return button.pressed; })) {
+      buttons[0].pressed = true
+    }
+  }
+  _intervalID = setInterval(function () { return drawControls(); }, 1000 / FRAME_RATE)
+};
+ControlManager.stop = function stop () {
+  if (_intervalID) {
+    clearInterval(_intervalID)
+    _intervalID = null
+  }
+};
+ControlManager.convertToPixels = function convertToPixels (dim, value) {
+  var reference;
+  switch (dim) {
+    case 'y':
+    case 'height':
+      reference = _canvas.height
+      break
+    default:
+      reference = _canvas.width
+      break
+  }
+  switch (typeof value) {
+    case 'number':
+      if (value > 0 && value < 1.0) {
+        value *= 100
+      }
+      return Math.round(value * reference / 100)
+    case 'string':
+      var matches = value.match(/^([0-9]+)([^0-9]*)$/);
+      if (matches) {
+        var num = matches[1];
+          var unit = matches[2];
+        value = parseInt(num)
+        switch (unit) {
+          case '%':
+          case '':
+            return Math.round(value * reference / 100)
+          case 'px':
+            return value
+        }
+      }
+    default:
+      return null
+  }
+};
+ControlManager.registerControl = function registerControl (control) {
+  var name = control.name;
+  if (_controls[name]) {
+    throw new Error(("Control already exists: " + name))
+  }
+  _controls[name] = control
+};
+Object.defineProperties( ControlManager, staticAccessors$1 );
+
+var Joystick = (function (Control$$1) {
+  function Joystick (name) {
+    Control$$1.call(this, name)
+    this.position = { x: 0, y: 0 }
+    this.radius = 10
+    this.sticky = false
+    this.style = 'white'
+    this.x = 0
+    this.y = 0
+  }
+  if ( Control$$1 ) Joystick.__proto__ = Control$$1;
+  Joystick.prototype = Object.create( Control$$1 && Control$$1.prototype );
+  Joystick.prototype.constructor = Joystick;
+  Joystick.prototype.getDimensions = function getDimensions () {
+    return { x: this.position.x, y: this.position.y, r: this.radius }
+  };
+  Joystick.prototype.matchesTouch = function matchesTouch (touch) {
+    var clientX = touch.clientX;
+    var clientY = touch.clientY;
+    var ref = this.getPixelDimensions();
+    var x = ref.x;
+    var y = ref.y;
+    var r = ref.r;
+    var dx = (x - clientX);
+    var dy = (y - clientY);
+    return Math.sqrt(dx * dx + dy * dy) <= r
+  };
+  Joystick.prototype.setTouch = function setTouch (touch) {
+    Control$$1.prototype.setTouch.call(this, touch)
+    if (touch) {
+      var ref = this.getPixelDimensions();
+      var x = ref.x;
+      var y = ref.y;
+      var r = ref.r;
+      this.x = constrain((x - touch.clientX) / r, -1.0, 1.0)
+      this.y = constrain((y - touch.clientY) / r, -1.0, 1.0)
+    } else if (!this.sticky) {
+      this.x = 0.0
+      this.y = 0.0
+    }
+  };
+  Joystick.prototype.draw = function draw (ctx) {
+    var ref = this.getPixelDimensions();
+    var x = ref.x;
+    var y = ref.y;
+    var r = ref.r;
+    var ir = Math.round(r / 3);
+    ctx.beginPath()
+    ctx.strokeStyle = (this.touch && this.touchedStyle) || this.style
+    ctx.lineWidth = 5
+    ctx.arc(x, y, ir, 0, Math.PI * 2, true)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.strokeStyle = (this.touch && this.touchedStyle) || this.style
+    ctx.lineWidth = 2
+    ctx.arc(x, y, r, 0, Math.PI * 2, true)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.strokeStyle = this.style
+    ctx.arc(x - this.x * r, y - this.y * r, ir, 0, Math.PI * 2, true)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.fillStyle = 'white'
+    ctx.fillText(
+      ((this.name) + ", x: " + (this.x.toFixed(3)) + ", y: " + (this.y.toFixed(3))),
+      x - 50, y + r + 15
+    )
+  };
+  return Joystick;
+}(Control));
+
+var Slider = (function (Control$$1) {
   function Slider (name) {
-    Control.call(this, name)
+    Control$$1.call(this, name)
     this.position = { x: 0, y: 0 }
     this.radius = 10
     this.length = 30
@@ -612,8 +632,8 @@ var Slider = (function (Control) {
     this.style = 'white'
     this.value = 0
   }
-  if ( Control ) Slider.__proto__ = Control;
-  Slider.prototype = Object.create( Control && Control.prototype );
+  if ( Control$$1 ) Slider.__proto__ = Control$$1;
+  Slider.prototype = Object.create( Control$$1 && Control$$1.prototype );
   Slider.prototype.constructor = Slider;
   Slider.prototype.getDimensions = function getDimensions () {
     return {
@@ -621,22 +641,6 @@ var Slider = (function (Control) {
       y: this.position.y,
       r: this.radius,
       l: this.length
-    }
-  };
-  Slider.prototype.setTouch = function setTouch (touch) {
-    Control.prototype.setTouch.call(this, touch)
-    if (touch) {
-      var ref = this.getHelperDimensions();
-      var l = ref.l;
-      var xa = ref.xa;
-      var ya = ref.ya;
-      if (this.type === Slider.HORIZONTAL) {
-        this.value = constrain((xa - touch.clientX) / l, 0.0, 1.0)
-      } else {
-        this.value = constrain((ya - touch.clientY) / l, 0.0, 1.0)
-      }
-    } else if (!this.sticky) {
-      this.value = 0
     }
   };
   Slider.prototype.getHelperDimensions = function getHelperDimensions () {
@@ -694,6 +698,22 @@ var Slider = (function (Control) {
     if (Math.sqrt(dxa * dxa + dya * dya) <= r) { return true }
     return (clientX >= x1) && (clientX <= x2) && (clientY >= y1) && (clientY <= y2)
   };
+  Slider.prototype.setTouch = function setTouch (touch) {
+    Control$$1.prototype.setTouch.call(this, touch)
+    if (touch) {
+      var ref = this.getHelperDimensions();
+      var l = ref.l;
+      var xa = ref.xa;
+      var ya = ref.ya;
+      if (this.type === Slider.HORIZONTAL) {
+        this.value = constrain((xa - touch.clientX) / l, 0.0, 1.0)
+      } else {
+        this.value = constrain((ya - touch.clientY) / l, 0.0, 1.0)
+      }
+    } else if (!this.sticky) {
+      this.value = 0
+    }
+  };
   Slider.prototype.draw = function draw (ctx) {
     var ref = this.getHelperDimensions();
     var x = ref.x;
@@ -749,10 +769,11 @@ var Connection = function Connection () {
   this.state = Connection.DISCONNECTED
   this.enabled = false
   this.lastError = null
-  this.responseData = null
   this.pingTimeMs = null
   this.onstatechange = null
   this.onresponsedata = null
+  this.responseData = null
+  this.dataPacket = null
 };
 Connection.prototype.start = function start () {
   this.enabled = true
@@ -787,54 +808,56 @@ Connection.CONNECTED = 'Connected'
 Connection.CONNECTING = 'Connecting'
 Connection.DISCONNECTED = 'Disconnected'
 Connection.ERROR = 'Error'
-var AjaxConnection = (function (Connection) {
+
+var AjaxConnection = (function (Connection$$1) {
   function AjaxConnection (timeoutMillis) {
-    Connection.call(this)
+    Connection$$1.call(this)
     this.timeoutMillis = timeoutMillis || 500
     this.timerId = null
   }
-  if ( Connection ) AjaxConnection.__proto__ = Connection;
-  AjaxConnection.prototype = Object.create( Connection && Connection.prototype );
+  if ( Connection$$1 ) AjaxConnection.__proto__ = Connection$$1;
+  AjaxConnection.prototype = Object.create( Connection$$1 && Connection$$1.prototype );
   AjaxConnection.prototype.constructor = AjaxConnection;
   AjaxConnection.prototype.poll = function poll () {
     var this$1 = this;
     var pollStartMs = new Date().getTime();
     ajaxPut('/control?body=' + this.dataPacket, this.dataPacket, this.timeoutMillis, function (err, res) {
       this$1.lastError = err
-      if (this$1.state === Connection.DISCONNECTED) {
+      if (this$1.state === Connection$$1.DISCONNECTED) {
         this$1.setResponseData(null)
         return
       }
       if (!this$1.lastError) {
-        if (this$1.state !== Connection.CONNECTED) {
-          this$1.setState(Connection.CONNECTED)
+        if (this$1.state !== Connection$$1.CONNECTED) {
+          this$1.setState(Connection$$1.CONNECTED)
         }
         this$1.pingTimeMs = new Date().getTime() - pollStartMs
         this$1.setResponseData(res.data)
       } else {
-        this$1.setState(Connection.ERROR)
+        this$1.setState(Connection$$1.ERROR)
         this$1.setResponseData(null)
       }
-      var pollMs = (this$1.state === Connection.ERROR) ? 1000 : 50;
+      var pollMs = (this$1.state === Connection$$1.ERROR) ? 1000 : 50;
       this$1.timerId = setTimeout(this$1.poll.bind(this$1), pollMs)
     })
   };
   AjaxConnection.prototype.start = function start () {
-    this.setState(Connection.CONNECTING)
-    Connection.prototype.start.call(this)
+    this.setState(Connection$$1.CONNECTING)
+    Connection$$1.prototype.start.call(this)
     this.poll()
   };
   AjaxConnection.prototype.stop = function stop () {
     if (this.timerId) { clearTimeout(this.timerId) }
-    Connection.prototype.stop.call(this)
-    this.setState(Connection.DISCONNECTED)
+    Connection$$1.prototype.stop.call(this)
+    this.setState(Connection$$1.DISCONNECTED)
     this.setResponseData(null)
   };
   return AjaxConnection;
 }(Connection));
-var WebSocketConnection = (function (Connection) {
+
+var WebSocketConnection = (function (Connection$$1) {
   function WebSocketConnection (hostName) {
-    Connection.call(this)
+    Connection$$1.call(this)
     var ref = document.location;
     var hostname = ref.hostname;
     var port = ref.port;
@@ -842,21 +865,21 @@ var WebSocketConnection = (function (Connection) {
     this.socket = null
     this.startTimeMs = null
   }
-  if ( Connection ) WebSocketConnection.__proto__ = Connection;
-  WebSocketConnection.prototype = Object.create( Connection && Connection.prototype );
+  if ( Connection$$1 ) WebSocketConnection.__proto__ = Connection$$1;
+  WebSocketConnection.prototype = Object.create( Connection$$1 && Connection$$1.prototype );
   WebSocketConnection.prototype.constructor = WebSocketConnection;
   WebSocketConnection.prototype.start = function start () {
     var this$1 = this;
-    this.setState(Connection.CONNECTING)
-    Connection.prototype.start.call(this)
+    this.setState(Connection$$1.CONNECTING)
+    Connection$$1.prototype.start.call(this)
     this.startTimeMs = new Date().getTime()
     this.socket = new WebSocket(("ws://" + (this.hostName) + "/ws"), [ 'arduino' ])
     this.socket.onopen = function () {
-      this$1.setState(Connection.CONNECTED)
+      this$1.setState(Connection$$1.CONNECTED)
     }
     this.socket.onerror = function (err) {
       this$1.lastError = err
-      this$1.setState(Connection.ERROR)
+      this$1.setState(Connection$$1.ERROR)
       this$1.setResponseData(null)
     }
     this.socket.onmessage = function (event) {
@@ -864,9 +887,9 @@ var WebSocketConnection = (function (Connection) {
       this$1.setResponseData(event.data)
     }
     this.socket.onclose = function (event) {
-      if (this$1.state !== Connection.ERROR) {
+      if (this$1.state !== Connection$$1.ERROR) {
         this$1.lastError = new Error('Connection lost')
-        this$1.setState(Connection.ERROR)
+        this$1.setState(Connection$$1.ERROR)
         this$1.setResponseData(null)
         this$1.socket = null
       }
@@ -880,18 +903,18 @@ var WebSocketConnection = (function (Connection) {
       this.setResponseData(null)
       this.socket = null
     }
-    Connection.prototype.stop.call(this)
-    this.setState(Connection.DISCONNECTED)
+    Connection$$1.prototype.stop.call(this)
+    this.setState(Connection$$1.DISCONNECTED)
   };
   WebSocketConnection.prototype.setRobotData = function setRobotData (data) {
-    Connection.prototype.setRobotData.call(this, data)
-    if (this.socket && this.state === Connection.CONNECTED) {
+    Connection$$1.prototype.setRobotData.call(this, data)
+    if (this.socket && this.state === Connection$$1.CONNECTED) {
       if (this.socket.readyState !== WebSocket.OPEN) {
         this.lastError = new Error(("Invalid socket state: " + ((this.socket.readyState === WebSocket.CONNECTING) ? 'CONNECTING'
           : (this.socket.readyState === WebSocket.CLOSING) ? 'CLOSING'
           : (this.socket.readyState === WebSocket.CLOSED) ? 'CLOSED'
           : 'UNKNOWN')))
-        this.setState(Connection.ERROR)
+        this.setState(Connection$$1.ERROR)
         return
       }
       try {
@@ -899,7 +922,7 @@ var WebSocketConnection = (function (Connection) {
         this.socket.send(this.dataPacket)
       } catch (err) {
         this.lastError = err
-        this.setState(Connection.ERROR)
+        this.setState(Connection$$1.ERROR)
         this.setResponseData(null)
       }
     }
