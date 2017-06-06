@@ -11,7 +11,7 @@ This diagram describes the eesibot architecture.
 
 Defining a full-feature robot only requires editing, at most, two files:
  1. `robot.js` - code that defines the robot setup, user interface and control loop ([documentation](./robot.js.md))
- 2. `hardware.json` - driver configuration file that sets the configuration of the underlying hardware ([documentation](./hardware.js.md))
+ 2. `hardware.json` - driver configuration file that sets the configuration of the underlying hardware ([documentation](./hardware.json.md))
 
 ## API Documentation ##
 The API documentation for the JavaScript library can be found here:
