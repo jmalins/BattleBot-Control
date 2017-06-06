@@ -94,8 +94,8 @@ let _oldHeight = 0
 function transformTouch (touch) {
   return {
     identifier: touch.identifier,
-    clientX: Math.round(touch.clientX - ControlManager.canvas.offsetLeft),
-    clientY: Math.round(touch.clientY - ControlManager.canvas.offsetTop),
+    clientX: Math.round(touch.clientX - _canvas.offsetLeft),
+    clientY: Math.round(touch.clientY - _canvas.offsetTop),
     force: touch.force
   }
 }
@@ -298,10 +298,10 @@ export default class ControlManager {
     switch (dim) {
       case &apos;y&apos;:
       case &apos;height&apos;:
-        reference = ControlManager.canvas.height
+        reference = _canvas.height
         break
       default:
-        reference = ControlManager.canvas.width
+        reference = _canvas.width
         break
     }
 

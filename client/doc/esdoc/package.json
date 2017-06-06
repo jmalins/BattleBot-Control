@@ -51,7 +51,7 @@
   },
   "esdoc": {
     "source": "./lib",
-    "destination": "./doc"
+    "destination": "./doc/esdoc"
   },
   "dependencies": {}
 }

@@ -1838,7 +1838,7 @@
     "__docId__": 84,
     "kind": "file",
     "name": "lib/controls/ControlManager.js",
-    "content": "import Button from './Button'\n\n// constants //\nconst FRAME_RATE = 30\n\n// internal state //\nconst _touchOwners = { }\nconst _controls = { }\nlet _canvas = null\nlet _context = null\nlet _intervalID = null\nlet _oldWidth = 0\nlet _oldHeight = 0\n\n/**\n * Event wrapper to unify multi-touch and mouse events.\n * @protected\n *\n * @typedef {Object} TouchEvent\n * @property {!string} identifer unique identifier (from DOM for multi-touch, 'mouse' if from mouse)\n * @property {!number} clientX the X position in pixels, relative to canvas origin (top left)\n * @property {!number} clientY the Y position in pixles, relative to canvas origin (top left)\n * @property {number} [force] the force of the touch, null for mouse\n */\n\n/**\n * Transforms DOM touch (or mouse) event to pixel coordinates relative to\n * the canvas. This is needed because the coordinates are relative to the\n * screen. Need to subtract the canvas position to compensate.\n *\n * @param {Object} touch the DOM touch event\n * @return {TouchEvent}\n */\nfunction transformTouch (touch) {\n  return {\n    identifier: touch.identifier,\n    clientX: Math.round(touch.clientX - ControlManager.canvas.offsetLeft),\n    clientY: Math.round(touch.clientY - ControlManager.canvas.offsetTop),\n    force: touch.force\n  }\n}\n\n/**\n * Attempt to process a new touch event. Queries all controls for\n * for first one that responds true to @link Control#matchesTouch.\n *\n * The first match captures the touch and will receive all updates\n * through the @link Control#setTouch call.\n *\n * @param {Object} touch the DOM touch event\n */\nfunction doAdd (touch) {\n  if (typeof touch.identifier === 'undefined') touch.identifier = 'mouse'\n  touch = transformTouch(touch)\n\n  // loop through controls and see if one captures the touch //\n  for (const controlName in ControlManager.controls) {\n    const control = ControlManager.controls[controlName]\n    if (control.matchesTouch(touch)) {\n      _touchOwners[touch.identifier] = control\n      control.setTouch(touch)\n      fireUpdate()\n      break\n    }\n  }\n}\n\n/**\n * If the specified touch has been captured, funnel it to the\n * @link Control#setTouch method of the owner control.\n *\n * @param {Object} touch the DOM touch event\n */\nfunction doUpdate (touch) {\n  if (typeof touch.identifier === 'undefined') touch.identifier = 'mouse'\n  const control = _touchOwners[touch.identifier]\n  if (!control) return\n  control.setTouch(transformTouch(touch))\n  fireUpdate()\n}\n\n/**\n * If the specified touch has been captured, signal the capturing control\n * that it has ended by passing null to @line Control#setTouch.\n *\n * @param {Object} touch the DOM touch event\n */\nfunction doRemove (touch) {\n  if (typeof touch.identifier === 'undefined') touch.identifier = 'mouse'\n  const control = _touchOwners[touch.identifier]\n  if (!control) return\n  control.setTouch(null)\n  delete _touchOwners[touch.identifier]\n  fireUpdate()\n}\n\n/**\n * Fire the update event, if one is defined.\n */\nfunction fireUpdate () {\n  const { onupdate } = ControlManager\n  if (typeof onupdate === 'function') {\n    onupdate()\n  }\n}\n\n/**\n * Loop through each {@link Control} and paint it to the canvas.\n */\nfunction drawControls () {\n  // check for canvas resize //\n  const resized = (_canvas.width !== _oldWidth || _canvas.height !== _oldHeight)\n  if (resized) {\n    _oldWidth = _canvas.width\n    _oldHeight = _canvas.height\n  }\n\n  _context.clearRect(0, 0, _canvas.width, _canvas.height)\n\n  // loop through controls //\n  for (const controlName in _controls) {\n    const control = _controls[controlName]\n    if (resized) control.pixelCache = null\n    control.draw(_context)\n  }\n}\n\n/**\n * Manages the display canvas, processing touch events and painting of\n * all user-created controls.\n *\n * The class is part of the core framework infrastructure and should not be\n * needed in your code under most circumstances.\n *\n * @protected\n */\nexport default class ControlManager {\n  /**\n   * All declared {@link Control} instances, keyed by control name.\n   *\n   * @type {Map<string,Control>}\n   */\n  static get controls () {\n    return _controls\n  }\n\n  /**\n   * Initialize the ControlManager with the specified HTML5 canvas object.\n   *\n   * This method will attach the relevant event listeners to monitor the canvas\n   * for touch and mouse events.\n   *\n   * @protected\n   * @param {!HTMLElement} canvas the canvas element\n   */\n  static setCanvas (canvas) {\n    /**\n     * Split all multi-touches in a touch event to discrete calls.\n     */\n    function handleTouches (e, handler) {\n      // prevent scrolling and mouse fallthrough on desktop //\n      e.preventDefault()\n      // loop through touches //\n      for (let i = 0; i < e.changedTouches.length; i++) {\n        handler(e.changedTouches[i])\n      }\n    }\n\n    canvas.addEventListener('touchstart', (e) => handleTouches(e, doAdd), false)\n    canvas.addEventListener('touchmove', (e) => handleTouches(e, doUpdate), false)\n    canvas.addEventListener('touchend', (e) => handleTouches(e, doRemove), false)\n\n    canvas.addEventListener('mousedown', doAdd, false)\n    canvas.addEventListener('mousemove', doUpdate, false)\n    canvas.addEventListener('mouseup', doRemove, false)\n\n    _canvas = canvas\n    _context = canvas.getContext('2d')\n  }\n\n  /**\n   * Start control process and canvas updates.\n   * @protected\n   */\n  static start () {\n    // handle default values of button groups //\n    const buttonGroups = { }\n    for (const controlName in _controls) {\n      const control = _controls[controlName]\n      if (control instanceof Button && control.groupName) {\n        const { groupName } = control\n        if (buttonGroups[groupName]) {\n          buttonGroups[groupName].push(control)\n        } else {\n          buttonGroups[groupName] = [ control ]\n        }\n      }\n    }\n    for (const groupName in buttonGroups) {\n      const buttons = buttonGroups[groupName]\n      // if user has not set a default pressed button, select first //\n      if (!buttons.some(button => button.pressed)) {\n        buttons[0].pressed = true\n      }\n    }\n\n    // start painting //\n    _intervalID = setInterval(() => drawControls(), 1000 / FRAME_RATE)\n  }\n\n  /**\n   * Stop control processing and canvas updates.\n   * @protected\n   */\n  static stop () {\n    if (_intervalID) {\n      clearInterval(_intervalID)\n      _intervalID = null\n    }\n  }\n\n  /**\n   * Converts a flexible dimension string pixels for use on the canvas.\n   *\n   * This method supports multiple different formats.\n   * @example\n   * control.dimension = 50     // 50% of the height or width, depending on context\n   * control.dimension = '50%'  // same as above\n   * control.dimension = '20px' // pixels specified directly, only good for one screen size\n   *\n   * @param {!string} dim - the name of the dimension ('x', 'height', etc.)\n   * @param {!(number|string)} value - raw dimension value, any format\n   * @return {number} result in pixels\n   */\n  static convertToPixels (dim, value) {\n    // determine the reference dimension based on name //\n    let reference\n    switch (dim) {\n      case 'y':\n      case 'height':\n        reference = ControlManager.canvas.height\n        break\n      default:\n        reference = ControlManager.canvas.width\n        break\n    }\n\n    // handle based on type //\n    switch (typeof value) {\n      case 'number':\n        // if a fraction, assume a percent //\n        if (value > 0 && value < 1.0) {\n          value *= 100\n        }\n        return Math.round(value * reference / 100)\n      case 'string':\n        const matches = value.match(/^([0-9]+)([^0-9]*)$/)\n        if (matches) {\n          const [ , num, unit ] = matches\n          value = parseInt(num)\n          switch (unit) {\n            case '%':\n            case '':\n              return Math.round(value * reference / 100)\n            case 'px':\n              return value\n          }\n        }\n        // fallthrough //\n      default:\n        return null\n    }\n  }\n\n  /**\n   * Add a new {@link Control} to the ControlManager. This method\n   * is called automatically by the {@link Control} constructor.\n   *\n   * @private\n   * @param {!Control} control - the control\n   * @throws {Error} control with that name already exists\n   */\n  static registerControl (control) {\n    const name = control.name\n    if (_controls[name]) {\n      throw new Error(`Control already exists: ${name}`)\n    }\n    _controls[name] = control\n  }\n}\n",
+    "content": "import Button from './Button'\n\n// constants //\nconst FRAME_RATE = 30\n\n// internal state //\nconst _touchOwners = { }\nconst _controls = { }\nlet _canvas = null\nlet _context = null\nlet _intervalID = null\nlet _oldWidth = 0\nlet _oldHeight = 0\n\n/**\n * Event wrapper to unify multi-touch and mouse events.\n * @protected\n *\n * @typedef {Object} TouchEvent\n * @property {!string} identifer unique identifier (from DOM for multi-touch, 'mouse' if from mouse)\n * @property {!number} clientX the X position in pixels, relative to canvas origin (top left)\n * @property {!number} clientY the Y position in pixles, relative to canvas origin (top left)\n * @property {number} [force] the force of the touch, null for mouse\n */\n\n/**\n * Transforms DOM touch (or mouse) event to pixel coordinates relative to\n * the canvas. This is needed because the coordinates are relative to the\n * screen. Need to subtract the canvas position to compensate.\n *\n * @param {Object} touch the DOM touch event\n * @return {TouchEvent}\n */\nfunction transformTouch (touch) {\n  return {\n    identifier: touch.identifier,\n    clientX: Math.round(touch.clientX - _canvas.offsetLeft),\n    clientY: Math.round(touch.clientY - _canvas.offsetTop),\n    force: touch.force\n  }\n}\n\n/**\n * Attempt to process a new touch event. Queries all controls for\n * for first one that responds true to @link Control#matchesTouch.\n *\n * The first match captures the touch and will receive all updates\n * through the @link Control#setTouch call.\n *\n * @param {Object} touch the DOM touch event\n */\nfunction doAdd (touch) {\n  if (typeof touch.identifier === 'undefined') touch.identifier = 'mouse'\n  touch = transformTouch(touch)\n\n  // loop through controls and see if one captures the touch //\n  for (const controlName in ControlManager.controls) {\n    const control = ControlManager.controls[controlName]\n    if (control.matchesTouch(touch)) {\n      _touchOwners[touch.identifier] = control\n      control.setTouch(touch)\n      fireUpdate()\n      break\n    }\n  }\n}\n\n/**\n * If the specified touch has been captured, funnel it to the\n * @link Control#setTouch method of the owner control.\n *\n * @param {Object} touch the DOM touch event\n */\nfunction doUpdate (touch) {\n  if (typeof touch.identifier === 'undefined') touch.identifier = 'mouse'\n  const control = _touchOwners[touch.identifier]\n  if (!control) return\n  control.setTouch(transformTouch(touch))\n  fireUpdate()\n}\n\n/**\n * If the specified touch has been captured, signal the capturing control\n * that it has ended by passing null to @line Control#setTouch.\n *\n * @param {Object} touch the DOM touch event\n */\nfunction doRemove (touch) {\n  if (typeof touch.identifier === 'undefined') touch.identifier = 'mouse'\n  const control = _touchOwners[touch.identifier]\n  if (!control) return\n  control.setTouch(null)\n  delete _touchOwners[touch.identifier]\n  fireUpdate()\n}\n\n/**\n * Fire the update event, if one is defined.\n */\nfunction fireUpdate () {\n  const { onupdate } = ControlManager\n  if (typeof onupdate === 'function') {\n    onupdate()\n  }\n}\n\n/**\n * Loop through each {@link Control} and paint it to the canvas.\n */\nfunction drawControls () {\n  // check for canvas resize //\n  const resized = (_canvas.width !== _oldWidth || _canvas.height !== _oldHeight)\n  if (resized) {\n    _oldWidth = _canvas.width\n    _oldHeight = _canvas.height\n  }\n\n  _context.clearRect(0, 0, _canvas.width, _canvas.height)\n\n  // loop through controls //\n  for (const controlName in _controls) {\n    const control = _controls[controlName]\n    if (resized) control.pixelCache = null\n    control.draw(_context)\n  }\n}\n\n/**\n * Manages the display canvas, processing touch events and painting of\n * all user-created controls.\n *\n * The class is part of the core framework infrastructure and should not be\n * needed in your code under most circumstances.\n *\n * @protected\n */\nexport default class ControlManager {\n  /**\n   * All declared {@link Control} instances, keyed by control name.\n   *\n   * @type {Map<string,Control>}\n   */\n  static get controls () {\n    return _controls\n  }\n\n  /**\n   * Initialize the ControlManager with the specified HTML5 canvas object.\n   *\n   * This method will attach the relevant event listeners to monitor the canvas\n   * for touch and mouse events.\n   *\n   * @protected\n   * @param {!HTMLElement} canvas the canvas element\n   */\n  static setCanvas (canvas) {\n    /**\n     * Split all multi-touches in a touch event to discrete calls.\n     */\n    function handleTouches (e, handler) {\n      // prevent scrolling and mouse fallthrough on desktop //\n      e.preventDefault()\n      // loop through touches //\n      for (let i = 0; i < e.changedTouches.length; i++) {\n        handler(e.changedTouches[i])\n      }\n    }\n\n    canvas.addEventListener('touchstart', (e) => handleTouches(e, doAdd), false)\n    canvas.addEventListener('touchmove', (e) => handleTouches(e, doUpdate), false)\n    canvas.addEventListener('touchend', (e) => handleTouches(e, doRemove), false)\n\n    canvas.addEventListener('mousedown', doAdd, false)\n    canvas.addEventListener('mousemove', doUpdate, false)\n    canvas.addEventListener('mouseup', doRemove, false)\n\n    _canvas = canvas\n    _context = canvas.getContext('2d')\n  }\n\n  /**\n   * Start control process and canvas updates.\n   * @protected\n   */\n  static start () {\n    // handle default values of button groups //\n    const buttonGroups = { }\n    for (const controlName in _controls) {\n      const control = _controls[controlName]\n      if (control instanceof Button && control.groupName) {\n        const { groupName } = control\n        if (buttonGroups[groupName]) {\n          buttonGroups[groupName].push(control)\n        } else {\n          buttonGroups[groupName] = [ control ]\n        }\n      }\n    }\n    for (const groupName in buttonGroups) {\n      const buttons = buttonGroups[groupName]\n      // if user has not set a default pressed button, select first //\n      if (!buttons.some(button => button.pressed)) {\n        buttons[0].pressed = true\n      }\n    }\n\n    // start painting //\n    _intervalID = setInterval(() => drawControls(), 1000 / FRAME_RATE)\n  }\n\n  /**\n   * Stop control processing and canvas updates.\n   * @protected\n   */\n  static stop () {\n    if (_intervalID) {\n      clearInterval(_intervalID)\n      _intervalID = null\n    }\n  }\n\n  /**\n   * Converts a flexible dimension string pixels for use on the canvas.\n   *\n   * This method supports multiple different formats.\n   * @example\n   * control.dimension = 50     // 50% of the height or width, depending on context\n   * control.dimension = '50%'  // same as above\n   * control.dimension = '20px' // pixels specified directly, only good for one screen size\n   *\n   * @param {!string} dim - the name of the dimension ('x', 'height', etc.)\n   * @param {!(number|string)} value - raw dimension value, any format\n   * @return {number} result in pixels\n   */\n  static convertToPixels (dim, value) {\n    // determine the reference dimension based on name //\n    let reference\n    switch (dim) {\n      case 'y':\n      case 'height':\n        reference = _canvas.height\n        break\n      default:\n        reference = _canvas.width\n        break\n    }\n\n    // handle based on type //\n    switch (typeof value) {\n      case 'number':\n        // if a fraction, assume a percent //\n        if (value > 0 && value < 1.0) {\n          value *= 100\n        }\n        return Math.round(value * reference / 100)\n      case 'string':\n        const matches = value.match(/^([0-9]+)([^0-9]*)$/)\n        if (matches) {\n          const [ , num, unit ] = matches\n          value = parseInt(num)\n          switch (unit) {\n            case '%':\n            case '':\n              return Math.round(value * reference / 100)\n            case 'px':\n              return value\n          }\n        }\n        // fallthrough //\n      default:\n        return null\n    }\n  }\n\n  /**\n   * Add a new {@link Control} to the ControlManager. This method\n   * is called automatically by the {@link Control} constructor.\n   *\n   * @private\n   * @param {!Control} control - the control\n   * @throws {Error} control with that name already exists\n   */\n  static registerControl (control) {\n    const name = control.name\n    if (_controls[name]) {\n      throw new Error(`Control already exists: ${name}`)\n    }\n    _controls[name] = control\n  }\n}\n",
     "static": true,
     "longname": "lib/controls/ControlManager.js",
     "access": null,
@@ -3998,7 +3998,7 @@
     "__docId__": 169,
     "kind": "file",
     "name": "lib/hardware/DigitalInput.js",
-    "content": "import Device from './Device'\n\n/**\n * Digital Input\n *\n * A digital input device, such as an input pin. This can be connected\n * to a switch, bump sensor, line follower or other digital device.\n */\nexport default class DigitalInput extends Device {\n  /**\n   * Constructor\n   *\n   * @param {string} name - name of the digital input\n   */\n  constructor (name) {\n    super(name)\n    /** \n     * The value of the input.\n     * @private \n     * @type {boolean}\n     */\n    this.value = false\n  }\n\n  /**\n   * Get the value of the input as a boolean (true or false).\n   *\n   * @return {boolean} the value of the input\n   */\n  get () {\n    return this.value\n  }\n\n  /**\n   * Called by the framework to set the value of this input after\n   * it is received from the robot.\n   *\n   * @override\n   * @protected\n   * @param {number} value - the value to set\n   */\n  setInput (value) {\n    this.value = !!value\n  }\n\n  /**\n   * Does the input support a specified driver.\n   *\n   * Digital inputs currently support the following drivers:\n   *\n   *  - DIGITAL_IN : an input pin\n   *\n   * @private\n   * @param {string} driverName - name of the proposed driver\n   * @return {boolean} true if the DigitalInput supports the specified driver.\n   */\n  supportsDriver (driverName) {\n    return [ 'DIGITAL_IN' ].indexOf(driverName) !== -1\n  }\n}\n",
+    "content": "import Device from './Device'\n\n/**\n * Digital Input\n *\n * A digital input device, such as an input pin. This can be connected\n * to a switch, bump sensor, line follower or other digital device.\n */\nexport default class DigitalInput extends Device {\n  /**\n   * Constructor\n   *\n   * @param {string} name - name of the digital input\n   */\n  constructor (name) {\n    super(name)\n    /**\n     * The value of the input.\n     * @private\n     * @type {boolean}\n     */\n    this.value = false\n  }\n\n  /**\n   * Get the value of the input as a boolean (true or false).\n   *\n   * @return {boolean} the value of the input\n   */\n  get () {\n    return this.value\n  }\n\n  /**\n   * Called by the framework to set the value of this input after\n   * it is received from the robot.\n   *\n   * @override\n   * @protected\n   * @param {number} value - the value to set\n   */\n  setInput (value) {\n    this.value = !!value\n  }\n\n  /**\n   * Does the input support a specified driver.\n   *\n   * Digital inputs currently support the following drivers:\n   *\n   *  - DIGITAL_IN : an input pin\n   *\n   * @private\n   * @param {string} driverName - name of the proposed driver\n   * @return {boolean} true if the DigitalInput supports the specified driver.\n   */\n  supportsDriver (driverName) {\n    return [ 'DIGITAL_IN' ].indexOf(driverName) !== -1\n  }\n}\n",
     "static": true,
     "longname": "lib/hardware/DigitalInput.js",
     "access": null,
@@ -4331,7 +4331,7 @@
     "__docId__": 184,
     "kind": "file",
     "name": "lib/hardware/HardwareManager.js",
-    "content": "// state variables //\nconst _devices = { }\nlet _config = null\n\n/**\n * Manages the virtual hardware layer, allowing uses to send commands to\n * the robot or receive sensor values from the robot by manipulating hardware\n * interface objects.\n *\n * The class is part of the core framework infrastructure and should not be\n * needed in your code under most circumstances.\n *\n * @protected\n */\nexport default class HardwareManager {\n  /**\n   * Validate the hardware configuration. Returns an array of any errors.\n   * This method makes sure the robot only defines logical devices that are\n   * configured in the hardware.\n   *\n   * @protected\n   * @return {array} - any errors in configuration, or null if no errors\n   */\n  static validateConfig () {\n    // error collection //\n    const errors = [ ]\n    const addError = (message) => errors.push({ type: 'HARDWARE', message })\n\n    // configuration must be set //\n    if (!_config) {\n      addError('Hardware configuration not set')\n    } else if (!_config.devices) {\n      addError('Hardware configuration is missing devices')\n    }\n    if (errors.length) return errors\n\n    // validate all logical devices are configured //\n    for (const deviceName in HardwareManager.devices) {\n      const device = HardwareManager.devices[deviceName]\n      const config = HardwareManager.config.devices[deviceName]\n      if (config) {\n        // make sure the driver is known //\n        const driverName = config.driver\n        if (!device.supportsDriver(driverName)) {\n          errors.push(`Device ${deviceName} has invalid driver: ${driverName}`)\n        }\n      } else {\n        // logical device name has no configuration onboard robot //\n        addError(`Device has no configuration: ${deviceName}`)\n      }\n    }\n\n    return (errors.length) ? errors : null\n  }\n\n  /**\n   * Get the outputs of all hardware devices by device name. This\n   * method is called by the framework to build the data packet to\n   * be sent to the robot.\n   *\n   * @protected\n   * @return {Map<string,number>} - values for all output devices by device name\n   */\n  static getOutputs () {\n    const packet = { }\n    // get device outputs //\n    for (const deviceName in _devices) {\n      const device = _devices[deviceName]\n      if (device.getOutput) {\n        packet[deviceName] = device.getOutput()\n      }\n    }\n    return packet\n  }\n\n  /**\n   * Set the values of named input devices. This method is called\n   * by the framework with raw values received from the robot.\n   *\n   * @protected\n   * @param {object} values - values of all input devices\n   */\n  static setInputs (values) {\n    // write inputs to devices //\n    for (const deviceName in values) {\n      const device = _devices[deviceName]\n      if (device && device.setInput) {\n        device.setInput(values[deviceName])\n      }\n    }\n  }\n\n  /**\n   * Called by the Device class constructor to register a device\n   * with the HardwareManager.\n   *\n   * @private\n   * @param {string} device - device name\n   * @throws {Error} device with that name already exists\n   */\n  static registerDevice (device) {\n    const name = device.name\n    if (_devices[name]) {\n      throw new Error(`Device already exists: ${name}`)\n    }\n    _devices[name] = device\n  }\n}\n",
+    "content": "// state variables //\nconst _devices = { }\nlet _config = null\n\n/**\n * Manages the virtual hardware layer, allowing uses to send commands to\n * the robot or receive sensor values from the robot by manipulating hardware\n * interface objects.\n *\n * The class is part of the core framework infrastructure and should not be\n * needed in your code under most circumstances.\n *\n * @protected\n */\nexport default class HardwareManager {\n  /**\n   * Set the hardware config. This is stored as 'hardware.json' on the\n   * robot file-system.\n   *\n   * @protected\n   * @param {object} value - the hardware.json object\n   */\n  static set config (value) {\n    _config = value\n  }\n\n  /**\n   * Validate the hardware configuration. Returns an array of any errors.\n   * This method makes sure the robot only defines logical devices that are\n   * configured in the hardware.\n   *\n   * @protected\n   * @return {array} - any errors in configuration, or null if no errors\n   */\n  static validateConfig () {\n    // error collection //\n    const errors = [ ]\n    const addError = (message) => errors.push({ type: 'HARDWARE', message })\n\n    // configuration must be set //\n    if (!_config) {\n      addError('Hardware configuration not set')\n    } else if (!_config.devices) {\n      addError('Hardware configuration is missing devices')\n    }\n    if (errors.length) return errors\n\n    // validate all logical devices are configured //\n    for (const deviceName in HardwareManager.devices) {\n      const device = HardwareManager.devices[deviceName]\n      const config = HardwareManager.config.devices[deviceName]\n      if (config) {\n        // make sure the driver is known //\n        const driverName = config.driver\n        if (!device.supportsDriver(driverName)) {\n          errors.push(`Device ${deviceName} has invalid driver: ${driverName}`)\n        }\n      } else {\n        // logical device name has no configuration onboard robot //\n        addError(`Device has no configuration: ${deviceName}`)\n      }\n    }\n\n    return (errors.length) ? errors : null\n  }\n\n  /**\n   * Get the outputs of all hardware devices by device name. This\n   * method is called by the framework to build the data packet to\n   * be sent to the robot.\n   *\n   * @protected\n   * @return {Map<string,number>} - values for all output devices by device name\n   */\n  static getOutputs () {\n    const packet = { }\n    // get device outputs //\n    for (const deviceName in _devices) {\n      const device = _devices[deviceName]\n      if (device.getOutput) {\n        packet[deviceName] = device.getOutput()\n      }\n    }\n    return packet\n  }\n\n  /**\n   * Set the values of named input devices. This method is called\n   * by the framework with raw values received from the robot.\n   *\n   * @protected\n   * @param {object} values - values of all input devices\n   */\n  static setInputs (values) {\n    // write inputs to devices //\n    for (const deviceName in values) {\n      const device = _devices[deviceName]\n      if (device && device.setInput) {\n        device.setInput(values[deviceName])\n      }\n    }\n  }\n\n  /**\n   * Called by the Device class constructor to register a device\n   * with the HardwareManager.\n   *\n   * @private\n   * @param {string} device - device name\n   * @throws {Error} device with that name already exists\n   */\n  static registerDevice (device) {\n    const name = device.name\n    if (_devices[name]) {\n      throw new Error(`Device already exists: ${name}`)\n    }\n    _devices[name] = device\n  }\n}\n",
     "static": true,
     "longname": "lib/hardware/HardwareManager.js",
     "access": null,
@@ -4407,6 +4407,36 @@
   },
   {
     "__docId__": 188,
+    "kind": "set",
+    "name": "config",
+    "memberof": "lib/hardware/HardwareManager.js~HardwareManager",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "lib/hardware/HardwareManager.js~HardwareManager.config",
+    "access": "protected",
+    "description": "Set the hardware config. This is stored as 'hardware.json' on the\nrobot file-system.",
+    "lineNumber": 23,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "the hardware.json object"
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 189,
     "kind": "method",
     "name": "validateConfig",
     "memberof": "lib/hardware/HardwareManager.js~HardwareManager",
@@ -4416,7 +4446,7 @@
     "longname": "lib/hardware/HardwareManager.js~HardwareManager.validateConfig",
     "access": "protected",
     "description": "Validate the hardware configuration. Returns an array of any errors.\nThis method makes sure the robot only defines logical devices that are\nconfigured in the hardware.",
-    "lineNumber": 24,
+    "lineNumber": 35,
     "params": [],
     "return": {
       "nullable": null,
@@ -4428,7 +4458,7 @@
     }
   },
   {
-    "__docId__": 189,
+    "__docId__": 190,
     "kind": "method",
     "name": "getOutputs",
     "memberof": "lib/hardware/HardwareManager.js~HardwareManager",
@@ -4438,7 +4468,7 @@
     "longname": "lib/hardware/HardwareManager.js~HardwareManager.getOutputs",
     "access": "protected",
     "description": "Get the outputs of all hardware devices by device name. This\nmethod is called by the framework to build the data packet to\nbe sent to the robot.",
-    "lineNumber": 64,
+    "lineNumber": 75,
     "params": [],
     "return": {
       "nullable": null,
@@ -4450,7 +4480,7 @@
     }
   },
   {
-    "__docId__": 190,
+    "__docId__": 191,
     "kind": "method",
     "name": "setInputs",
     "memberof": "lib/hardware/HardwareManager.js~HardwareManager",
@@ -4460,7 +4490,7 @@
     "longname": "lib/hardware/HardwareManager.js~HardwareManager.setInputs",
     "access": "protected",
     "description": "Set the values of named input devices. This method is called\nby the framework with raw values received from the robot.",
-    "lineNumber": 83,
+    "lineNumber": 94,
     "params": [
       {
         "nullable": null,
@@ -4475,7 +4505,7 @@
     ]
   },
   {
-    "__docId__": 191,
+    "__docId__": 192,
     "kind": "method",
     "name": "registerDevice",
     "memberof": "lib/hardware/HardwareManager.js~HardwareManager",
@@ -4485,7 +4515,7 @@
     "longname": "lib/hardware/HardwareManager.js~HardwareManager.registerDevice",
     "access": "private",
     "description": "Called by the Device class constructor to register a device\nwith the HardwareManager.",
-    "lineNumber": 101,
+    "lineNumber": 112,
     "params": [
       {
         "nullable": null,
@@ -4508,7 +4538,7 @@
     ]
   },
   {
-    "__docId__": 192,
+    "__docId__": 193,
     "kind": "file",
     "name": "lib/hardware/Motor.js",
     "content": "import Device from './Device'\nimport { constrain } from '../utils'\n\n/**\n * Controls a motor, which is presumed to support both forward\n * reverse movement with values of -1.0 to 1.0.\n */\nexport default class Motor extends Device {\n  /**\n   * Constructor\n   *\n   * @param {string} name - name of the motor\n   */\n  constructor (name) {\n    super(name)\n    /**\n     * Is the motor direction reversed.\n     *\n     * Defaults to `false`.\n     * @type {boolean}\n     */\n    this.reversed = false\n    this.set(0)\n  }\n\n  /**\n   * Set the value of the motor. This is constrained betweem -1.0 (full reverse)\n   * and 1.0 (full forward). A value of 0 is stopped.\n   *\n   * @param {number} [value=0] - the motor power value [-1.0, 1.0]\n   */\n  set (value = 0) {\n    super.set(constrain(this.inverted ? -value : value, -1.0, 1.0))\n  }\n\n  /**\n   * Returns the motor output. This will be an integer between -1023 and\n   * 1023, converted to a string.\n   *\n   * @override\n   * @protected\n   * @return {string} the motor value [-1023, 1023]\n   */\n  getOutput () {\n    return Math.round(this.get() * 1023).toString()\n  }\n\n  /**\n   * Does the Motor support a specified driver.\n   *\n   * Motors currently support the following drivers for motor-like devices:\n   *\n   *  - PWM_HBRIDGE : reversible power driver (speed and direction outputs)\n   *  - PWM : brushless ESC\n   *  - PWM : single direction power driver\n   *  - PWM : continuous rotation servo\n   *\n   * @private\n   * @param {string} driverName - name of the proposed driver\n   * @return {boolean} true if the Motor supports the specified driver.\n   **/\n  supportsDriver (driverName) {\n    return [ 'PWM_HBRIDGE', 'PWM' ].indexOf(driverName) !== -1\n  }\n}\n",
@@ -4519,7 +4549,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 193,
+    "__docId__": 194,
     "kind": "class",
     "name": "Motor",
     "memberof": "lib/hardware/Motor.js",
@@ -4537,7 +4567,7 @@
     ]
   },
   {
-    "__docId__": 194,
+    "__docId__": 195,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "lib/hardware/Motor.js~Motor",
@@ -4562,7 +4592,7 @@
     ]
   },
   {
-    "__docId__": 195,
+    "__docId__": 196,
     "kind": "member",
     "name": "reversed",
     "memberof": "lib/hardware/Motor.js~Motor",
@@ -4581,7 +4611,7 @@
     }
   },
   {
-    "__docId__": 196,
+    "__docId__": 197,
     "kind": "method",
     "name": "set",
     "memberof": "lib/hardware/Motor.js~Motor",
@@ -4608,7 +4638,7 @@
     ]
   },
   {
-    "__docId__": 197,
+    "__docId__": 198,
     "kind": "method",
     "name": "getOutput",
     "memberof": "lib/hardware/Motor.js~Motor",
@@ -4631,7 +4661,7 @@
     "override": true
   },
   {
-    "__docId__": 198,
+    "__docId__": 199,
     "kind": "method",
     "name": "supportsDriver",
     "memberof": "lib/hardware/Motor.js~Motor",
@@ -4664,7 +4694,7 @@
     }
   },
   {
-    "__docId__": 199,
+    "__docId__": 200,
     "kind": "file",
     "name": "lib/hardware/Servo.js",
     "content": "import Device from './Device'\nimport { map } from '../utils'\n\n/**\n * Controls a servo via a PWM output. Input values are 0.0 to 1.0,\n * representing the minimum and maximum rotational positions.\n */\nexport default class Servo extends Device {\n  /**\n   * Constructor.\n   *\n   * @param {string} name - name of the Servo\n   */\n  constructor (name) {\n    super(name)\n    /**\n     * The minimum value of the servo output, on a normalized scale of [0, 1.0].\n     *\n     * To limit the Servo minimum position to a value of 25% of full scale, set\n     * minOutput to 0.25.\n     *\n     * @type {number}\n     */\n    this.minOutput = 0.0\n    /**\n     * The maximum value of the servo output, on a normalized scale of [0, 1.0].\n     *\n     * To limit the Servo maximum position to a value of 75% of full scale, set\n     * minOutput to 0.75.\n     *\n     * @type {number}\n     */\n    this.maxOutput = 1.0\n    /**\n     * Should the servo direction be swapped.\n     *\n     * If true, an input of 0 will correspond to 100% full scale, while an input of\n     * 1.0 will correspond to 0% of full scale.\n     *\n     * @type {boolean}\n     */\n    this.reversed = false\n    this.set(0.5)\n  }\n\n  /**\n   * Set the value of the Servo on the configured scale between minOutput and\n   * maxOutput. Value of 0 corresponds to minOutput and 1.0 corresponds to maxOutput.\n   * If `reversed` is set, the values with be swapped.\n   *\n   * @param {number} [value=0] - the servo position [0, 1.0]\n   */\n  set (value = 0) {\n    if (this.reversed) {\n      super.set(map(value, 0.0, 1.0, this.minOutput, this.maxOutput))\n    } else {\n      super.set(map(value, 0.0, 1.0, this.maxOutput, this.minOutput))\n    }\n  }\n\n  /**\n   * Returns the Servo output. This will be an integer between 0 and 1023,\n   * converted to a string.\n   *\n   * @override\n   * @protected\n   * @return {string} the motor value [0, 1023]\n   */\n  getOutput () {\n    return Math.round(this.get() * 1023).toString()\n  }\n\n  /**\n   * Does the Servo support a specified driver.\n   *\n   * Servos currently support the following drivers:\n   *\n   *  - PWM : standard driver\n   *\n   * @private\n   * @param {string} driverName - name of the proposed driver\n   * @return {boolean} true if the Servo supports the specified driver.\n   **/\n  supportsDriver (driverName) {\n    return [ 'PWM' ].indexOf(driverName) !== -1\n  }\n}\n",
@@ -4675,7 +4705,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 200,
+    "__docId__": 201,
     "kind": "class",
     "name": "Servo",
     "memberof": "lib/hardware/Servo.js",
@@ -4693,7 +4723,7 @@
     ]
   },
   {
-    "__docId__": 201,
+    "__docId__": 202,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "lib/hardware/Servo.js~Servo",
@@ -4718,7 +4748,7 @@
     ]
   },
   {
-    "__docId__": 202,
+    "__docId__": 203,
     "kind": "member",
     "name": "minOutput",
     "memberof": "lib/hardware/Servo.js~Servo",
@@ -4737,7 +4767,7 @@
     }
   },
   {
-    "__docId__": 203,
+    "__docId__": 204,
     "kind": "member",
     "name": "maxOutput",
     "memberof": "lib/hardware/Servo.js~Servo",
@@ -4756,7 +4786,7 @@
     }
   },
   {
-    "__docId__": 204,
+    "__docId__": 205,
     "kind": "member",
     "name": "reversed",
     "memberof": "lib/hardware/Servo.js~Servo",
@@ -4775,7 +4805,7 @@
     }
   },
   {
-    "__docId__": 205,
+    "__docId__": 206,
     "kind": "method",
     "name": "set",
     "memberof": "lib/hardware/Servo.js~Servo",
@@ -4802,7 +4832,7 @@
     ]
   },
   {
-    "__docId__": 206,
+    "__docId__": 207,
     "kind": "method",
     "name": "getOutput",
     "memberof": "lib/hardware/Servo.js~Servo",
@@ -4825,7 +4855,7 @@
     "override": true
   },
   {
-    "__docId__": 207,
+    "__docId__": 208,
     "kind": "method",
     "name": "supportsDriver",
     "memberof": "lib/hardware/Servo.js~Servo",
@@ -4858,7 +4888,7 @@
     }
   },
   {
-    "__docId__": 208,
+    "__docId__": 209,
     "kind": "file",
     "name": "lib/hardware/index.js",
     "content": "// re-export the individual modules //\nexport { default as HardwareManager } from './HardwareManager'\nexport { default as Device } from './Device'\nexport { default as Motor } from './Motor'\nexport { default as Servo } from './Servo'\nexport { default as DigitalOutput } from './DigitalOutput'\nexport { default as DigitalInput } from './DigitalInput'\n",
@@ -4869,7 +4899,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 209,
+    "__docId__": 210,
     "kind": "file",
     "name": "lib/index.js",
     "content": "/* eslint-disable no-unused-vars */\nimport { HardwareManager, Motor, Servo, DigitalOutput, DigitalInput } from './hardware'\nimport { TankDrive, ArcadeDrive } from './drive'\nimport { Joystick, Button, Slider, ControlManager } from './controls'\nimport { AjaxConnection, WebSocketConnection, Connection } from './connection'\nimport { ajaxGet } from './utils'\n\n// get HTML elements //\nconst heading = document.getElementById('heading')\nconst statusIcon = document.getElementById('status-box')\nconst statusText = document.getElementById('status-text')\nconst infoBox = document.getElementById('info-box')\nconst errorBox = document.getElementById('error-box')\nconst canvas = document.getElementById('touch-canvas')\n\n// configure the ControlManager HTML5 canvas //\nconst resizeCanvas = () => {\n  canvas.width = window.innerWidth\n  canvas.height = window.innerHeight - heading.clientHeight - 1\n\n  window.scrollTo(0, 0)\n}\nwindow.addEventListener('orientationchange', resizeCanvas)\nwindow.addEventListener('resize', resizeCanvas)\nresizeCanvas()\nControlManager.setCanvas(canvas)\n\n// add an error to error box //\nfunction addError ({ type, message }) {\n  const eline = document.createElement('li')\n  eline.className = type\n  // error type //\n  const tspan = document.createElement('span')\n  tspan.className = 'type'\n  tspan.innerText = type\n  eline.appendChild(tspan)\n  // error message //\n  const mspan = document.createElement('span')\n  mspan.className = 'message'\n  mspan.innerText = message\n  eline.appendChild(mspan)\n  errorBox.appendChild(eline)\n}\n\nfunction clearErrors (type) {\n  const els = type\n    ? errorBox.getElementsByClassName(type)\n    : errorBox.getElementByTagName('ul')\n  for (let i = 0; i < els.length; i++) {\n    els[i].remove()\n  }\n}\n\n// set UI connection state //\nfunction setConnectionState (state) {\n  console.log('Connection state:', state)\n  switch (state) {\n    case Connection.DISCONNECTED:\n    case Connection.CONNECTING:\n      statusIcon.style.backgroundColor = 'yellow'\n      break\n    case Connection.CONNECTED:\n      statusIcon.style.backgroundColor = 'green'\n      break\n    default:\n      statusIcon.style.backgroundColor = 'red'\n      break\n  }\n  statusText.innerText = state\n}\n\nfunction setConnectionInfo (conn) {\n  infoBox.innerText = `Ping: ${\n    (conn.pingTimeMs !== null) ? `${conn.pingTimeMs} ms` : '----'\n  }`\n}\n\n// initialize the application //\nconst getHardwareConfig = new Promise((resolve, reject) =>\n  ajaxGet('./hardware.json', (err, resp) => {\n    if (err) return reject(err)\n    resolve(JSON.parse(resp.data))\n  })\n)\nconst waitForLoad = new Promise((resolve, reject) => {\n  window.addEventListener('load', () => {\n    console.log('Page loaded')\n    resolve()\n  })\n})\n\nconst WEBSOCKET = true\nlet _runLoop = true\nlet _connection = null\nPromise.all([ getHardwareConfig, waitForLoad ])\n  .then(([ config ]) => {\n    // set hardware configuration //\n    HardwareManager.config = config\n\n    if (window.setup) {\n      console.log('Running robot setup...')\n      try {\n        window.setup()\n      } catch (error) {\n        addError({ type: 'SETUP', message: error.message })\n      }\n    }\n    // test hardware config //\n    const hwErrors = HardwareManager.validateConfig()\n    if (hwErrors) {\n      for (let i = 0; i < hwErrors.length; i++) {\n        addError(hwErrors[i])\n      }\n    }\n\n    // establish connection //\n    _connection = WEBSOCKET ? new WebSocketConnection() : new AjaxConnection()\n    _connection.onstatechange = (newState, oldState) => {\n      setConnectionState(newState)\n      if (newState === Connection.ERROR) {\n        console.log(_connection.lastError)\n        addError({ type: 'CONNECTION', message: _connection.lastError.message })\n      } else if (oldState === Connection.ERROR) {\n        clearErrors('CONNECTION')\n      }\n    }\n    _connection.onresponsedata = (data) => {\n      HardwareManager.setInputs(data)\n      setConnectionInfo(_connection)\n    }\n    // initialize UI //\n    setConnectionState(_connection.state)\n    // initialize control data //\n    _connection.setRobotData(getPacket(HardwareManager.getOutputs()))\n    _connection.start()\n\n    // start the UI control loop //\n    ControlManager.start()\n    ControlManager.onupdate = () => {\n      if (!_runLoop) return\n\n      // call the loop() method to update virtual hardware //\n      if (window.loop) {\n        try {\n          window.loop()\n        } catch (error) {\n          addError({ type: 'LOOP', message: error.message })\n        }\n      }\n      const request = getPacket(HardwareManager.getOutputs())\n      // console.log('request', request)\n      _connection.setRobotData(request)\n    }\n  })\n  .catch(err => {\n    addError({ type: 'SCRIPT', message: err.message })\n  })\n\n// FIXME: get the ghetto-packet for legacy firmware //\nfunction getPacket (json) {\n  return `${json.leftMotor}:${json.rightMotor}:${json.weaponMotor}`\n}\n",
@@ -4880,7 +4910,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 210,
+    "__docId__": 211,
     "kind": "variable",
     "name": "heading",
     "memberof": "lib/index.js",
@@ -4906,7 +4936,7 @@
     }
   },
   {
-    "__docId__": 211,
+    "__docId__": 212,
     "kind": "variable",
     "name": "statusIcon",
     "memberof": "lib/index.js",
@@ -4932,7 +4962,7 @@
     }
   },
   {
-    "__docId__": 212,
+    "__docId__": 213,
     "kind": "variable",
     "name": "statusText",
     "memberof": "lib/index.js",
@@ -4958,7 +4988,7 @@
     }
   },
   {
-    "__docId__": 213,
+    "__docId__": 214,
     "kind": "variable",
     "name": "infoBox",
     "memberof": "lib/index.js",
@@ -4984,7 +5014,7 @@
     }
   },
   {
-    "__docId__": 214,
+    "__docId__": 215,
     "kind": "variable",
     "name": "errorBox",
     "memberof": "lib/index.js",
@@ -5010,7 +5040,7 @@
     }
   },
   {
-    "__docId__": 215,
+    "__docId__": 216,
     "kind": "variable",
     "name": "canvas",
     "memberof": "lib/index.js",
@@ -5036,7 +5066,7 @@
     }
   },
   {
-    "__docId__": 216,
+    "__docId__": 217,
     "kind": "function",
     "name": "resizeCanvas",
     "memberof": "lib/index.js",
@@ -5060,7 +5090,7 @@
     "params": []
   },
   {
-    "__docId__": 217,
+    "__docId__": 218,
     "kind": "function",
     "name": "addError",
     "memberof": "lib/index.js",
@@ -5096,7 +5126,7 @@
     ]
   },
   {
-    "__docId__": 218,
+    "__docId__": 219,
     "kind": "function",
     "name": "clearErrors",
     "memberof": "lib/index.js",
@@ -5127,7 +5157,7 @@
     ]
   },
   {
-    "__docId__": 219,
+    "__docId__": 220,
     "kind": "function",
     "name": "setConnectionState",
     "memberof": "lib/index.js",
@@ -5158,7 +5188,7 @@
     ]
   },
   {
-    "__docId__": 220,
+    "__docId__": 221,
     "kind": "function",
     "name": "setConnectionInfo",
     "memberof": "lib/index.js",
@@ -5189,7 +5219,7 @@
     ]
   },
   {
-    "__docId__": 221,
+    "__docId__": 222,
     "kind": "variable",
     "name": "getHardwareConfig",
     "memberof": "lib/index.js",
@@ -5215,7 +5245,7 @@
     }
   },
   {
-    "__docId__": 222,
+    "__docId__": 223,
     "kind": "variable",
     "name": "waitForLoad",
     "memberof": "lib/index.js",
@@ -5241,7 +5271,7 @@
     }
   },
   {
-    "__docId__": 223,
+    "__docId__": 224,
     "kind": "variable",
     "name": "WEBSOCKET",
     "memberof": "lib/index.js",
@@ -5267,7 +5297,7 @@
     }
   },
   {
-    "__docId__": 224,
+    "__docId__": 225,
     "kind": "variable",
     "name": "_runLoop",
     "memberof": "lib/index.js",
@@ -5293,7 +5323,7 @@
     }
   },
   {
-    "__docId__": 225,
+    "__docId__": 226,
     "kind": "variable",
     "name": "_connection",
     "memberof": "lib/index.js",
@@ -5319,7 +5349,7 @@
     }
   },
   {
-    "__docId__": 226,
+    "__docId__": 227,
     "kind": "function",
     "name": "getPacket",
     "memberof": "lib/index.js",
@@ -5355,7 +5385,7 @@
     }
   },
   {
-    "__docId__": 227,
+    "__docId__": 228,
     "kind": "file",
     "name": "lib/utils.js",
     "content": "/**\n * Utility functions\n *\n * @module utils\n */\n/* globals XMLHttpRequest */\n\n/**\n * Constrain input to a given range.\n *\n * Identical to the Arduino library function with the same name.\n * @see https://www.arduino.cc/en/Reference/Constrain\n *\n * @param {number} value - input value\n * @param {number} min - minimum value\n * @param {number} max - maximum value\n * @return {number}\n */\nexport function constrain (value, min, max) {\n  if (value < min) return min\n  if (value > max) return max\n  return value\n}\n\n/**\n * Map a value from an input range to an output range.\n *\n * Identical to the Arduino library function with the same name.\n * @see https://www.arduino.cc/en/Reference/Map\n *\n * @param {number} value input value\n * @param {number} inputMin input range low value\n * @param {number} inputMax input range high value\n * @param {number} outputMin output range low value\n * @param {number} outputMax output range high value\n * @return {number}\n */\nexport function map (value, inputMin, inputMax, outputMin, outputMax) {\n  return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin\n}\n\n/**\n * General AJAX call.\n * @private\n *\n * @param {string} method HTTP method\n * @param {string} url url to call\n * @param {?string|Object} data data to send, will be stringified to JSON if object\n * @param {?number} timeout timeout in milliseconds\n * @param {Function} callback (err, data)\n */\nexport function ajax (method, url, data, timeout, callback) {\n  if (typeof timeout === 'function') {\n    callback = timeout\n    timeout = undefined\n  }\n\n  // get the response //\n  const getResponse = (xhr, data) => ({\n    status: xhr.status,\n    statusText: xhr.statusText,\n    data,\n    xhr\n  })\n\n  // create request //\n  const xhr = new XMLHttpRequest()\n  xhr.open(method, url, true)\n  xhr.timeout = timeout\n  xhr.addEventListener('load', () => {\n    if (xhr.status >= 200 && xhr.status < 300) {\n      callback(null, getResponse(xhr, xhr.responseText))\n    } else {\n      callback(new Error(`${xhr.status} - ${xhr.statusText}`), getResponse(xhr))\n    }\n  })\n  xhr.addEventListener('error', (e) => callback(new Error('Request failed'), getResponse(xhr)))\n  xhr.addEventListener('timeout', () => callback(new Error('Request timeout'), getResponse(xhr)))\n\n  if (data) {\n    xhr.send(typeof data !== 'string' ? JSON.stringify(data) : data)\n  } else {\n    xhr.send()\n  }\n}\n\n/**\n * XHR wrapper to simplify AJAX GET calls.\n * @private\n *\n * @param {string} url url to call\n * @param {?number} timeoutMs connection timeout in milliseconds\n * @param {Function} callback - (err, data)\n */\nexport function ajaxGet (url, timeoutMs, callback) {\n  return ajax('GET', url, null, timeoutMs, callback)\n}\n\n/**\n * XHR wrapper to simplify AJAX PUT calls.\n * @private\n *\n * @param {string} url url to call\n * @param {?string|Object} data data to send, will be stringified to JSON if object\n * @param {?number} timeout timeout in milliseconds\n * @param {Function} callback (err, data)\n */\nexport function ajaxPut (url, data, timeout, callback) {\n  return ajax('PUT', url, data, timeout, callback)\n}\n",
@@ -5366,7 +5396,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 228,
+    "__docId__": 229,
     "kind": "function",
     "name": "constrain",
     "memberof": "lib/utils.js",
@@ -5425,7 +5455,7 @@
     }
   },
   {
-    "__docId__": 229,
+    "__docId__": 230,
     "kind": "function",
     "name": "map",
     "memberof": "lib/utils.js",
@@ -5504,7 +5534,7 @@
     }
   },
   {
-    "__docId__": 230,
+    "__docId__": 231,
     "kind": "function",
     "name": "ajax",
     "memberof": "lib/utils.js",
@@ -5573,7 +5603,7 @@
     ]
   },
   {
-    "__docId__": 231,
+    "__docId__": 232,
     "kind": "function",
     "name": "ajaxGet",
     "memberof": "lib/utils.js",
@@ -5626,7 +5656,7 @@
     }
   },
   {
-    "__docId__": 232,
+    "__docId__": 233,
     "kind": "function",
     "name": "ajaxPut",
     "memberof": "lib/utils.js",
@@ -5690,7 +5720,7 @@
     }
   },
   {
-    "__docId__": 234,
+    "__docId__": 235,
     "kind": "external",
     "name": "Infinity",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity",
@@ -5702,7 +5732,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 235,
+    "__docId__": 236,
     "kind": "external",
     "name": "NaN",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN",
@@ -5714,7 +5744,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 236,
+    "__docId__": 237,
     "kind": "external",
     "name": "undefined",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined",
@@ -5726,7 +5756,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 237,
+    "__docId__": 238,
     "kind": "external",
     "name": "null",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null",
@@ -5738,7 +5768,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 238,
+    "__docId__": 239,
     "kind": "external",
     "name": "Object",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
@@ -5750,7 +5780,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 239,
+    "__docId__": 240,
     "kind": "external",
     "name": "object",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
@@ -5762,7 +5792,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 240,
+    "__docId__": 241,
     "kind": "external",
     "name": "Function",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
@@ -5774,7 +5804,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 241,
+    "__docId__": 242,
     "kind": "external",
     "name": "function",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
@@ -5786,7 +5816,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 242,
+    "__docId__": 243,
     "kind": "external",
     "name": "Boolean",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
@@ -5798,7 +5828,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 243,
+    "__docId__": 244,
     "kind": "external",
     "name": "boolean",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
@@ -5810,7 +5840,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 244,
+    "__docId__": 245,
     "kind": "external",
     "name": "Symbol",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol",
@@ -5822,7 +5852,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 245,
+    "__docId__": 246,
     "kind": "external",
     "name": "Error",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error",
@@ -5834,7 +5864,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 246,
+    "__docId__": 247,
     "kind": "external",
     "name": "EvalError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/EvalError",
@@ -5846,7 +5876,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 247,
+    "__docId__": 248,
     "kind": "external",
     "name": "InternalError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/InternalError",
@@ -5858,7 +5888,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 248,
+    "__docId__": 249,
     "kind": "external",
     "name": "RangeError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RangeError",
@@ -5870,7 +5900,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 249,
+    "__docId__": 250,
     "kind": "external",
     "name": "ReferenceError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError",
@@ -5882,7 +5912,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 250,
+    "__docId__": 251,
     "kind": "external",
     "name": "SyntaxError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError",
@@ -5894,7 +5924,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 251,
+    "__docId__": 252,
     "kind": "external",
     "name": "TypeError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError",
@@ -5906,7 +5936,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 252,
+    "__docId__": 253,
     "kind": "external",
     "name": "URIError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/URIError",
@@ -5918,7 +5948,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 253,
+    "__docId__": 254,
     "kind": "external",
     "name": "Number",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
@@ -5930,7 +5960,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 254,
+    "__docId__": 255,
     "kind": "external",
     "name": "number",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
@@ -5942,7 +5972,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 255,
+    "__docId__": 256,
     "kind": "external",
     "name": "Date",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date",
@@ -5954,7 +5984,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 256,
+    "__docId__": 257,
     "kind": "external",
     "name": "String",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
@@ -5966,7 +5996,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 257,
+    "__docId__": 258,
     "kind": "external",
     "name": "string",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
@@ -5978,7 +6008,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 258,
+    "__docId__": 259,
     "kind": "external",
     "name": "RegExp",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp",
@@ -5990,7 +6020,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 259,
+    "__docId__": 260,
     "kind": "external",
     "name": "Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array",
@@ -6002,7 +6032,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 260,
+    "__docId__": 261,
     "kind": "external",
     "name": "Int8Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int8Array",
@@ -6014,7 +6044,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 261,
+    "__docId__": 262,
     "kind": "external",
     "name": "Uint8Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array",
@@ -6026,7 +6056,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 262,
+    "__docId__": 263,
     "kind": "external",
     "name": "Uint8ClampedArray",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray",
@@ -6038,7 +6068,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 263,
+    "__docId__": 264,
     "kind": "external",
     "name": "Int16Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int16Array",
@@ -6050,7 +6080,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 264,
+    "__docId__": 265,
     "kind": "external",
     "name": "Uint16Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint16Array",
@@ -6062,7 +6092,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 265,
+    "__docId__": 266,
     "kind": "external",
     "name": "Int32Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int32Array",
@@ -6074,7 +6104,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 266,
+    "__docId__": 267,
     "kind": "external",
     "name": "Uint32Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array",
@@ -6086,7 +6116,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 267,
+    "__docId__": 268,
     "kind": "external",
     "name": "Float32Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array",
@@ -6098,7 +6128,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 268,
+    "__docId__": 269,
     "kind": "external",
     "name": "Float64Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float64Array",
@@ -6110,7 +6140,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 269,
+    "__docId__": 270,
     "kind": "external",
     "name": "Map",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map",
@@ -6122,7 +6152,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 270,
+    "__docId__": 271,
     "kind": "external",
     "name": "Set",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set",
@@ -6134,7 +6164,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 271,
+    "__docId__": 272,
     "kind": "external",
     "name": "WeakMap",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap",
@@ -6146,7 +6176,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 272,
+    "__docId__": 273,
     "kind": "external",
     "name": "WeakSet",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet",
@@ -6158,7 +6188,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 273,
+    "__docId__": 274,
     "kind": "external",
     "name": "ArrayBuffer",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer",
@@ -6170,7 +6200,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 274,
+    "__docId__": 275,
     "kind": "external",
     "name": "DataView",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView",
@@ -6182,7 +6212,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 275,
+    "__docId__": 276,
     "kind": "external",
     "name": "JSON",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON",
@@ -6194,7 +6224,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 276,
+    "__docId__": 277,
     "kind": "external",
     "name": "Promise",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
@@ -6206,7 +6236,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 277,
+    "__docId__": 278,
     "kind": "external",
     "name": "Generator",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator",
@@ -6218,7 +6248,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 278,
+    "__docId__": 279,
     "kind": "external",
     "name": "GeneratorFunction",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/GeneratorFunction",
@@ -6230,7 +6260,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 279,
+    "__docId__": 280,
     "kind": "external",
     "name": "Reflect",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect",
@@ -6242,7 +6272,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 280,
+    "__docId__": 281,
     "kind": "external",
     "name": "Proxy",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy",
@@ -6255,7 +6285,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 282,
+    "__docId__": 283,
     "kind": "external",
     "name": "CanvasRenderingContext2D",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D",
@@ -6267,7 +6297,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 283,
+    "__docId__": 284,
     "kind": "external",
     "name": "DocumentFragment",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment",
@@ -6279,7 +6309,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 284,
+    "__docId__": 285,
     "kind": "external",
     "name": "Element",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Element",
@@ -6291,7 +6321,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 285,
+    "__docId__": 286,
     "kind": "external",
     "name": "Event",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Event",
@@ -6303,7 +6333,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 286,
+    "__docId__": 287,
     "kind": "external",
     "name": "Node",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Node",
@@ -6315,7 +6345,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 287,
+    "__docId__": 288,
     "kind": "external",
     "name": "NodeList",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/NodeList",
@@ -6327,7 +6357,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 288,
+    "__docId__": 289,
     "kind": "external",
     "name": "XMLHttpRequest",
     "externalLink": "https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest",
@@ -6339,7 +6369,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 289,
+    "__docId__": 290,
     "kind": "external",
     "name": "AudioContext",
     "externalLink": "https://developer.mozilla.org/en/docs/Web/API/AudioContext",

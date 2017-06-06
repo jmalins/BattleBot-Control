@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <base data-ice="baseUrl" href="../../../">
-  <title data-ice="title">lib/hardware/HardwareManager.js | API Document</title>
+  <title data-ice="title">lib/hardware/DigitalInput.js | API Document</title>
   <link type="text/css" rel="stylesheet" href="css/style.css">
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
@@ -57,113 +57,65 @@
 </div>
 </nav>
 
-<div class="content" data-ice="content"><h1 data-ice="title">lib/hardware/HardwareManager.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">// state variables //
-const _devices = { }
-let _config = null
+<div class="content" data-ice="content"><h1 data-ice="title">lib/hardware/DigitalInput.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Device from &apos;./Device&apos;
 
 /**
- * Manages the virtual hardware layer, allowing uses to send commands to
- * the robot or receive sensor values from the robot by manipulating hardware
- * interface objects.
+ * Digital Input
  *
- * The class is part of the core framework infrastructure and should not be
- * needed in your code under most circumstances.
- *
- * @protected
+ * A digital input device, such as an input pin. This can be connected
+ * to a switch, bump sensor, line follower or other digital device.
  */
-export default class HardwareManager {
+export default class DigitalInput extends Device {
   /**
-   * Validate the hardware configuration. Returns an array of any errors.
-   * This method makes sure the robot only defines logical devices that are
-   * configured in the hardware.
+   * Constructor
    *
-   * @protected
-   * @return {array} - any errors in configuration, or null if no errors
+   * @param {string} name - name of the digital input
    */
-  static validateConfig () {
-    // error collection //
-    const errors = [ ]
-    const addError = (message) =&gt; errors.push({ type: &apos;HARDWARE&apos;, message })
-
-    // configuration must be set //
-    if (!_config) {
-      addError(&apos;Hardware configuration not set&apos;)
-    } else if (!_config.devices) {
-      addError(&apos;Hardware configuration is missing devices&apos;)
-    }
-    if (errors.length) return errors
-
-    // validate all logical devices are configured //
-    for (const deviceName in HardwareManager.devices) {
-      const device = HardwareManager.devices[deviceName]
-      const config = HardwareManager.config.devices[deviceName]
-      if (config) {
-        // make sure the driver is known //
-        const driverName = config.driver
-        if (!device.supportsDriver(driverName)) {
-          errors.push(`Device ${deviceName} has invalid driver: ${driverName}`)
-        }
-      } else {
-        // logical device name has no configuration onboard robot //
-        addError(`Device has no configuration: ${deviceName}`)
-      }
-    }
-
-    return (errors.length) ? errors : null
+  constructor (name) {
+    super(name)
+    /**
+     * The value of the input.
+     * @private
+     * @type {boolean}
+     */
+    this.value = false
   }
 
   /**
-   * Get the outputs of all hardware devices by device name. This
-   * method is called by the framework to build the data packet to
-   * be sent to the robot.
+   * Get the value of the input as a boolean (true or false).
    *
-   * @protected
-   * @return {Map&lt;string,number&gt;} - values for all output devices by device name
+   * @return {boolean} the value of the input
    */
-  static getOutputs () {
-    const packet = { }
-    // get device outputs //
-    for (const deviceName in _devices) {
-      const device = _devices[deviceName]
-      if (device.getOutput) {
-        packet[deviceName] = device.getOutput()
-      }
-    }
-    return packet
+  get () {
+    return this.value
   }
 
   /**
-   * Set the values of named input devices. This method is called
-   * by the framework with raw values received from the robot.
+   * Called by the framework to set the value of this input after
+   * it is received from the robot.
    *
+   * @override
    * @protected
-   * @param {object} values - values of all input devices
+   * @param {number} value - the value to set
    */
-  static setInputs (values) {
-    // write inputs to devices //
-    for (const deviceName in values) {
-      const device = _devices[deviceName]
-      if (device &amp;&amp; device.setInput) {
-        device.setInput(values[deviceName])
-      }
-    }
+  setInput (value) {
+    this.value = !!value
   }
 
   /**
-   * Called by the Device class constructor to register a device
-   * with the HardwareManager.
+   * Does the input support a specified driver.
+   *
+   * Digital inputs currently support the following drivers:
+   *
+   *  - DIGITAL_IN : an input pin
    *
    * @private
-   * @param {string} device - device name
-   * @throws {Error} device with that name already exists
+   * @param {string} driverName - name of the proposed driver
+   * @return {boolean} true if the DigitalInput supports the specified driver.
    */
-  static registerDevice (device) {
-    const name = device.name
-    if (_devices[name]) {
-      throw new Error(`Device already exists: ${name}`)
-    }
-    _devices[name] = device
+  supportsDriver (driverName) {
+    return [ &apos;DIGITAL_IN&apos; ].indexOf(driverName) !== -1
   }
 }
 </code></pre>

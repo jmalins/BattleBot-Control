@@ -1,7 +1,7 @@
 {
   "type": "File",
   "start": 0,
-  "end": 1320,
+  "end": 1318,
   "loc": {
     "start": {
       "line": 1,
@@ -15,7 +15,7 @@
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 1320,
+    "end": 1318,
     "loc": {
       "start": {
         "line": 1,
@@ -120,7 +120,7 @@
       {
         "type": "ExportDefaultDeclaration",
         "start": 198,
-        "end": 1319,
+        "end": 1317,
         "loc": {
           "start": {
             "line": 9,
@@ -134,7 +134,7 @@
         "declaration": {
           "type": "ClassDeclaration",
           "start": 213,
-          "end": 1319,
+          "end": 1317,
           "loc": {
             "start": {
               "line": 9,
@@ -183,7 +183,7 @@
           "body": {
             "type": "ClassBody",
             "start": 247,
-            "end": 1319,
+            "end": 1317,
             "loc": {
               "start": {
                 "line": 9,
@@ -198,7 +198,7 @@
               {
                 "type": "ClassMethod",
                 "start": 339,
-                "end": 490,
+                "end": 488,
                 "loc": {
                   "start": {
                     "line": 15,
@@ -256,7 +256,7 @@
                 "body": {
                   "type": "BlockStatement",
                   "start": 358,
-                  "end": 490,
+                  "end": 488,
                   "loc": {
                     "start": {
                       "line": 15,
@@ -335,9 +335,9 @@
                       "trailingComments": [
                         {
                           "type": "CommentBlock",
-                          "value": "* \n     * The value of the input.\n     * @private \n     * @type {boolean}\n     ",
+                          "value": "*\n     * The value of the input.\n     * @private\n     * @type {boolean}\n     ",
                           "start": 380,
-                          "end": 463,
+                          "end": 461,
                           "loc": {
                             "start": {
                               "line": 17,
@@ -353,8 +353,8 @@
                     },
                     {
                       "type": "ExpressionStatement",
-                      "start": 468,
-                      "end": 486,
+                      "start": 466,
+                      "end": 484,
                       "loc": {
                         "start": {
                           "line": 22,
@@ -367,8 +367,8 @@
                       },
                       "expression": {
                         "type": "AssignmentExpression",
-                        "start": 468,
-                        "end": 486,
+                        "start": 466,
+                        "end": 484,
                         "loc": {
                           "start": {
                             "line": 22,
@@ -382,8 +382,8 @@
                         "operator": "=",
                         "left": {
                           "type": "MemberExpression",
-                          "start": 468,
-                          "end": 478,
+                          "start": 466,
+                          "end": 476,
                           "loc": {
                             "start": {
                               "line": 22,
@@ -396,8 +396,8 @@
                           },
                           "object": {
                             "type": "ThisExpression",
-                            "start": 468,
-                            "end": 472,
+                            "start": 466,
+                            "end": 470,
                             "loc": {
                               "start": {
                                 "line": 22,
@@ -412,8 +412,8 @@
                           },
                           "property": {
                             "type": "Identifier",
-                            "start": 473,
-                            "end": 478,
+                            "start": 471,
+                            "end": 476,
                             "loc": {
                               "start": {
                                 "line": 22,
@@ -432,8 +432,8 @@
                         },
                         "right": {
                           "type": "BooleanLiteral",
-                          "start": 481,
-                          "end": 486,
+                          "start": 479,
+                          "end": 484,
                           "loc": {
                             "start": {
                               "line": 22,
@@ -451,9 +451,9 @@
                       "leadingComments": [
                         {
                           "type": "CommentBlock",
-                          "value": "* \n     * The value of the input.\n     * @private \n     * @type {boolean}\n     ",
+                          "value": "*\n     * The value of the input.\n     * @private\n     * @type {boolean}\n     ",
                           "start": 380,
-                          "end": 463,
+                          "end": 461,
                           "loc": {
                             "start": {
                               "line": 17,
@@ -493,8 +493,8 @@
                   {
                     "type": "CommentBlock",
                     "value": "*\n   * Get the value of the input as a boolean (true or false).\n   *\n   * @return {boolean} the value of the input\n   ",
-                    "start": 494,
-                    "end": 616,
+                    "start": 492,
+                    "end": 614,
                     "loc": {
                       "start": {
                         "line": 25,
@@ -510,8 +510,8 @@
               },
               {
                 "type": "ClassMethod",
-                "start": 619,
-                "end": 653,
+                "start": 617,
+                "end": 651,
                 "loc": {
                   "start": {
                     "line": 30,
@@ -525,8 +525,8 @@
                 "computed": false,
                 "key": {
                   "type": "Identifier",
-                  "start": 619,
-                  "end": 622,
+                  "start": 617,
+                  "end": 620,
                   "loc": {
                     "start": {
                       "line": 30,
@@ -550,8 +550,8 @@
                 "params": [],
                 "body": {
                   "type": "BlockStatement",
-                  "start": 626,
-                  "end": 653,
+                  "start": 624,
+                  "end": 651,
                   "loc": {
                     "start": {
                       "line": 30,
@@ -565,8 +565,8 @@
                   "body": [
                     {
                       "type": "ReturnStatement",
-                      "start": 632,
-                      "end": 649,
+                      "start": 630,
+                      "end": 647,
                       "loc": {
                         "start": {
                           "line": 31,
@@ -579,8 +579,8 @@
                       },
                       "argument": {
                         "type": "MemberExpression",
-                        "start": 639,
-                        "end": 649,
+                        "start": 637,
+                        "end": 647,
                         "loc": {
                           "start": {
                             "line": 31,
@@ -593,8 +593,8 @@
                         },
                         "object": {
                           "type": "ThisExpression",
-                          "start": 639,
-                          "end": 643,
+                          "start": 637,
+                          "end": 641,
                           "loc": {
                             "start": {
                               "line": 31,
@@ -608,8 +608,8 @@
                         },
                         "property": {
                           "type": "Identifier",
-                          "start": 644,
-                          "end": 649,
+                          "start": 642,
+                          "end": 647,
                           "loc": {
                             "start": {
                               "line": 31,
@@ -634,8 +634,8 @@
                   {
                     "type": "CommentBlock",
                     "value": "*\n   * Get the value of the input as a boolean (true or false).\n   *\n   * @return {boolean} the value of the input\n   ",
-                    "start": 494,
-                    "end": 616,
+                    "start": 492,
+                    "end": 614,
                     "loc": {
                       "start": {
                         "line": 25,
@@ -652,8 +652,8 @@
                   {
                     "type": "CommentBlock",
                     "value": "*\n   * Called by the framework to set the value of this input after\n   * it is received from the robot.\n   *\n   * @override\n   * @protected\n   * @param {number} value - the value to set\n   ",
-                    "start": 657,
-                    "end": 850,
+                    "start": 655,
+                    "end": 848,
                     "loc": {
                       "start": {
                         "line": 34,
@@ -669,8 +669,8 @@
               },
               {
                 "type": "ClassMethod",
-                "start": 853,
-                "end": 900,
+                "start": 851,
+                "end": 898,
                 "loc": {
                   "start": {
                     "line": 42,
@@ -684,8 +684,8 @@
                 "computed": false,
                 "key": {
                   "type": "Identifier",
-                  "start": 853,
-                  "end": 861,
+                  "start": 851,
+                  "end": 859,
                   "loc": {
                     "start": {
                       "line": 42,
@@ -709,8 +709,8 @@
                 "params": [
                   {
                     "type": "Identifier",
-                    "start": 863,
-                    "end": 868,
+                    "start": 861,
+                    "end": 866,
                     "loc": {
                       "start": {
                         "line": 42,
@@ -727,8 +727,8 @@
                 ],
                 "body": {
                   "type": "BlockStatement",
-                  "start": 870,
-                  "end": 900,
+                  "start": 868,
+                  "end": 898,
                   "loc": {
                     "start": {
                       "line": 42,
@@ -742,8 +742,8 @@
                   "body": [
                     {
                       "type": "ExpressionStatement",
-                      "start": 876,
-                      "end": 896,
+                      "start": 874,
+                      "end": 894,
                       "loc": {
                         "start": {
                           "line": 43,
@@ -756,8 +756,8 @@
                       },
                       "expression": {
                         "type": "AssignmentExpression",
-                        "start": 876,
-                        "end": 896,
+                        "start": 874,
+                        "end": 894,
                         "loc": {
                           "start": {
                             "line": 43,
@@ -771,8 +771,8 @@
                         "operator": "=",
                         "left": {
                           "type": "MemberExpression",
-                          "start": 876,
-                          "end": 886,
+                          "start": 874,
+                          "end": 884,
                           "loc": {
                             "start": {
                               "line": 43,
@@ -785,8 +785,8 @@
                           },
                           "object": {
                             "type": "ThisExpression",
-                            "start": 876,
-                            "end": 880,
+                            "start": 874,
+                            "end": 878,
                             "loc": {
                               "start": {
                                 "line": 43,
@@ -800,8 +800,8 @@
                           },
                           "property": {
                             "type": "Identifier",
-                            "start": 881,
-                            "end": 886,
+                            "start": 879,
+                            "end": 884,
                             "loc": {
                               "start": {
                                 "line": 43,
@@ -819,8 +819,8 @@
                         },
                         "right": {
                           "type": "UnaryExpression",
-                          "start": 889,
-                          "end": 896,
+                          "start": 887,
+                          "end": 894,
                           "loc": {
                             "start": {
                               "line": 43,
@@ -835,8 +835,8 @@
                           "prefix": true,
                           "argument": {
                             "type": "UnaryExpression",
-                            "start": 890,
-                            "end": 896,
+                            "start": 888,
+                            "end": 894,
                             "loc": {
                               "start": {
                                 "line": 43,
@@ -851,8 +851,8 @@
                             "prefix": true,
                             "argument": {
                               "type": "Identifier",
-                              "start": 891,
-                              "end": 896,
+                              "start": 889,
+                              "end": 894,
                               "loc": {
                                 "start": {
                                   "line": 43,
@@ -884,8 +884,8 @@
                   {
                     "type": "CommentBlock",
                     "value": "*\n   * Called by the framework to set the value of this input after\n   * it is received from the robot.\n   *\n   * @override\n   * @protected\n   * @param {number} value - the value to set\n   ",
-                    "start": 657,
-                    "end": 850,
+                    "start": 655,
+                    "end": 848,
                     "loc": {
                       "start": {
                         "line": 34,
@@ -902,8 +902,8 @@
                   {
                     "type": "CommentBlock",
                     "value": "*\n   * Does the input support a specified driver.\n   *\n   * Digital inputs currently support the following drivers:\n   *\n   *  - DIGITAL_IN : an input pin\n   *\n   * @private\n   * @param {string} driverName - name of the proposed driver\n   * @return {boolean} true if the DigitalInput supports the specified driver.\n   ",
-                    "start": 904,
-                    "end": 1226,
+                    "start": 902,
+                    "end": 1224,
                     "loc": {
                       "start": {
                         "line": 46,
@@ -919,8 +919,8 @@
               },
               {
                 "type": "ClassMethod",
-                "start": 1229,
-                "end": 1317,
+                "start": 1227,
+                "end": 1315,
                 "loc": {
                   "start": {
                     "line": 57,
@@ -934,8 +934,8 @@
                 "computed": false,
                 "key": {
                   "type": "Identifier",
-                  "start": 1229,
-                  "end": 1243,
+                  "start": 1227,
+                  "end": 1241,
                   "loc": {
                     "start": {
                       "line": 57,
@@ -959,8 +959,8 @@
                 "params": [
                   {
                     "type": "Identifier",
-                    "start": 1245,
-                    "end": 1255,
+                    "start": 1243,
+                    "end": 1253,
                     "loc": {
                       "start": {
                         "line": 57,
@@ -977,8 +977,8 @@
                 ],
                 "body": {
                   "type": "BlockStatement",
-                  "start": 1257,
-                  "end": 1317,
+                  "start": 1255,
+                  "end": 1315,
                   "loc": {
                     "start": {
                       "line": 57,
@@ -992,8 +992,8 @@
                   "body": [
                     {
                       "type": "ReturnStatement",
-                      "start": 1263,
-                      "end": 1313,
+                      "start": 1261,
+                      "end": 1311,
                       "loc": {
                         "start": {
                           "line": 58,
@@ -1006,8 +1006,8 @@
                       },
                       "argument": {
                         "type": "BinaryExpression",
-                        "start": 1270,
-                        "end": 1313,
+                        "start": 1268,
+                        "end": 1311,
                         "loc": {
                           "start": {
                             "line": 58,
@@ -1020,8 +1020,8 @@
                         },
                         "left": {
                           "type": "CallExpression",
-                          "start": 1270,
-                          "end": 1306,
+                          "start": 1268,
+                          "end": 1304,
                           "loc": {
                             "start": {
                               "line": 58,
@@ -1034,8 +1034,8 @@
                           },
                           "callee": {
                             "type": "MemberExpression",
-                            "start": 1270,
-                            "end": 1294,
+                            "start": 1268,
+                            "end": 1292,
                             "loc": {
                               "start": {
                                 "line": 58,
@@ -1048,8 +1048,8 @@
                             },
                             "object": {
                               "type": "ArrayExpression",
-                              "start": 1270,
-                              "end": 1286,
+                              "start": 1268,
+                              "end": 1284,
                               "loc": {
                                 "start": {
                                   "line": 58,
@@ -1063,8 +1063,8 @@
                               "elements": [
                                 {
                                   "type": "StringLiteral",
-                                  "start": 1272,
-                                  "end": 1284,
+                                  "start": 1270,
+                                  "end": 1282,
                                   "loc": {
                                     "start": {
                                       "line": 58,
@@ -1085,8 +1085,8 @@
                             },
                             "property": {
                               "type": "Identifier",
-                              "start": 1287,
-                              "end": 1294,
+                              "start": 1285,
+                              "end": 1292,
                               "loc": {
                                 "start": {
                                   "line": 58,
@@ -1105,8 +1105,8 @@
                           "arguments": [
                             {
                               "type": "Identifier",
-                              "start": 1295,
-                              "end": 1305,
+                              "start": 1293,
+                              "end": 1303,
                               "loc": {
                                 "start": {
                                   "line": 58,
@@ -1125,8 +1125,8 @@
                         "operator": "!==",
                         "right": {
                           "type": "UnaryExpression",
-                          "start": 1311,
-                          "end": 1313,
+                          "start": 1309,
+                          "end": 1311,
                           "loc": {
                             "start": {
                               "line": 58,
@@ -1141,8 +1141,8 @@
                           "prefix": true,
                           "argument": {
                             "type": "NumericLiteral",
-                            "start": 1312,
-                            "end": 1313,
+                            "start": 1310,
+                            "end": 1311,
                             "loc": {
                               "start": {
                                 "line": 58,
@@ -1172,8 +1172,8 @@
                   {
                     "type": "CommentBlock",
                     "value": "*\n   * Does the input support a specified driver.\n   *\n   * Digital inputs currently support the following drivers:\n   *\n   *  - DIGITAL_IN : an input pin\n   *\n   * @private\n   * @param {string} driverName - name of the proposed driver\n   * @return {boolean} true if the DigitalInput supports the specified driver.\n   ",
-                    "start": 904,
-                    "end": 1226,
+                    "start": 902,
+                    "end": 1224,
                     "loc": {
                       "start": {
                         "line": 46,
@@ -1266,9 +1266,9 @@
     },
     {
       "type": "CommentBlock",
-      "value": "* \n     * The value of the input.\n     * @private \n     * @type {boolean}\n     ",
+      "value": "*\n     * The value of the input.\n     * @private\n     * @type {boolean}\n     ",
       "start": 380,
-      "end": 463,
+      "end": 461,
       "loc": {
         "start": {
           "line": 17,
@@ -1283,8 +1283,8 @@
     {
       "type": "CommentBlock",
       "value": "*\n   * Get the value of the input as a boolean (true or false).\n   *\n   * @return {boolean} the value of the input\n   ",
-      "start": 494,
-      "end": 616,
+      "start": 492,
+      "end": 614,
       "loc": {
         "start": {
           "line": 25,
@@ -1299,8 +1299,8 @@
     {
       "type": "CommentBlock",
       "value": "*\n   * Called by the framework to set the value of this input after\n   * it is received from the robot.\n   *\n   * @override\n   * @protected\n   * @param {number} value - the value to set\n   ",
-      "start": 657,
-      "end": 850,
+      "start": 655,
+      "end": 848,
       "loc": {
         "start": {
           "line": 34,
@@ -1315,8 +1315,8 @@
     {
       "type": "CommentBlock",
       "value": "*\n   * Does the input support a specified driver.\n   *\n   * Digital inputs currently support the following drivers:\n   *\n   *  - DIGITAL_IN : an input pin\n   *\n   * @private\n   * @param {string} driverName - name of the proposed driver\n   * @return {boolean} true if the DigitalInput supports the specified driver.\n   ",
-      "start": 904,
-      "end": 1226,
+      "start": 902,
+      "end": 1224,
       "loc": {
         "start": {
           "line": 46,
@@ -1891,9 +1891,9 @@
     },
     {
       "type": "CommentBlock",
-      "value": "* \n     * The value of the input.\n     * @private \n     * @type {boolean}\n     ",
+      "value": "*\n     * The value of the input.\n     * @private\n     * @type {boolean}\n     ",
       "start": 380,
-      "end": 463,
+      "end": 461,
       "loc": {
         "start": {
           "line": 17,
@@ -1920,8 +1920,8 @@
         "updateContext": null
       },
       "value": "this",
-      "start": 468,
-      "end": 472,
+      "start": 466,
+      "end": 470,
       "loc": {
         "start": {
           "line": 22,
@@ -1946,8 +1946,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 472,
-      "end": 473,
+      "start": 470,
+      "end": 471,
       "loc": {
         "start": {
           "line": 22,
@@ -1972,8 +1972,8 @@
         "binop": null
       },
       "value": "value",
-      "start": 473,
-      "end": 478,
+      "start": 471,
+      "end": 476,
       "loc": {
         "start": {
           "line": 22,
@@ -1999,8 +1999,8 @@
         "updateContext": null
       },
       "value": "=",
-      "start": 479,
-      "end": 480,
+      "start": 477,
+      "end": 478,
       "loc": {
         "start": {
           "line": 22,
@@ -2027,8 +2027,8 @@
         "updateContext": null
       },
       "value": "false",
-      "start": 481,
-      "end": 486,
+      "start": 479,
+      "end": 484,
       "loc": {
         "start": {
           "line": 22,
@@ -2052,8 +2052,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 489,
-      "end": 490,
+      "start": 487,
+      "end": 488,
       "loc": {
         "start": {
           "line": 23,
@@ -2068,8 +2068,8 @@
     {
       "type": "CommentBlock",
       "value": "*\n   * Get the value of the input as a boolean (true or false).\n   *\n   * @return {boolean} the value of the input\n   ",
-      "start": 494,
-      "end": 616,
+      "start": 492,
+      "end": 614,
       "loc": {
         "start": {
           "line": 25,
@@ -2094,8 +2094,8 @@
         "binop": null
       },
       "value": "get",
-      "start": 619,
-      "end": 622,
+      "start": 617,
+      "end": 620,
       "loc": {
         "start": {
           "line": 30,
@@ -2119,8 +2119,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 623,
-      "end": 624,
+      "start": 621,
+      "end": 622,
       "loc": {
         "start": {
           "line": 30,
@@ -2144,8 +2144,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 624,
-      "end": 625,
+      "start": 622,
+      "end": 623,
       "loc": {
         "start": {
           "line": 30,
@@ -2169,8 +2169,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 626,
-      "end": 627,
+      "start": 624,
+      "end": 625,
       "loc": {
         "start": {
           "line": 30,
@@ -2197,8 +2197,8 @@
         "updateContext": null
       },
       "value": "return",
-      "start": 632,
-      "end": 638,
+      "start": 630,
+      "end": 636,
       "loc": {
         "start": {
           "line": 31,
@@ -2225,8 +2225,8 @@
         "updateContext": null
       },
       "value": "this",
-      "start": 639,
-      "end": 643,
+      "start": 637,
+      "end": 641,
       "loc": {
         "start": {
           "line": 31,
@@ -2251,8 +2251,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 643,
-      "end": 644,
+      "start": 641,
+      "end": 642,
       "loc": {
         "start": {
           "line": 31,
@@ -2277,8 +2277,8 @@
         "binop": null
       },
       "value": "value",
-      "start": 644,
-      "end": 649,
+      "start": 642,
+      "end": 647,
       "loc": {
         "start": {
           "line": 31,
@@ -2302,8 +2302,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 652,
-      "end": 653,
+      "start": 650,
+      "end": 651,
       "loc": {
         "start": {
           "line": 32,
@@ -2318,8 +2318,8 @@
     {
       "type": "CommentBlock",
       "value": "*\n   * Called by the framework to set the value of this input after\n   * it is received from the robot.\n   *\n   * @override\n   * @protected\n   * @param {number} value - the value to set\n   ",
-      "start": 657,
-      "end": 850,
+      "start": 655,
+      "end": 848,
       "loc": {
         "start": {
           "line": 34,
@@ -2344,8 +2344,8 @@
         "binop": null
       },
       "value": "setInput",
-      "start": 853,
-      "end": 861,
+      "start": 851,
+      "end": 859,
       "loc": {
         "start": {
           "line": 42,
@@ -2369,8 +2369,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 862,
-      "end": 863,
+      "start": 860,
+      "end": 861,
       "loc": {
         "start": {
           "line": 42,
@@ -2395,8 +2395,8 @@
         "binop": null
       },
       "value": "value",
-      "start": 863,
-      "end": 868,
+      "start": 861,
+      "end": 866,
       "loc": {
         "start": {
           "line": 42,
@@ -2420,8 +2420,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 868,
-      "end": 869,
+      "start": 866,
+      "end": 867,
       "loc": {
         "start": {
           "line": 42,
@@ -2445,8 +2445,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 870,
-      "end": 871,
+      "start": 868,
+      "end": 869,
       "loc": {
         "start": {
           "line": 42,
@@ -2473,8 +2473,8 @@
         "updateContext": null
       },
       "value": "this",
-      "start": 876,
-      "end": 880,
+      "start": 874,
+      "end": 878,
       "loc": {
         "start": {
           "line": 43,
@@ -2499,8 +2499,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 880,
-      "end": 881,
+      "start": 878,
+      "end": 879,
       "loc": {
         "start": {
           "line": 43,
@@ -2525,8 +2525,8 @@
         "binop": null
       },
       "value": "value",
-      "start": 881,
-      "end": 886,
+      "start": 879,
+      "end": 884,
       "loc": {
         "start": {
           "line": 43,
@@ -2552,8 +2552,8 @@
         "updateContext": null
       },
       "value": "=",
-      "start": 887,
-      "end": 888,
+      "start": 885,
+      "end": 886,
       "loc": {
         "start": {
           "line": 43,
@@ -2579,8 +2579,8 @@
         "updateContext": null
       },
       "value": "!",
-      "start": 889,
-      "end": 890,
+      "start": 887,
+      "end": 888,
       "loc": {
         "start": {
           "line": 43,
@@ -2606,8 +2606,8 @@
         "updateContext": null
       },
       "value": "!",
-      "start": 890,
-      "end": 891,
+      "start": 888,
+      "end": 889,
       "loc": {
         "start": {
           "line": 43,
@@ -2632,8 +2632,8 @@
         "binop": null
       },
       "value": "value",
-      "start": 891,
-      "end": 896,
+      "start": 889,
+      "end": 894,
       "loc": {
         "start": {
           "line": 43,
@@ -2657,8 +2657,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 899,
-      "end": 900,
+      "start": 897,
+      "end": 898,
       "loc": {
         "start": {
           "line": 44,
@@ -2673,8 +2673,8 @@
     {
       "type": "CommentBlock",
       "value": "*\n   * Does the input support a specified driver.\n   *\n   * Digital inputs currently support the following drivers:\n   *\n   *  - DIGITAL_IN : an input pin\n   *\n   * @private\n   * @param {string} driverName - name of the proposed driver\n   * @return {boolean} true if the DigitalInput supports the specified driver.\n   ",
-      "start": 904,
-      "end": 1226,
+      "start": 902,
+      "end": 1224,
       "loc": {
         "start": {
           "line": 46,
@@ -2699,8 +2699,8 @@
         "binop": null
       },
       "value": "supportsDriver",
-      "start": 1229,
-      "end": 1243,
+      "start": 1227,
+      "end": 1241,
       "loc": {
         "start": {
           "line": 57,
@@ -2724,8 +2724,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1244,
-      "end": 1245,
+      "start": 1242,
+      "end": 1243,
       "loc": {
         "start": {
           "line": 57,
@@ -2750,8 +2750,8 @@
         "binop": null
       },
       "value": "driverName",
-      "start": 1245,
-      "end": 1255,
+      "start": 1243,
+      "end": 1253,
       "loc": {
         "start": {
           "line": 57,
@@ -2775,8 +2775,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1255,
-      "end": 1256,
+      "start": 1253,
+      "end": 1254,
       "loc": {
         "start": {
           "line": 57,
@@ -2800,8 +2800,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1257,
-      "end": 1258,
+      "start": 1255,
+      "end": 1256,
       "loc": {
         "start": {
           "line": 57,
@@ -2828,8 +2828,8 @@
         "updateContext": null
       },
       "value": "return",
-      "start": 1263,
-      "end": 1269,
+      "start": 1261,
+      "end": 1267,
       "loc": {
         "start": {
           "line": 58,
@@ -2854,8 +2854,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 1270,
-      "end": 1271,
+      "start": 1268,
+      "end": 1269,
       "loc": {
         "start": {
           "line": 58,
@@ -2881,8 +2881,8 @@
         "updateContext": null
       },
       "value": "DIGITAL_IN",
-      "start": 1272,
-      "end": 1284,
+      "start": 1270,
+      "end": 1282,
       "loc": {
         "start": {
           "line": 58,
@@ -2907,8 +2907,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 1285,
-      "end": 1286,
+      "start": 1283,
+      "end": 1284,
       "loc": {
         "start": {
           "line": 58,
@@ -2933,8 +2933,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 1286,
-      "end": 1287,
+      "start": 1284,
+      "end": 1285,
       "loc": {
         "start": {
           "line": 58,
@@ -2959,8 +2959,8 @@
         "binop": null
       },
       "value": "indexOf",
-      "start": 1287,
-      "end": 1294,
+      "start": 1285,
+      "end": 1292,
       "loc": {
         "start": {
           "line": 58,
@@ -2984,8 +2984,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1294,
-      "end": 1295,
+      "start": 1292,
+      "end": 1293,
       "loc": {
         "start": {
           "line": 58,
@@ -3010,8 +3010,8 @@
         "binop": null
       },
       "value": "driverName",
-      "start": 1295,
-      "end": 1305,
+      "start": 1293,
+      "end": 1303,
       "loc": {
         "start": {
           "line": 58,
@@ -3035,8 +3035,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1305,
-      "end": 1306,
+      "start": 1303,
+      "end": 1304,
       "loc": {
         "start": {
           "line": 58,
@@ -3062,8 +3062,8 @@
         "updateContext": null
       },
       "value": "!==",
-      "start": 1307,
-      "end": 1310,
+      "start": 1305,
+      "end": 1308,
       "loc": {
         "start": {
           "line": 58,
@@ -3089,8 +3089,8 @@
         "updateContext": null
       },
       "value": "-",
-      "start": 1311,
-      "end": 1312,
+      "start": 1309,
+      "end": 1310,
       "loc": {
         "start": {
           "line": 58,
@@ -3116,8 +3116,8 @@
         "updateContext": null
       },
       "value": 1,
-      "start": 1312,
-      "end": 1313,
+      "start": 1310,
+      "end": 1311,
       "loc": {
         "start": {
           "line": 58,
@@ -3141,8 +3141,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1316,
-      "end": 1317,
+      "start": 1314,
+      "end": 1315,
       "loc": {
         "start": {
           "line": 59,
@@ -3166,8 +3166,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1318,
-      "end": 1319,
+      "start": 1316,
+      "end": 1317,
       "loc": {
         "start": {
           "line": 60,
@@ -3192,8 +3192,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 1320,
-      "end": 1320,
+      "start": 1318,
+      "end": 1318,
       "loc": {
         "start": {
           "line": 61,

@@ -9,7 +9,7 @@
     "deploy": "npm run build && cp build/* ../data",
     "watch": "rollup -c -w",
     "serve": "rollup --format=cjs -e http,express,body-parser,ws tools/server.js | buble --no modules | PORT=8080 node",
-    "docs": "esdoc",
+    "doc": "esdoc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -51,7 +51,7 @@
   },
   "esdoc": {
     "source": "./lib",
-    "destination": "./doc"
+    "destination": "./doc/esdoc"
   },
   "dependencies": {}
 }

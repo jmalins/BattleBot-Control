@@ -1110,6 +1110,12 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "lib/hardware/hardwaremanager.js~hardwaremanager.config",
+    "class/lib/hardware/HardwareManager.js~HardwareManager.html#static-set-config",
+    "lib/hardware/HardwareManager.js~HardwareManager.config",
+    "member"
+  ],
+  [
     "lib/hardware/hardwaremanager.js~hardwaremanager.getoutputs",
     "class/lib/hardware/HardwareManager.js~HardwareManager.html#static-method-getOutputs",
     "lib/hardware/HardwareManager.js~HardwareManager.getOutputs",
