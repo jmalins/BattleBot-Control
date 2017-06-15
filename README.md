@@ -35,17 +35,18 @@ for a basic robot setup. Subsequent sections describe the development environmen
 
 #### Loading the firmware: ####
 
- 1. Open `BattleBot-Control.ino` in the Arduino IDE.
- 2. Ensure the following settings are set in the "Tools" menu:
+ 1. Download this entire repository to your Arduino projects directory. Make sure the containing folder is called 'BattleBot-Control' (by default, GitHub will name the zip 'Battlebot-Control-\<branch name>').
+ 2. Open `BattleBot-Control.ino` in the Arduino IDE.
+ 3. Ensure the following settings are set in the "Tools" menu:
    * Board: "NodeMCU 1.0 (ESP-12E Module)"
    * CPU Frequency: "80 MHz"
    * Flash Size: "4M (3M SPIFFS)"
    * Upload Speed: "115200"
    * Choose correct serial port for module
- 3. Run "Tools" > "ESP8266 Sketch Data Upload" to initialize the file system and load the HTML / javascript user interface
+ 4. Run "Tools" > "ESP8266 Sketch Data Upload" to initialize the file system and load the HTML / javascript user interface
     files to the module. This process takes a while, since it is uploading a formatted 3MB file system image. Spend the time
     pondering what life was like for your great-grandfather on dial-up.
- 4. Load the Sketch to the module, "Sketch" > "Upload".
+ 5. Load the Sketch to the module, "Sketch" > "Upload".
  
 #### Driving: ####
 After the default firmware is loaded, the robot should be drivable. In the default configuration, the robot creates a WiFi access point (AP). If you connect to this network and enter the URL of the robot, a user interface will be served up in the browser, allowing you to drive.
