@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">lib/controls/Joystick.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/jmalins/BattleBot-Control" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-constrain">constrain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-map">map</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">connection</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/AjaxConnection.js~AjaxConnection.html">AjaxConnection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/Connection.js~Connection.html">Connection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/WebSocketConnection.js~WebSocketConnection.html">WebSocketConnection</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">controls</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Button.js~Button.html">Button</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Control.js~Control.html">Control</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/ControlManager.js~ControlManager.html">ControlManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Joystick.js~Joystick.html">Joystick</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Slider.js~Slider.html">Slider</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-Position">Position</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-TouchEvent">TouchEvent</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">drive</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/ArcadeDrive.js~ArcadeDrive.html">ArcadeDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TankDrive.js~TankDrive.html">TankDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TwoWheelDrive.js~TwoWheelDrive.html">TwoWheelDrive</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">hardware</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Device.js~Device.html">Device</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalInput.js~DigitalInput.html">DigitalInput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalOutput.js~DigitalOutput.html">DigitalOutput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/HardwareManager.js~HardwareManager.html">HardwareManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Motor.js~Motor.html">Motor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Servo.js~Servo.html">Servo</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">lib/controls/Joystick.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Control from &apos;./Control&apos;
+import { constrain } from &apos;../utils&apos;
+
+/**
+ * Joystick for two dimensional X-Y control.
+ *
+ * This is the primary tool for controlling the robot. It functions just like a
+ * physical joystick, giving readings in both the X and Y directions.
+ *
+ * @example &lt;caption&gt;Setting Joystick parametes in &apos;setup()&apos;&lt;/caption&gt;
+ * var myJoystick = new Joystick(&apos;leftStick&apos;);
+ * myJoystick.position.x = 40;
+ * myJoystick.position.y = 50;
+ * myJoystick.radius = 15;
+ *
+ * @example &lt;caption&gt;Reading Joystick value in &apos;loop()&apos;&lt;/caption&gt;
+ * var valueX = myJoystick.x;
+ * myMotor.set(valueX);
+ */
+export default class Joystick extends Control {
+  /**
+   * Constructor. Create a new Joystick and add it to the canvas.
+   *
+   * @override
+   * @param {!string} name - the joystick name
+   * @throws {Error} control already exists with specified name
+   */
+  constructor (name) {
+    super(name)
+    /**
+     * The placement of the Joystick on the canvas. For dimension values,
+     * see {@link ControlManager.convertToPixels}.
+     *
+     * @example &lt;caption&gt;Set individually&lt;/caption&gt;
+     * myJoystick.position.x = 10;
+     * myJoystick.position.y = 20;
+     *
+     * @example &lt;caption&gt;Set as an Object literal&lt;/caption&gt;
+     * myJoystick.position = { x: 10, y: 20 };
+     *
+     * @type {Position}
+     */
+    this.position = { x: 0, y: 0 }
+    /**
+     * The radius of the Joystick. Sets the overall size, and therefore
+     * sensitivity. Smaller joysticks are more sensitive.
+     *
+     * @example
+     * myJoystick.radius = 10;
+     *
+     * @type {number}
+     */
+    this.radius = 10
+    /**
+     * Should the Joystick reset to zero output when a TouchEvent ends, or
+     * continue with the last value. Think of this as &quot;spring return&quot; in a
+     * physical Joystick.
+     *
+     * Defaults to `false`.
+     *
+     * @example
+     * myJoystick.sticky = true;
+     *
+     * @type {boolean}
+     */
+    this.sticky = false
+    /**
+     * Style to draw.
+     * @type {string}
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/strokeStyle
+     */
+    this.style = &apos;white&apos;
+
+    /**
+     * *Output* - The horizontal value of the Joystick. This will be a value between
+     * -1.0 (full right) and 1.0 (full left). Idle in the center is 0.0.
+     *
+     * @example &lt;caption&gt;Get X value&lt;/caption&gt;
+     * var myValueX = myJoystick.x;
+     *
+     * @type {!number}
+     */
+    this.x = 0
+
+    /**
+     * *Output* - The vertical value of the Joystick. This will be a value between
+     * -1.0 (full down) and 1.0 (full up). Idle in the center is 0.0.
+     *
+     * @example &lt;caption&gt;Get Y value&lt;/caption&gt;
+     * var myValueY = myJoystick.y;
+     *
+     * @type {!number}
+     */
+    this.y = 0
+  }
+
+  /**
+   * Get Joystick dimensions.
+   *
+   * @protected
+   * @return {Map&lt;string,number|string&gt;} the dimension collection
+   * @property {!(number|string)} x - the x coordinate
+   * @property {!(number|string)} y - the y coordinate
+   * @property {!(number|string)} r - the radius
+   */
+  getDimensions () {
+    return { x: this.position.x, y: this.position.y, r: this.radius }
+  }
+
+  /**
+   * Is the specified touch inside the Joystick.
+   *
+   * This method is called by the framework, so need not be used directly.
+   *
+   * @override
+   * @protected
+   * @param {!TouchEvent} touch - the TouchEvent to test
+   * @return {boolean} - true if the control matches the event
+   */
+  matchesTouch (touch) {
+    const { clientX, clientY } = touch
+    const { x, y, r } = this.getPixelDimensions()
+
+    const dx = (x - clientX)
+    const dy = (y - clientY)
+    return Math.sqrt(dx * dx + dy * dy) &lt;= r
+  }
+
+  /**
+   * A touch tracked by the Joystick has been updated. Updates the
+   * values of `x` and `y` outputs and handles sticky behavior.
+   *
+   * This method is called by the framework, so need not be used directly.
+   *
+   * @override
+   * @protected
+   * @param {?TouchEvent} touch - the TouchEvent to test
+   */
+  setTouch (touch) {
+    super.setTouch(touch)
+    if (touch) {
+      const { x, y, r } = this.getPixelDimensions()
+      this.x = constrain((x - touch.clientX) / r, -1.0, 1.0)
+      this.y = constrain((y - touch.clientY) / r, -1.0, 1.0)
+    } else if (!this.sticky) {
+      this.x = 0.0
+      this.y = 0.0
+    }
+  }
+
+  /**
+   * Draw the Joystick on the canvas.
+   *
+   * This method is called by the framework, so need not be used directly.
+   *
+   * @override
+   * @protected
+   * @param {!CanvasRenderingContext2D} ctx - the 2D drawing context
+   */
+  draw (ctx) {
+    const { x, y, r } = this.getPixelDimensions()
+    const ir = Math.round(r / 3)
+
+    ctx.beginPath()
+    ctx.strokeStyle = (this.touch &amp;&amp; this.touchedStyle) || this.style
+    ctx.lineWidth = 5
+    ctx.arc(x, y, ir, 0, Math.PI * 2, true)
+    ctx.stroke()
+
+    ctx.beginPath()
+    ctx.strokeStyle = (this.touch &amp;&amp; this.touchedStyle) || this.style
+    ctx.lineWidth = 2
+    ctx.arc(x, y, r, 0, Math.PI * 2, true)
+    ctx.stroke()
+
+    // paint the current touch //
+    ctx.beginPath()
+    ctx.strokeStyle = this.style
+    ctx.arc(x - this.x * r, y - this.y * r, ir, 0, Math.PI * 2, true)
+    ctx.stroke()
+
+    ctx.beginPath()
+    ctx.fillStyle = &apos;white&apos;
+    ctx.fillText(
+      `${this.name}, x: ${this.x.toFixed(3)}, y: ${this.y.toFixed(3)}`,
+      x - 50, y + r + 15
+    )
+  }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

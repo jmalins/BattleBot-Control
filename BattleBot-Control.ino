@@ -1,36 +1,16 @@
 /* 
   Cardboard BattleBot Control Firmware
-  Copyright (c) 2016 Jeff Malins. All rights reserved.
+  Copyright (c) 2016-17 Jeff Malins. All rights reserved.
   
-  Adapted from FSBrowser - Example WebServer with SPIFFS backend for esp8266
-  Copyright (c) 2015 Hristo Gochkov.
- 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-/*
-  upload the contents of the data folder with MkSPIFFS Tool ("ESP8266 Sketch Data Upload" in Tools menu in Arduino IDE)
-  or you can upload the contents of a folder if you CD in that folder and run the following command:
-  for file in `ls -A1`; do curl -F "file=@$PWD/$file" esp8266fs.local/edit; done
-  
-  access the sample web page at http://esp8266fs.local
-  edit the page by going to http://esp8266fs.local/edit
-*/
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 #include <FS.h>
+#include <SPIFFSEditor.h>
+
 #include <stdlib.h>
 #include <Servo.h>
 
@@ -40,9 +20,9 @@
  * Network Configuration                                                        *
  ********************************************************************************/
  
-#define SERVER_PORT   80
-#define HOST_NAME     "battlebot"
-#define AP_SSID_BASE  "BattleBot-"
+#define HTTP_PORT       80
+#define HOST_NAME       "battlebot"
+#define AP_SSID_BASE    "BattleBot-"
 
 /********************************************************************************
  * Globals                                                                      *
@@ -54,12 +34,14 @@ enum RobotState {
   STATE_SETUP,
   STATE_CONNECT,
   STATE_IDLE,
-  STATE_DRIVING
+  STATE_DRIVING,
+  STATE_DRIVING_WITH_TIMEOUT
 };
 
 // function prototypes //
 void enterState(RobotState);
 void runStateMachine(void);
+void updateHardware(String);
 bool getWiFiForceAPMode();
 
 #define DBG_OUTPUT_PORT Serial
@@ -140,152 +122,115 @@ void setupWiFi() {
 
   // start mDNS //
   MDNS.begin(HOST_NAME);
+  MDNS.addService("http", "tcp", HTTP_PORT);
+  
   DBG_OUTPUT_PORT.print("Open http://");
   DBG_OUTPUT_PORT.print(HOST_NAME);
   DBG_OUTPUT_PORT.println(".local/ to access user interface");
 }
 
 /********************************************************************************
- * Web Server                                                                   *
- *  Implementation of web server methods to server up the UI web resources and  *
- *  allow updating of modifications during development.                         *
+ * REST Event Handler                                                           *
+ *  Respond to REST interface from the client.                                  *
+ ********************************************************************************/
+ 
+void handleControlPut(AsyncWebServerRequest *request) {
+  /*DBG_OUTPUT_PORT.println("START control put");
+  int parms = request->params();
+  for(int i = 0; i < parms; i++) {
+    AsyncWebParameter* p = request->getParam(i);
+    DBG_OUTPUT_PORT.println("  param: " + p->name() + " " + p->value());
+  }
+  DBG_OUTPUT_PORT.println("END control put");*/
+  
+  // should have a POST body //
+  if(request->hasParam("body")) {
+    enterState(STATE_DRIVING_WITH_TIMEOUT);
+    
+    String body = request->getParam("body")->value();
+    //DBG_OUTPUT_PORT.println("handleControlPut: " + body);
+
+    int index = body.indexOf(":"), index2 = body.indexOf(":", index + 1);
+    int i = body.substring(0, index).toInt();
+    int j = (index2 >= 0)? 
+      body.substring(index + 1, index2).toInt(): 
+      body.substring(index + 1).toInt();  
+    int k = (index2 >= 0)? 
+      body.substring(index2 + 1).toInt(): 
+      0;
+  
+    setWheelPower(i, j);
+    setWeaponPower(k);
+      
+    request->send(200, "text/plain", "ok");
+  } else {
+    request->send(400);
+  }  
+}
+
+/********************************************************************************
+ * WebSocket Event Handler                                                      *
+ *  Implement the WebSocket interface. These functions handle connect,          *
+ *  disconnect and data packets from the client.                                *
  ********************************************************************************/
 
-// web server instance //
-ESP8266WebServer server(SERVER_PORT);
+// websocket server instance //
+AsyncWebSocketClient *_activeClient;
 
-// file handle for the current upload //
-File fsUploadFile;
-
-// format file size as a human-readable string //
-String formatFileSize(size_t bytes){
-  if (bytes < 1024){
-    return String(bytes) + "B";
-  } else if (bytes < (1024 * 1024)){
-    return String(bytes/1024.0) + "KB";
-  } else if (bytes < (1024 * 1024 * 1024)){
-    return String(bytes / 1024.0 / 1024.0) + "MB";
-  } else {
-    return String(bytes / 1024.0 / 1024.0 / 1024.0) + "GB";
+void onWSEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
+  switch(type) {
+    case WS_EVT_CONNECT:
+      // we connected, print debug message //
+      {
+        IPAddress ip = client->remoteIP();
+        DBG_OUTPUT_PORT.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", client->id(), ip[0], ip[1], ip[2], ip[3], server->url());
+      }
+      // send success message to client //
+      client->printf("Connected: %u", client->id());
+      client->ping();
+      // enable driving //
+      _activeClient = client;
+      enterState(STATE_DRIVING_WITH_TIMEOUT);
+      setWheelPower(0, 0);
+      setWeaponPower(0);
+      break;
+    case WS_EVT_DISCONNECT:
+      DBG_OUTPUT_PORT.printf("[%u] Disconnected!\n", client->id());
+      _activeClient = NULL;
+      enterState(STATE_IDLE);
+      break;
+    case WS_EVT_ERROR:
+      DBG_OUTPUT_PORT.printf("ws[%s][%u] error(%u): %s\n", server->url(), client->id(), *((uint16_t*) arg), (char*) data);
+      break;
+    case WS_EVT_PONG:
+      DBG_OUTPUT_PORT.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len)? (char*)data: "");
+      break;
+    case WS_EVT_DATA:
+      AwsFrameInfo * info = (AwsFrameInfo*) arg;
+      // only handle a single data packet, for now //
+      if(info->final && info->index == 0 && info->len == len) {
+        if(info->opcode == WS_TEXT) {
+          data[len] = 0;
+          //DBG_OUTPUT_PORT.printf("[%u] command: %s\n", client->id(), data);
+          {
+            enterState(STATE_DRIVING_WITH_TIMEOUT);
+  
+            String cmd((char *) data);
+            updateHardware(cmd);
+          }
+        }
+      }
+      break;
   }
 }
 
-// infer the content type from the file extension //
-String getContentType(String filename){
-  if (server.hasArg("download"))       return "application/octet-stream";
-  else if (filename.endsWith(".htm"))  return "text/html";
-  else if (filename.endsWith(".html")) return "text/html";
-  else if (filename.endsWith(".css"))  return "text/css";
-  else if (filename.endsWith(".js"))   return "application/javascript";
-  else if (filename.endsWith(".png"))  return "image/png";
-  else if (filename.endsWith(".gif"))  return "image/gif";
-  else if (filename.endsWith(".jpg"))  return "image/jpeg";
-  else if (filename.endsWith(".ico"))  return "image/x-icon";
-  else if (filename.endsWith(".xml"))  return "text/xml";
-  else if (filename.endsWith(".pdf"))  return "application/x-pdf";
-  else if (filename.endsWith(".zip"))  return "application/x-zip";
-  else if (filename.endsWith(".gz"))   return "application/x-gzip";
-  return "text/plain";
+// set a message to the active web socket //
+// used for heartbeat to client app       //
+void webSocketMessage(String msg) {
+  if(!_activeClient) return;
+  //DBG_OUTPUT_PORT.printf("[%u] send message: %s\n", _activeClient->id(), msg.c_str());
+  _activeClient->text(msg.c_str());
 }
-
-// serve the contents of a file back to client //
-bool handleFileRead(String path){
-  DBG_OUTPUT_PORT.println("handleFileRead: " + path);
-  if (path.endsWith("/")) path += "index.html";
-  String contentType = getContentType(path);
-  String pathWithGz = path + ".gz";
-  if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)){
-    if (SPIFFS.exists(pathWithGz))
-      path += ".gz";
-    File file = SPIFFS.open(path, "r");
-    size_t sent = server.streamFile(file, contentType);
-    file.close();
-    return true;
-  }
-  return false;
-}
-
-// update the contents of a file in the file system //
-void handleFileUpload(){
-  if (server.uri() != "/edit") return;
-  HTTPUpload& upload = server.upload();
-  if (upload.status == UPLOAD_FILE_START) {
-    String filename = upload.filename;
-    if (!filename.startsWith("/")) filename = "/"+filename;
-    DBG_OUTPUT_PORT.print("handleFileUpload Name: "); DBG_OUTPUT_PORT.println(filename);
-    fsUploadFile = SPIFFS.open(filename, "w");
-    filename = String();
-  } else if (upload.status == UPLOAD_FILE_WRITE) {
-    DBG_OUTPUT_PORT.print("handleFileUpload Data: "); DBG_OUTPUT_PORT.println(upload.currentSize);
-    if (fsUploadFile)
-      fsUploadFile.write(upload.buf, upload.currentSize);
-  } else if (upload.status == UPLOAD_FILE_END) {
-    if (fsUploadFile) 
-      fsUploadFile.close();
-    DBG_OUTPUT_PORT.print("handleFileUpload Size: "); DBG_OUTPUT_PORT.println(upload.totalSize);
-  }
-}
-
-// delete a file from the file system //
-void handleFileDelete(){
-  if (server.args() == 0) return server.send(500, "text/plain", "BAD ARGS");
-  String path = server.arg(0);
-  DBG_OUTPUT_PORT.println("handleFileDelete: " + path);
-  if (path == "/")
-    return server.send(500, "text/plain", "BAD PATH");
-  if (!SPIFFS.exists(path))
-    return server.send(404, "text/plain", "FileNotFound");
-  SPIFFS.remove(path);
-  server.send(200, "text/plain", "");
-  path = String();
-}
-
-// return the contents of a directory in the file system as JSON //
-void handleFileList() {
-  if (!server.hasArg("dir")) {server.send(500, "text/plain", "BAD ARGS"); return;}
-    
-  String path = server.arg("dir");
-  DBG_OUTPUT_PORT.println("handleFileList: " + path);
-  Dir dir = SPIFFS.openDir(path);
-  path = String();
-
-  String output = "[";
-  while (dir.next()){
-    File entry = dir.openFile("r");
-    if (output != "[") output += ',';
-    bool isDir = false;
-    output += "{ \"type\": \"";
-    output += (isDir)?"dir":"file";
-    output += "\", \"name\": \"";
-    output += String(entry.name()).substring(1);
-    output += "\", \"size\": \"";
-    output += formatFileSize(entry.size());
-    output += "\" }";
-    entry.close();
-  }
-  output += "]";
-  server.send(200, "text/json", output);
-}
-
-/*
-void handleFileCreate(){
-  if (server.args() == 0)
-    return server.send(500, "text/plain", "BAD ARGS");
-  String path = server.arg(0);
-  DBG_OUTPUT_PORT.println("handleFileCreate: " + path);
-  if (path == "/")
-    return server.send(500, "text/plain", "BAD PATH");
-  if (SPIFFS.exists(path))
-    return server.send(500, "text/plain", "FILE EXISTS");
-  File file = SPIFFS.open(path, "w");
-  if (file)
-    file.close();
-  else
-    return server.send(500, "text/plain", "CREATE FAILED");
-  server.send(200, "text/plain", "");
-  path = String();
-}
-*/
 
 /********************************************************************************
  * Hardware Control                                                             *
@@ -299,13 +244,15 @@ void handleFileCreate(){
 #define PIN_L_PWM   PIN_PWM_B   // B is left       //
 #define PIN_L_DIR   PIN_DIR_B   // high is forward //
 
-// use SD2 for WIFI override //
+// use D5 for WIFI override //
 #define PIN_WIFI_AP_MODE  PIN_D5
 
-Servo weaponESC, servo;
+// use D6 for weapon ESC //
+#define PIN_WEAPON_ESC  PIN_D6
+#define ESC_MIN_USEC    900
+#define ESC_MAX_USEC    1800
 
-// drive command timeout //
-long _lastCommandMillis;
+Servo weaponESC;
 
 // configure the hardware //
 void setupHardware() {
@@ -322,11 +269,8 @@ void setupHardware() {
   // WiFi override //
   pinMode(PIN_WIFI_AP_MODE, INPUT_PULLUP);
 
-  weaponESC.attach(PIN_D6);
-  weaponESC.writeMicroseconds(900);
-  
-  servo.attach(PIN_D7);
-  servo.write(90);
+  weaponESC.attach(PIN_WEAPON_ESC);
+  weaponESC.writeMicroseconds(ESC_MIN_USEC);
 }
 
 // get the debugging LED //
@@ -357,47 +301,31 @@ void setWheelPower(int left, int right) {
 }
 
 // set the weapon power //
-void setWeaponPower(int power) {
-  power = constrain(power, 0, 1023);
-  
-  int usec = 900 + (power * 900) / 1024;
+void setWeaponPower(int power) {  
+  int usec = map(power, 0, 1023, ESC_MIN_USEC, ESC_MAX_USEC);
   weaponESC.writeMicroseconds(usec);
 }
 
-// interpret data PUT to the control endpoint //
-//  format: "${leftPower}:${rightPower}"
+// interpret a command string //
+//  format: "${leftPower}:${rightPower}(:${weaponPower})?"
 //
-//  where:  leftPower  - int [-1023, 1023]
-//          rightPower - int [-1023, 1023]
+//  where:  leftPower   - int [-1023, 1023]
+//          rightPower  - int [-1023, 1023]
+//          weaponPower - int [-1023, 1023] (optional)
 //
 //  positive values are forward 
-void handleControlPut() {
-  enterState(STATE_DRIVING);
-  
-  String body = server.arg("plain"); // "plain" is the PUT body //
-  //DBG_OUTPUT_PORT.println("handleControlPut: " + body);
-
-  int index = body.indexOf(":"), index2 = body.indexOf(":", index + 1);
-  int i = body.substring(0, index).toInt();
-  int j = (index2 >= 0)? 
-    body.substring(index + 1, index2).toInt(): 
-    body.substring(index + 1).toInt();  
-  int k = (index2 >= 0)? 
-    body.substring(index2 + 1).toInt(): 
+void updateHardware(String cmd) {
+  int index = cmd.indexOf(":"), index2 = cmd.indexOf(":", index + 1);
+  int leftPower  = cmd.substring(0, index).toInt();
+  int rightPower = (index2 >= 0)? 
+    cmd.substring(index + 1, index2).toInt(): 
+    cmd.substring(index + 1).toInt();  
+  int weaponPower = (index2 >= 0)? 
+    cmd.substring(index2 + 1).toInt(): 
     0;
   
-  //DBG_OUTPUT_PORT.print("i: "); DBG_OUTPUT_PORT.print(i); 
-  //DBG_OUTPUT_PORT.print(", j: "); DBG_OUTPUT_PORT.println(j); 
-
-  setWheelPower(i, j);
-  setWeaponPower(k);
-  
-  //int servo2 = 90 + (j * 90) / 1024;
-  //DBG_OUTPUT_PORT.print(", s2: "); DBG_OUTPUT_PORT.println(servo2); 
-  //testServo2.write(servo2);
-  
-  server.send(200, "text/plain", "");
-  body = String();
+  setWheelPower(leftPower, rightPower);
+  setWeaponPower(weaponPower);
 }
 
 /********************************************************************************
@@ -420,8 +348,9 @@ void enterState(RobotState state) {
     case STATE_IDLE:
       setStatusLED(false);
       setWheelPower(0, 0);
+      setWeaponPower(0);
       break;
-    case STATE_DRIVING:
+    case STATE_DRIVING_WITH_TIMEOUT:
       _driveTimeout = millis() + DRIVE_TIMEOUT;
       break;
   }
@@ -454,16 +383,21 @@ void runStateMachine() {
         _stateDelay = millis() + (getStatusLED()? 100: 2000);
       }
       break;
-    case STATE_DRIVING:
+    case STATE_DRIVING_WITH_TIMEOUT:
       // check for timeout, if expired, stop driving //
       if(millis() > _driveTimeout) {
         enterState(STATE_IDLE);
         break;
       }
+      // note: fall-through here //
+    case STATE_DRIVING:
       // medium blink //
       if (millis() > _stateDelay) {
         setStatusLED(!getStatusLED());
         _stateDelay = millis() + 500;
+        
+        // send heartbeat back to client //
+        webSocketMessage("heartbeat");
       }
       break;
   }
@@ -474,6 +408,10 @@ void runStateMachine() {
  *  Configure the hardware, connect to WiFi, start mDNS and setup web server    *
  *  route handling.                                                             *
  ********************************************************************************/
+
+// web server instance //
+AsyncWebServer server(HTTP_PORT);
+AsyncWebSocket ws("/ws");
 
 void setup(void){
   // configure debug serial port //
@@ -492,28 +430,27 @@ void setup(void){
 
   // start wifi //
   setupWiFi();
-  
-  // web server control, file browser routes //
-  server.on("/list", HTTP_GET, handleFileList);
-  server.on("/edit", HTTP_GET, [](){
-    if(!handleFileRead("/edit.htm")) server.send(404, "text/plain", "FileNotFound");
-  });
-  //server.on("/edit", HTTP_PUT, handleFileCreate);
-  server.on("/edit", HTTP_DELETE, handleFileDelete);
-  server.on("/edit", HTTP_POST, 
-    [](){ server.send(200, "text/plain", ""); }, 
-    handleFileUpload
-  );
 
-  // hardware control routes //
+  // attach WebSocket interface //
+  ws.onEvent(onWSEvent);
+  server.addHandler(&ws);
+
+  // attach REST interface //
   server.on("/control", HTTP_PUT, handleControlPut);
-  
-  // use the not-found route to server up arbitrary files //
-  server.onNotFound([](){
-    if(!handleFileRead(server.uri()))
-      server.send(404, "text/plain", "FileNotFound");
-  });
 
+  // serve static file system //
+  server
+    .serveStatic("/", SPIFFS, "/")
+    .setDefaultFile("index.html");
+  
+  // file system editor //
+  server.addHandler(new SPIFFSEditor());
+
+  // 404'd! //
+  server.onNotFound([](AsyncWebServerRequest *request){
+    request->send(404);
+  });
+  
   // we're ready //
   server.begin();
   DBG_OUTPUT_PORT.println("HTTP server started");
@@ -522,5 +459,4 @@ void setup(void){
  
 void loop(void){
   runStateMachine();
-  server.handleClient();
 }

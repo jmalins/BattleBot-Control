@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">lib/controls.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/jmalins/BattleBot-Control" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection.js~AjaxConnection.html">AjaxConnection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection.js~Connection.html">Connection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection.js~WebSocketConnection.html">WebSocketConnection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls.js~Button.html">Button</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls.js~Control.html">Control</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls.js~Joystick.html">Joystick</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls.js~Slider.html">Slider</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive.js~ArcadeDrive.html">ArcadeDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive.js~TankDrive.html">TankDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive.js~TwoWheelDrive.html">TwoWheelDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~Device.html">Device</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~DigitalInput.html">DigitalInput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~DigitalOutput.html">DigitalOutput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~Motor.html">Motor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~Servo.html">Servo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-constrain">constrain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-map">map</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ControlManager">ControlManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-HardwareManager">HardwareManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">controls</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Button.js~Button.html">Button</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Control.js~Control.html">Control</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/ControlManager.js~ControlManager.html">ControlManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Joystick.js~Joystick.html">Joystick</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Slider.js~Slider.html">Slider</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-Position">Position</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-TouchEvent">TouchEvent</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">foo</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/foo/TestThing.js~TestThing.html">TestThing</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">lib/controls.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+ * Module for configurable control interface. Makes use of an HTML5
+ * canvas to paint controls and handle multi-touch events.
+ *
+ * @module controls
+ */
+import { constrain } from &apos;./utils&apos;
+
+/**************************************************************
+ * ControlManager Implementation                              *
+ **************************************************************/
+
+const _touchOwners = { }
+
+/**
+ * Transforms DOM touch (or mouse) event to pixel coordinates relative to
+ * the canvas. This is needed because the coordinates are relative to the
+ * screen. Need to subtract the canvas position to compensate.
+ *
+ * @param {Object} touch the DOM touch event
+ * @return {TouchEvent}
+ */
+function transformTouch (touch) {
+  return {
+    identifier: touch.identifier,
+    clientX: Math.round(touch.clientX - ControlManager.canvas.offsetLeft),
+    clientY: Math.round(touch.clientY - ControlManager.canvas.offsetTop),
+    force: touch.force
+  }
+}
+
+/**
+ * Attempt to process a new touch event. Queries all controls for
+ * for first one that responds true to @link Control#matchesTouch.
+ *
+ * The first match captures the touch and will receive all updates
+ * through the @link Control#setTouch call.
+ *
+ * @private
+ * @param {Object} touch the DOM touch event
+ */
+function doAdd (touch) {
+  if (typeof touch.identifier === &apos;undefined&apos;) touch.identifier = &apos;mouse&apos;
+  touch = transformTouch(touch)
+
+  // loop through controls and see if one captures the touch //
+  for (const controlName in ControlManager.controls) {
+    const control = ControlManager.controls[controlName]
+    if (control.matchesTouch(touch)) {
+      _touchOwners[touch.identifier] = control
+      control.setTouch(touch)
+      ControlManager.update()
+      break
+    }
+  }
+}
+
+/**
+ * If the specified touch has been captured, funnel it to the
+ * @link Control#setTouch method of the owner control.
+ *
+ * @private
+ * @param {Object} touch the DOM touch event
+ */
+function doUpdate (touch) {
+  if (typeof touch.identifier === &apos;undefined&apos;) touch.identifier = &apos;mouse&apos;
+  const control = _touchOwners[touch.identifier]
+  if (!control) return
+  control.setTouch(transformTouch(touch))
+  ControlManager.update()
+}
+
+/**
+ * If the specified touch has been captured, signal the capturing control
+ * that it has ended by passing null to @line Control#setTouch.
+ *
+ * @private
+ * @param {Object} touch the DOM touch event
+ */
+function doRemove (touch) {
+  if (typeof touch.identifier === &apos;undefined&apos;) touch.identifier = &apos;mouse&apos;
+  const control = _touchOwners[touch.identifier]
+  if (!control) return
+  control.setTouch(null)
+  delete _touchOwners[touch.identifier]
+  // console.log(&apos;touchEnd&apos;, touch, touch.identifier)
+  ControlManager.update()
+}
+
+const FRAME_RATE = 35
+let _oldWidth
+let _oldHeight
+
+/**
+ * Manages the display canvas and all user-created {@link Control} objects.
+ *
+ * //type {Object}
+ * //property {HTMLElement} canvas the display canvas element
+ * //property {Map&lt;Control&gt;} controls all controls keyed by control name
+ * //property {function(): void} onupdate called whenever a {@link Control} is updated
+ */
+export const ControlManager = {
+  canvas: null,
+  ctx: null,
+  intervalID: null,
+  controls: { },
+  onupdate: null,
+
+  /**
+   * Initialize the ControlManager with the specified HTML5 canvas object.
+   * This method will attach the relevant event listeners to monitor the canvas
+   * for touch and mouse events.
+   *
+   * @public
+   * @param {HTMLElement} canvas the canvas element
+   */
+  setCanvas (canvas) {
+    /**
+     * Split all multi-touches in a touch event to discrete calls.
+     */
+    function handleTouches (e, handler) {
+      // prevent scrolling and mouse fallthrough on desktop //
+      e.preventDefault()
+      // loop through touches //
+      for (let i = 0; i &lt; e.changedTouches.length; i++) {
+        handler(e.changedTouches[i])
+      }
+    }
+
+    canvas.addEventListener(&apos;touchstart&apos;, (e) =&gt; handleTouches(e, doAdd), false)
+    canvas.addEventListener(&apos;touchmove&apos;, (e) =&gt; handleTouches(e, doUpdate), false)
+    canvas.addEventListener(&apos;touchend&apos;, (e) =&gt; handleTouches(e, doRemove), false)
+
+    canvas.addEventListener(&apos;mousedown&apos;, doAdd, false)
+    canvas.addEventListener(&apos;mousemove&apos;, doUpdate, false)
+    canvas.addEventListener(&apos;mouseup&apos;, doRemove, false)
+
+    ControlManager.canvas = canvas
+    ControlManager.ctx = canvas.getContext(&apos;2d&apos;)
+  },
+
+  /**
+   * @method
+   */
+  start () {
+    // handle default values of button groups //
+    const buttonGroups = { }
+    for (const controlName in ControlManager.controls) {
+      const control = ControlManager.controls[controlName]
+      if (control instanceof Button &amp;&amp; control.groupName) {
+        const { groupName } = control
+        if (buttonGroups[groupName]) {
+          buttonGroups[groupName].push(control)
+        } else {
+          buttonGroups[groupName] = [ control ]
+        }
+      }
+    }
+    for (const groupName in buttonGroups) {
+      const buttons = buttonGroups[groupName]
+      // if user has not set a default pressed button, select first //
+      if (!buttons.some(button =&gt; button.pressed)) {
+        buttons[0].pressed = true
+      }
+    }
+
+    // start painting //
+    ControlManager.intervalID = setInterval(
+      () =&gt; ControlManager.draw(),
+      1000 / FRAME_RATE
+    )
+  },
+
+  stop () {
+    if (ControlManager.intervalID) {
+      clearInterval(ControlManager.intervalID)
+    }
+  },
+
+  update () {
+    const { onupdate } = ControlManager
+    if (typeof onupdate === &apos;function&apos;) {
+      onupdate()
+    }
+  },
+
+  draw () {
+    const { canvas, ctx, controls } = ControlManager
+
+    // check for canvas resize //
+    const resized = (canvas.width !== _oldWidth || canvas.height !== _oldHeight)
+    if (resized) {
+      _oldWidth = canvas.width
+      _oldHeight = canvas.height
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    // loop through controls //
+    for (const controlName in controls) {
+      const control = controls[controlName]
+      if (resized) control.pixelCache = null
+      control.draw(ctx)
+    }
+  }
+}
+
+function addControl (name, control) {
+  if (ControlManager.controls[name]) {
+    throw new Error(`Control already exists: ${name}`)
+  }
+  ControlManager.controls[name] = control
+}
+
+function convertToPixels (dim, value) {
+  // determine the reference dimension based on name //
+  let reference
+  switch (dim) {
+    case &apos;y&apos;:
+    case &apos;height&apos;:
+      reference = ControlManager.canvas.height
+      break
+    default:
+      reference = ControlManager.canvas.width
+      break
+  }
+
+  // handle based on type //
+  switch (typeof value) {
+    case &apos;number&apos;:
+      // if a fraction, assume a percent //
+      if (value &gt; 0 &amp;&amp; value &lt; 1.0) {
+        value *= 100
+      }
+      return Math.round(value * reference / 100)
+    case &apos;string&apos;:
+      const matches = value.match(/^([0-9]+)([^0-9]*)$/)
+      if (matches) {
+        const [ , num, unit ] = matches
+        value = parseInt(num)
+        switch (unit) {
+          case &apos;%&apos;:
+          case &apos;&apos;:
+            return Math.round(value * reference / 100)
+          case &apos;px&apos;:
+            return value
+        }
+      }
+      // fallthrough //
+    default:
+      return null
+  }
+}
+
+/**************************************************************
+ * Control / Graphics Classes                                 *
+ **************************************************************/
+
+/**
+ * Base class for all UI controls.
+ */
+export class Control {
+  constructor (name) {
+    this.name = name || `control${++Control.count}`
+
+    this.touch = null
+    this.pixelCache = null
+    addControl(name, this)
+  }
+
+  /**
+   * Implemented by subclasses to determine if they match
+   * the specified touch.
+   */
+  matchesTouch (touch) {
+    return false
+  }
+
+  /**
+   * Update the touch captured by this control.
+   */
+  setTouch (touch) {
+    this.touch = touch
+  }
+
+  /**
+   * Get the control dimensions converted to pixels relative
+   * to the current canvas size. This cached for performance reasons.
+   */
+  getPixelDimensions () {
+    if (this.pixelCache) return this.pixelCache
+    const dimensions = this.getDimensions()
+    const pixels = {}
+    for (const dimName in dimensions) {
+      pixels[dimName] = convertToPixels(dimName, dimensions[dimName])
+    }
+    return (this.pixelCache = pixels)
+  }
+}
+Control.count = 0
+
+/**
+ * A joystick
+ */
+export class Joystick extends Control {
+  constructor (name) {
+    super(name)
+    this.position = { x: 0, y: 0 }
+    this.radius = 10
+    this.sticky = false
+    this.style = &apos;white&apos;
+    // initial values //
+    this.x = 0
+    this.y = 0
+  }
+
+  getDimensions () {
+    return { x: this.position.x, y: this.position.y, r: this.radius }
+  }
+
+  matchesTouch (touch) {
+    const { clientX, clientY } = touch
+    const { x, y, r } = this.getPixelDimensions()
+
+    const dx = (x - clientX)
+    const dy = (y - clientY)
+    return Math.sqrt(dx * dx + dy * dy) &lt;= r
+  }
+
+  setTouch (touch) {
+    super.setTouch(touch)
+    if (touch) {
+      const { x, y, r } = this.getPixelDimensions()
+      this.x = constrain((x - touch.clientX) / r, -1.0, 1.0)
+      this.y = constrain((y - touch.clientY) / r, -1.0, 1.0)
+    } else if (!this.sticky) {
+      this.x = 0.0
+      this.y = 0.0
+    }
+  }
+
+  draw (ctx) {
+    const { x, y, r } = this.getPixelDimensions()
+    const ir = Math.round(r / 3)
+
+    ctx.beginPath()
+    ctx.strokeStyle = (this.touch &amp;&amp; this.touchedStyle) || this.style
+    ctx.lineWidth = 5
+    ctx.arc(x, y, ir, 0, Math.PI * 2, true)
+    ctx.stroke()
+
+    ctx.beginPath()
+    ctx.strokeStyle = (this.touch &amp;&amp; this.touchedStyle) || this.style
+    ctx.lineWidth = 2
+    ctx.arc(x, y, r, 0, Math.PI * 2, true)
+    ctx.stroke()
+
+    // paint the current touch //
+    ctx.beginPath()
+    ctx.strokeStyle = this.style
+    ctx.arc(x - this.x * r, y - this.y * r, ir, 0, Math.PI * 2, true)
+    ctx.stroke()
+
+    ctx.beginPath()
+    ctx.fillStyle = &apos;white&apos;
+    ctx.fillText(
+      `${this.name}, x: ${this.x.toFixed(3)}, y: ${this.y.toFixed(3)}`,
+      x - 50, y + r + 15
+    )
+  }
+}
+
+/**
+ * A button
+ */
+export class Button extends Control {
+  constructor (name) {
+    super(name)
+    this.position = { x: 0, y: 0 }
+    this.radius = 10
+    this.sticky = false
+    this.groupName = null
+    this.style = &apos;white&apos;
+    // initial value //
+    this.pressed = false
+  }
+
+  getDimensions () {
+    return { x: this.position.x, y: this.position.y, r: this.radius }
+  }
+
+  matchesTouch (touch) {
+    const { clientX, clientY } = touch
+    const { x, y, r } = this.getPixelDimensions()
+
+    const dx = (x - clientX)
+    const dy = (y - clientY)
+    return Math.sqrt(dx * dx + dy * dy) &lt;= r
+  }
+
+  setTouch (touch) {
+    const lastState = !!this.touch
+    console.log(this.sticky, this.touch, lastState, touch, this.pressed)
+    super.setTouch(touch)
+    if (this.sticky) {
+      // only react to touchStart //
+      if (touch &amp;&amp; !lastState) {
+        // are we part of a group //
+        if (this.groupName) {
+          // only react to changed values //
+          if (!this.pressed) {
+            // clear all others in group //
+            for (const controlName in ControlManager.controls) {
+              const control = ControlManager.controls[controlName]
+              if (control instanceof Button &amp;&amp; control.groupName === this.groupName) {
+                control.pressed = false
+              }
+            }
+            this.pressed = true
+          }
+        } else {
+          // just toggle this button //
+          this.pressed = !!(this.pressed ^ true)
+        }
+      }
+    } else {
+      this.pressed = !!touch
+    }
+  }
+
+  draw (ctx) {
+    const { x, y, r } = this.getPixelDimensions()
+
+    ctx.beginPath()
+    ctx.strokeStyle = this.style
+    ctx.fillStyle = this.style
+    ctx.lineWidth = 6
+    ctx.arc(x, y, r, 0, Math.PI * 2, true)
+    if (this.pressed) {
+      ctx.fill()
+    } else {
+      ctx.stroke()
+    }
+
+    ctx.beginPath()
+    ctx.fillStyle = &apos;white&apos;
+    ctx.fillText(
+      `${this.name}, pressed: ${this.pressed}`,
+      x - 50, y + r + 15
+    )
+  }
+}
+
+/**
+ *  A slider. This is really shoddy algorithm design, and it only
+ *  support strictly horizontal or vertical sliders. Major FIXME
+ *  to come back and due to proper computation geometry.
+ */
+export class Slider extends Control {
+  constructor (name) {
+    super(name)
+    this.position = { x: 0, y: 0 }
+    this.radius = 10
+    this.length = 30
+    this.type = Slider.VERTICAL
+    this.sticky = true
+    this.style = &apos;white&apos;
+    // initial value //
+    this.value = 0
+  }
+
+  getDimensions () {
+    return {
+      x: this.position.x,
+      y: this.position.y,
+      r: this.radius,
+      l: this.length
+    }
+  }
+
+  setTouch (touch) {
+    super.setTouch(touch)
+    if (touch) {
+      const { l, xa, ya } = this.getHelperDimensions()
+      if (this.type === Slider.HORIZONTAL) {
+        this.value = constrain((xa - touch.clientX) / l, 0.0, 1.0)
+      } else {
+        this.value = constrain((ya - touch.clientY) / l, 0.0, 1.0)
+      }
+    } else if (!this.sticky) {
+      this.value = 0
+    }
+  }
+
+  getHelperDimensions () {
+    const { x, y, r, l } = this.getPixelDimensions()
+    if (this.type === Slider.HORIZONTAL) {
+      return {
+        x,
+        x1: x,
+        x2: x + l,
+        xa: x + l,
+        y,
+        y1: y - r,
+        y2: y + r,
+        ya: y,
+        r,
+        l
+      }
+    } else {
+      return {
+        x,
+        x1: x - r,
+        x2: x + r,
+        xa: x,
+        y,
+        y1: y,
+        y2: y + l,
+        ya: y + l,
+        r,
+        l
+      }
+    }
+  }
+
+  matchesTouch (touch) {
+    const { clientX, clientY } = touch
+    const { x, y, r, x1, y1, x2, y2, xa, ya } = this.getHelperDimensions()
+
+    // check if in the end circles //
+    const dx = (x - clientX)
+    const dy = (y - clientY)
+    if (Math.sqrt(dx * dx + dy * dy) &lt;= r) return true
+    const dxa = (xa - clientX)
+    const dya = (ya - clientY)
+    if (Math.sqrt(dxa * dxa + dya * dya) &lt;= r) return true
+
+    // check if in the rectangle //
+    return (clientX &gt;= x1) &amp;&amp; (clientX &lt;= x2) &amp;&amp; (clientY &gt;= y1) &amp;&amp; (clientY &lt;= y2)
+  }
+
+  draw (ctx) {
+    const { x, y, r, l, x1, y1, x2, y2, xa, ya } = this.getHelperDimensions()
+
+    ctx.beginPath()
+    ctx.strokeStyle = this.style
+    ctx.lineWidth = 2
+    if (this.type === Slider.HORIZONTAL) {
+      ctx.moveTo(x1, y1)
+      ctx.lineTo(x2, y1)
+      ctx.arc(xa, ya, r, Math.PI * 3 / 2, Math.PI / 2, false)
+      ctx.moveTo(x2, y2)
+      ctx.lineTo(x1, y2)
+      ctx.arc(x, y, r, Math.PI / 2, Math.PI * 3 / 2, false)
+    } else {
+      ctx.arc(x, y, r, Math.PI, Math.PI * 2, false)
+      ctx.moveTo(x2, y1)
+      ctx.lineTo(x2, y2)
+      ctx.arc(xa, ya, r, 0, Math.PI, false)
+      ctx.moveTo(x1, y2)
+      ctx.lineTo(x1, y1)
+    }
+    ctx.stroke()
+
+    // paint the current value //
+    ctx.beginPath()
+    if (this.type === Slider.HORIZONTAL) {
+      ctx.arc(xa - (this.value * l), y, r - 4, 0, Math.PI * 2, true)
+    } else {
+      ctx.arc(x, ya - (this.value * l), r - 4, 0, Math.PI * 2, true)
+    }
+    ctx.strokeStyle = this.style
+    ctx.stroke()
+
+    // paint debug text //
+    ctx.beginPath()
+    ctx.fillStyle = &apos;white&apos;
+    ctx.fillText(
+      `${this.name}, value: ${this.value.toFixed(3)}`,
+      xa - 50, ya + r + 15
+    )
+  }
+}
+Slider.HORIZONTAL = &apos;Horizontal&apos;
+Slider.VERTICAL = &apos;Vertical&apos;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

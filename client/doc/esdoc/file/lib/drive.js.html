@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">lib/drive.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/jmalins/BattleBot-Control" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection.js~AjaxConnection.html">AjaxConnection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection.js~Connection.html">Connection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection.js~WebSocketConnection.html">WebSocketConnection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive.js~ArcadeDrive.html">ArcadeDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive.js~TankDrive.html">TankDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive.js~TwoWheelDrive.html">TwoWheelDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~Device.html">Device</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~DigitalInput.html">DigitalInput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~DigitalOutput.html">DigitalOutput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~Motor.html">Motor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~Servo.html">Servo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-constrain">constrain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-map">map</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-HardwareManager">HardwareManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">controls</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Button.js~Button.html">Button</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Control.js~Control.html">Control</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/ControlManager.js~ControlManager.html">ControlManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Joystick.js~Joystick.html">Joystick</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Slider.js~Slider.html">Slider</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-Position">Position</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-TouchEvent">TouchEvent</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">drive</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/ArcadeDrive.js~ArcadeDrive.html">ArcadeDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TankDrive.js~TankDrive.html">TankDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TwoWheelDrive.js~TwoWheelDrive.html">TwoWheelDrive</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">lib/drive.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+ * Main module for driving robots. Contains implementations of the
+ * common robot control schemes, such as Tank and Arcade drive.
+ *
+ * @module drive
+ */
+import { constrain } from &apos;./utils&apos;
+import { Motor } from &apos;./hardware&apos;
+
+/**
+ * Base class for a two wheel robot.
+ *
+ * Motors named &apos;leftMotor&apos; and &apos;rightMotor&apos; must be configured
+ * in the hardware setup.
+ */
+export class TwoWheelDrive {
+  /**
+   * Constructor
+   */
+  constructor (leftMotor, rightMotor) {
+    this.motors = [
+      leftMotor || new Motor(&apos;leftMotor&apos;),
+      rightMotor || new Motor(&apos;rightMotor&apos;)
+    ]
+    this.swapMotors = false
+  }
+
+  get leftMotor () {
+    return this.motors[this.swapMotors ? 1 : 0]
+  }
+  get rightMotor () {
+    return this.motors[this.swapMotors ? 0 : 1]
+  }
+
+  set reverseLeftMotor (value) {
+    this.leftMotor.reversed = value
+  }
+  set reverseRightMotor (value) {
+    this.rightMotor.reversed = value
+  }
+
+  setMotorPowers (left, right) {
+    this.leftMotor.set(constrain(left, -1.0, 1.0))
+    this.rightMotor.set(constrain(right, -1.0, 1.0))
+  }
+
+  stop () {
+    this.leftMotor.set(0)
+    this.rightMotor.set(0)
+  }
+}
+
+/**
+ *  Differential &apos;tank&apos; style drive where left and right wheels
+ *  are controlled independently.
+ *
+ *  This style is harder to learn, but can offer superior control,
+ *  since it is easier to steer in curves without slowing down.
+ */
+export class TankDrive extends TwoWheelDrive {
+  /**
+   *  Set left and right wheel speeds independently.
+   *
+   *  @param {number} left wheel speed [-1.0, 1.0]
+   *  @param {number} right wheel speed [-1.0, 1.0]
+   */
+  setLeftAndRightSpeed (left, right) {
+    this.setMotorPowers(left, right)
+  }
+}
+
+/**
+ *  &apos;Arcade&apos; drive with separate control of speed and rotation.
+ *
+ *  This style is easier to learn for novice drivers.
+ */
+export class ArcadeDrive extends TwoWheelDrive {
+  /**
+   * Set speed and rotation
+   *
+   * @param {number} linear forward/reverse speed [-1.0, 1.0]
+   * @param {number} rotational left/right turning speed [-1.0, 1.0]
+   */
+  setSpeedAndRotation (speed, rotation) {
+    // clamp the inputs //
+    speed = constrain(speed, -1.0, 1.0)
+    if (this.speedScalar) {
+      speed = this.speedScalar.scale(speed)
+    }
+    rotation = constrain(rotation, -1.0, 1.0)
+    if (this.rotationScalar) {
+      rotation = this.rotationScalar.scale(rotation)
+    }
+
+    // mix speed and rotation signals //
+    let leftPower, rightPower
+    if (speed &gt; 0.0) {
+      if (rotation &gt; 0.0) {
+        leftPower = speed - rotation
+        rightPower = Math.max(speed, rotation)
+      } else {
+        leftPower = Math.max(speed, -rotation)
+        rightPower = speed + rotation
+      }
+    } else {
+      if (rotation &gt; 0.0) {
+        leftPower = -Math.max(-speed, rotation)
+        rightPower = speed + rotation
+      } else {
+        leftPower = speed - rotation
+        rightPower = -Math.max(-speed, -rotation)
+      }
+    }
+
+    this.setMotorPowers(leftPower, rightPower)
+  }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

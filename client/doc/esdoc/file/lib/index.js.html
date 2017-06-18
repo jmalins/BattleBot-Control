@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">lib/index.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/jmalins/BattleBot-Control" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-constrain">constrain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-map">map</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">connection</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/AjaxConnection.js~AjaxConnection.html">AjaxConnection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/Connection.js~Connection.html">Connection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/WebSocketConnection.js~WebSocketConnection.html">WebSocketConnection</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">controls</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Button.js~Button.html">Button</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Control.js~Control.html">Control</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/ControlManager.js~ControlManager.html">ControlManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Joystick.js~Joystick.html">Joystick</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Slider.js~Slider.html">Slider</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-Position">Position</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-TouchEvent">TouchEvent</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">drive</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/ArcadeDrive.js~ArcadeDrive.html">ArcadeDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TankDrive.js~TankDrive.html">TankDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TwoWheelDrive.js~TwoWheelDrive.html">TwoWheelDrive</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">hardware</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Device.js~Device.html">Device</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalInput.js~DigitalInput.html">DigitalInput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalOutput.js~DigitalOutput.html">DigitalOutput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/HardwareManager.js~HardwareManager.html">HardwareManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Motor.js~Motor.html">Motor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Servo.js~Servo.html">Servo</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">lib/index.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/* eslint-disable no-unused-vars */
+import { HardwareManager, Motor, Servo, DigitalOutput, DigitalInput } from &apos;./hardware&apos;
+import { TankDrive, ArcadeDrive } from &apos;./drive&apos;
+import { Joystick, Button, Slider, ControlManager } from &apos;./controls&apos;
+import { AjaxConnection, WebSocketConnection, Connection } from &apos;./connection&apos;
+import { ajaxGet } from &apos;./utils&apos;
+
+// get HTML elements //
+const heading = document.getElementById(&apos;heading&apos;)
+const statusIcon = document.getElementById(&apos;status-box&apos;)
+const statusText = document.getElementById(&apos;status-text&apos;)
+const infoBox = document.getElementById(&apos;info-box&apos;)
+const errorBox = document.getElementById(&apos;error-box&apos;)
+const canvas = document.getElementById(&apos;touch-canvas&apos;)
+
+// configure the ControlManager HTML5 canvas //
+const resizeCanvas = () =&gt; {
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight - heading.clientHeight - 1
+
+  window.scrollTo(0, 0)
+}
+window.addEventListener(&apos;orientationchange&apos;, resizeCanvas)
+window.addEventListener(&apos;resize&apos;, resizeCanvas)
+resizeCanvas()
+ControlManager.setCanvas(canvas)
+
+// add an error to error box //
+function addError ({ type, message }) {
+  const eline = document.createElement(&apos;li&apos;)
+  eline.className = type
+  // error type //
+  const tspan = document.createElement(&apos;span&apos;)
+  tspan.className = &apos;type&apos;
+  tspan.innerText = type
+  eline.appendChild(tspan)
+  // error message //
+  const mspan = document.createElement(&apos;span&apos;)
+  mspan.className = &apos;message&apos;
+  mspan.innerText = message
+  eline.appendChild(mspan)
+  errorBox.appendChild(eline)
+}
+
+function clearErrors (type) {
+  const els = type
+    ? errorBox.getElementsByClassName(type)
+    : errorBox.getElementByTagName(&apos;ul&apos;)
+  for (let i = 0; i &lt; els.length; i++) {
+    els[i].remove()
+  }
+}
+
+// set UI connection state //
+function setConnectionState (state) {
+  console.log(&apos;Connection state:&apos;, state)
+  switch (state) {
+    case Connection.DISCONNECTED:
+    case Connection.CONNECTING:
+      statusIcon.style.backgroundColor = &apos;yellow&apos;
+      break
+    case Connection.CONNECTED:
+      statusIcon.style.backgroundColor = &apos;green&apos;
+      break
+    default:
+      statusIcon.style.backgroundColor = &apos;red&apos;
+      break
+  }
+  statusText.innerText = state
+}
+
+function setConnectionInfo (conn) {
+  infoBox.innerText = `Ping: ${
+    (conn.pingTimeMs !== null) ? `${conn.pingTimeMs} ms` : &apos;----&apos;
+  }`
+}
+
+// initialize the application //
+const getHardwareConfig = new Promise((resolve, reject) =&gt;
+  ajaxGet(&apos;./hardware.json&apos;, (err, resp) =&gt; {
+    if (err) return reject(err)
+    resolve(JSON.parse(resp.data))
+  })
+)
+const waitForLoad = new Promise((resolve, reject) =&gt; {
+  window.addEventListener(&apos;load&apos;, () =&gt; {
+    console.log(&apos;Page loaded&apos;)
+    resolve()
+  })
+})
+
+const WEBSOCKET = true
+let _runLoop = true
+let _connection = null
+Promise.all([ getHardwareConfig, waitForLoad ])
+  .then(([ config ]) =&gt; {
+    // set hardware configuration //
+    HardwareManager.config = config
+
+    if (window.setup) {
+      console.log(&apos;Running robot setup...&apos;)
+      try {
+        window.setup()
+      } catch (error) {
+        addError({ type: &apos;SETUP&apos;, message: error.message })
+      }
+    }
+    // test hardware config //
+    const hwErrors = HardwareManager.validateConfig()
+    if (hwErrors) {
+      for (let i = 0; i &lt; hwErrors.length; i++) {
+        addError(hwErrors[i])
+      }
+    }
+
+    // establish connection //
+    _connection = WEBSOCKET ? new WebSocketConnection() : new AjaxConnection()
+    _connection.onstatechange = (newState, oldState) =&gt; {
+      setConnectionState(newState)
+      if (newState === Connection.ERROR) {
+        console.log(_connection.lastError)
+        addError({ type: &apos;CONNECTION&apos;, message: _connection.lastError.message })
+      } else if (oldState === Connection.ERROR) {
+        clearErrors(&apos;CONNECTION&apos;)
+      }
+    }
+    _connection.onresponsedata = (data) =&gt; {
+      HardwareManager.setInputs(data)
+      setConnectionInfo(_connection)
+    }
+    // initialize UI //
+    setConnectionState(_connection.state)
+    // initialize control data //
+    _connection.setRobotData(getPacket(HardwareManager.getOutputs()))
+    _connection.start()
+
+    // start the UI control loop //
+    ControlManager.start()
+    ControlManager.onupdate = () =&gt; {
+      if (!_runLoop) return
+
+      // call the loop() method to update virtual hardware //
+      if (window.loop) {
+        try {
+          window.loop()
+        } catch (error) {
+          addError({ type: &apos;LOOP&apos;, message: error.message })
+        }
+      }
+      const request = getPacket(HardwareManager.getOutputs())
+      // console.log(&apos;request&apos;, request)
+      _connection.setRobotData(request)
+    }
+  })
+  .catch(err =&gt; {
+    addError({ type: &apos;SCRIPT&apos;, message: err.message })
+  })
+
+// FIXME: get the ghetto-packet for legacy firmware //
+function getPacket (json) {
+  return `${json.leftMotor}:${json.rightMotor}:${json.weaponMotor}`
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

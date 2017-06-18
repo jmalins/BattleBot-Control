@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">lib/connection/Connection.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/jmalins/BattleBot-Control" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-constrain">constrain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-map">map</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">connection</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/AjaxConnection.js~AjaxConnection.html">AjaxConnection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/Connection.js~Connection.html">Connection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/WebSocketConnection.js~WebSocketConnection.html">WebSocketConnection</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">controls</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Button.js~Button.html">Button</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Control.js~Control.html">Control</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/ControlManager.js~ControlManager.html">ControlManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Joystick.js~Joystick.html">Joystick</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Slider.js~Slider.html">Slider</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-Position">Position</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-TouchEvent">TouchEvent</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">drive</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/ArcadeDrive.js~ArcadeDrive.html">ArcadeDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TankDrive.js~TankDrive.html">TankDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TwoWheelDrive.js~TwoWheelDrive.html">TwoWheelDrive</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">hardware</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Device.js~Device.html">Device</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalInput.js~DigitalInput.html">DigitalInput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalOutput.js~DigitalOutput.html">DigitalOutput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/HardwareManager.js~HardwareManager.html">HardwareManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Motor.js~Motor.html">Motor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Servo.js~Servo.html">Servo</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">lib/connection/Connection.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+ * Base interface for connection to robot.
+ *
+ * Contains shared functionality between the AJAX and WebSocket connection types.
+ *
+ * Implements a buffered asynchronous connection. External sources should
+ * call setRobotData() whenever new data is available. It will be sent to the robot
+ * at the fasted rate the connection will allow.
+ *
+ * @example &lt;caption&gt;Connection States&lt;/caption&gt;
+ * Connection.CONNECTED = &apos;Connected&apos;
+ * Connection.CONNECTING = &apos;Connecting&apos;
+ * Connection.DISCONNECTED = &apos;Disconnected&apos;
+ * Connection.ERROR = &apos;Error&apos;
+ */
+export default class Connection {
+  /**
+   * Constructor.
+   *
+   * @abstract
+   * @protected
+   */
+  constructor () {
+    /**
+     * The current state of the connection
+     * @type {string}
+     */
+    this.state = Connection.DISCONNECTED
+    /**
+     * Is connection enabled.
+     * @type {boolean}
+     */
+    this.enabled = false
+    /**
+     * The last error recorded if the state is ERROR
+     * @type {Error}
+     */
+    this.lastError = null
+    /**
+     * The round-trip time for the last packet received
+     * @type {number}
+     */
+    this.pingTimeMs = null
+    /**
+     * StateChange event, raised whenever the connection state changes.
+     *
+     * @emits {StateChangeEvent} the state connection state has changed
+     * @type {function(newState: string, oldState: string)}
+     */
+    this.onstatechange = null
+    /**
+     * ResponseData event, raised when the connection has received new data
+     * from the robot. The data is a raw string as generated by the robot
+     * firmware.
+     *
+     * @emits {ResponseDataEvent} new data received
+     * @type {function(data: string)}
+     */
+    this.onresponsedata = null
+    /**
+     * @private
+     * @type {string}
+     */
+    this.responseData = null
+    /**
+     * @private
+     * @type {string}
+     */
+    this.dataPacket = null
+  }
+
+  /**
+   *  Start connection to the robot.
+   */
+  start () {
+    this.enabled = true
+  }
+
+  /**
+   *  Stop connection to the robot.
+   */
+  stop () {
+    this.enabled = false
+  }
+
+  /**
+   * Update the connection state and notify listeners if the state
+   * has changed.
+   *
+   * @private
+   * @param {string} newState - the new state
+   */
+  setState (newState) {
+    if (newState === this.state) return
+    const oldState = this.state
+    this.state = newState
+
+    // notify listener //
+    if (typeof this.onstatechange === &apos;function&apos;) {
+      this.onstatechange(newState, oldState)
+    }
+  }
+
+  /**
+   * Set the raw data packet to send to the robot. The actual connection
+   * operates asynchronously, so this method should be called as frequently
+   * as new data is available.
+   *
+   * If an object is passed, it will be converted to JSON.
+   *
+   * @protected
+   * @param {object|string} data the data packet to send
+   */
+  setRobotData (data) {
+    this.dataPacket = (typeof data === &apos;string&apos;) ? data : JSON.stringify(data)
+  }
+
+  /**
+   * Get the latest raw data packet received from the robot. This is set
+   * asynchronously by the connection.
+   *
+   * @protected
+   * @return {string} last robot data packet
+   */
+  getResponseData () {
+    return this.responseData
+  }
+
+  /**
+   * Called by connections to set the latest response data and update
+   * any listeners.
+   *
+   * @private
+   * @param {string} data the data packet received
+   */
+  setResponseData (data) {
+    this.responseData = data
+    if (!data) {
+      this.pingTimeMs = null
+    }
+    // notify listener //
+    if (typeof this.onresponsedata === &apos;function&apos;) {
+      this.onresponsedata(data)
+    }
+  }
+}
+// connection status constants //
+Connection.CONNECTED = &apos;Connected&apos;
+Connection.CONNECTING = &apos;Connecting&apos;
+Connection.DISCONNECTED = &apos;Disconnected&apos;
+Connection.ERROR = &apos;Error&apos;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

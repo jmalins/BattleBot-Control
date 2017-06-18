@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">lib/hardware/HardwareManager.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/jmalins/BattleBot-Control" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-constrain">constrain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-map">map</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">connection</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/AjaxConnection.js~AjaxConnection.html">AjaxConnection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/Connection.js~Connection.html">Connection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/WebSocketConnection.js~WebSocketConnection.html">WebSocketConnection</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">controls</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Button.js~Button.html">Button</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Control.js~Control.html">Control</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/ControlManager.js~ControlManager.html">ControlManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Joystick.js~Joystick.html">Joystick</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Slider.js~Slider.html">Slider</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-Position">Position</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-TouchEvent">TouchEvent</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">drive</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/ArcadeDrive.js~ArcadeDrive.html">ArcadeDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TankDrive.js~TankDrive.html">TankDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TwoWheelDrive.js~TwoWheelDrive.html">TwoWheelDrive</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">hardware</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Device.js~Device.html">Device</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalInput.js~DigitalInput.html">DigitalInput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalOutput.js~DigitalOutput.html">DigitalOutput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/HardwareManager.js~HardwareManager.html">HardwareManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Motor.js~Motor.html">Motor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Servo.js~Servo.html">Servo</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">lib/hardware/HardwareManager.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">// state variables //
+const _devices = { }
+let _config = null
+
+/**
+ * Manages the virtual hardware layer, allowing uses to send commands to
+ * the robot or receive sensor values from the robot by manipulating hardware
+ * interface objects.
+ *
+ * The class is part of the core framework infrastructure and should not be
+ * needed in your code under most circumstances.
+ *
+ * @protected
+ */
+export default class HardwareManager {
+  /**
+   * Set the hardware config. This is stored as &apos;hardware.json&apos; on the
+   * robot file-system.
+   *
+   * @protected
+   * @param {object} value - the hardware.json object
+   */
+  static set config (value) {
+    _config = value
+  }
+
+  /**
+   * Validate the hardware configuration. Returns an array of any errors.
+   * This method makes sure the robot only defines logical devices that are
+   * configured in the hardware.
+   *
+   * @protected
+   * @return {array} - any errors in configuration, or null if no errors
+   */
+  static validateConfig () {
+    // error collection //
+    const errors = [ ]
+    const addError = (message) =&gt; errors.push({ type: &apos;HARDWARE&apos;, message })
+
+    // configuration must be set //
+    if (!_config) {
+      addError(&apos;Hardware configuration not set&apos;)
+    } else if (!_config.devices) {
+      addError(&apos;Hardware configuration is missing devices&apos;)
+    }
+    if (errors.length) return errors
+
+    // validate all logical devices are configured //
+    for (const deviceName in HardwareManager.devices) {
+      const device = HardwareManager.devices[deviceName]
+      const config = HardwareManager.config.devices[deviceName]
+      if (config) {
+        // make sure the driver is known //
+        const driverName = config.driver
+        if (!device.supportsDriver(driverName)) {
+          errors.push(`Device ${deviceName} has invalid driver: ${driverName}`)
+        }
+      } else {
+        // logical device name has no configuration onboard robot //
+        addError(`Device has no configuration: ${deviceName}`)
+      }
+    }
+
+    return (errors.length) ? errors : null
+  }
+
+  /**
+   * Get the outputs of all hardware devices by device name. This
+   * method is called by the framework to build the data packet to
+   * be sent to the robot.
+   *
+   * @protected
+   * @return {Map&lt;string,number&gt;} - values for all output devices by device name
+   */
+  static getOutputs () {
+    const packet = { }
+    // get device outputs //
+    for (const deviceName in _devices) {
+      const device = _devices[deviceName]
+      if (device.getOutput) {
+        packet[deviceName] = device.getOutput()
+      }
+    }
+    return packet
+  }
+
+  /**
+   * Set the values of named input devices. This method is called
+   * by the framework with raw values received from the robot.
+   *
+   * @protected
+   * @param {object} values - values of all input devices
+   */
+  static setInputs (values) {
+    // write inputs to devices //
+    for (const deviceName in values) {
+      const device = _devices[deviceName]
+      if (device &amp;&amp; device.setInput) {
+        device.setInput(values[deviceName])
+      }
+    }
+  }
+
+  /**
+   * Called by the Device class constructor to register a device
+   * with the HardwareManager.
+   *
+   * @private
+   * @param {string} device - device name
+   * @throws {Error} device with that name already exists
+   */
+  static registerDevice (device) {
+    const name = device.name
+    if (_devices[name]) {
+      throw new Error(`Device already exists: ${name}`)
+    }
+    _devices[name] = device
+  }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

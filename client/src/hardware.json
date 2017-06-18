@@ -1,0 +1,36 @@
+{
+  "network": {
+    "apSsid": "BattleBot-",
+    "mDnsName": "battlebot.local"
+  },
+  "devices": {
+    "leftMotor": {
+      "driver": "PWM_HBRIDGE",
+      "params": {
+        "pwmPin": 2,
+        "dirPin": 4
+      }
+    },
+    "rightMotor": {
+      "driver": "PWM_HBRIDGE",
+      "params": {
+        "pwmPin": 1,
+        "dirPin": 3
+      }
+    },
+    "weaponMotor": {
+      "driver": "PWM",
+      "params": {
+        "pwmPin": 6,
+        "minMicroseconds": 900,
+        "maxMicroseconds": 1800
+      }
+    },
+    "servo": {
+      "driver": "PWM",
+      "params": {
+        "pwmPin": 7
+      }
+    }
+  }
+}

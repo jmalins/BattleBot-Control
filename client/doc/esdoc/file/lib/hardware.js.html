@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">lib/hardware.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/jmalins/BattleBot-Control" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~Device.html">Device</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~DigitalInput.html">DigitalInput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~DigitalOutput.html">DigitalOutput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~Motor.html">Motor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware.js~Servo.html">Servo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-constrain">constrain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-map">map</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-HardwareManager">HardwareManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">connection</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/AjaxConnection.js~AjaxConnection.html">AjaxConnection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/Connection.js~Connection.html">Connection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/connection/WebSocketConnection.js~WebSocketConnection.html">WebSocketConnection</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">controls</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Button.js~Button.html">Button</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Control.js~Control.html">Control</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/ControlManager.js~ControlManager.html">ControlManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Joystick.js~Joystick.html">Joystick</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/controls/Slider.js~Slider.html">Slider</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-Position">Position</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-TouchEvent">TouchEvent</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">drive</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/ArcadeDrive.js~ArcadeDrive.html">ArcadeDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TankDrive.js~TankDrive.html">TankDrive</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/drive/TwoWheelDrive.js~TwoWheelDrive.html">TwoWheelDrive</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">hardware</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Device.js~Device.html">Device</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalInput.js~DigitalInput.html">DigitalInput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/DigitalOutput.js~DigitalOutput.html">DigitalOutput</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/HardwareManager.js~HardwareManager.html">HardwareManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Motor.js~Motor.html">Motor</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/hardware/Servo.js~Servo.html">Servo</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">lib/hardware.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+ * Hardware interface layer used by end-user code. Allows for creation of
+ * logical devices, such as motors and servos, separate from their physical
+ * config. This lets the same code be used across different robots and frees
+ * novices of having to deal with hardware configuration for &quot;kit&quot; robots.
+ *
+ * @module hardware
+ */
+import { constrain, map } from &apos;./utils&apos;
+
+/**************************************************************
+ * HardwareManager Implementation                             *
+ **************************************************************/
+
+/**
+ *  Hardware manager
+ */
+export const HardwareManager = {
+  devices: { },
+  config: null,
+
+  /**
+   * Validate the hardware configuration. Returns an array of any errors.
+   * This method makes sure the robot only defines logical devices that are
+   * configured in the hardware.
+   *
+   * @return {array} - any errors in configuration, or null if no errors
+   */
+  validateConfig () {
+    // error collection //
+    const errors = [ ]
+    const addError = (message) =&gt; errors.push({ type: &apos;HARDWARE&apos;, message })
+
+    // configuration must be set //
+    if (!HardwareManager.config) {
+      addError(&apos;Hardware configuration not set&apos;)
+    } else if (!HardwareManager.config.devices) {
+      addError(&apos;Hardware configuration is missing devices&apos;)
+    }
+    if (errors.length) return errors
+
+    // validate all logical devices are configured //
+    for (const deviceName in HardwareManager.devices) {
+      const device = HardwareManager.devices[deviceName]
+      const config = HardwareManager.config.devices[deviceName]
+      if (config) {
+        // make sure the driver is known //
+        const driverName = config.driver
+        if (!device.supportsDriver(driverName)) {
+          errors.push(`Device ${deviceName} has invalid driver: ${driverName}`)
+        }
+      } else {
+        // logical device name has no configuration onboard robot //
+        addError(`Device has no configuration: ${deviceName}`)
+      }
+    }
+
+    return (errors.length) ? errors : null
+  },
+
+  /**
+   *
+   * @return {object} - values for all output devices
+   */
+  getOutputs () {
+    const packet = { }
+    // get device outputs //
+    for (const deviceName in HardwareManager.devices) {
+      const device = HardwareManager.devices[deviceName]
+      if (device.getOutput) {
+        packet[deviceName] = device.getOutput()
+      }
+    }
+    return packet
+  },
+
+  /**
+   * Set the values of named input devices. This method is called
+   * with raw values received from the robot.
+   *
+   * @param {object} values - values of all input devices
+   */
+  setInputs (values) {
+    // write inputs to devices //
+    for (const deviceName in values) {
+      const device = HardwareManager.devices[deviceName]
+      if (device &amp;&amp; device.setInput) {
+        device.setInput(values[deviceName])
+      }
+    }
+  }
+}
+
+function addDevice (name, device) {
+  if (HardwareManager.devices[name]) {
+    throw new Error(`Device already exists: ${name}`)
+  }
+  HardwareManager.devices[name] = device
+}
+
+/***************************************************************
+ * Device Types                                                *
+ ***************************************************************/
+
+/**
+ * Generic device base class.
+ *
+ */
+export class Device {
+  /**
+   * Constructor
+   * @param {string} name - name of the device
+   */
+  constructor (name) {
+    this.name = name
+    this.value = 0
+    addDevice(name, this)
+  }
+
+  set (value) {
+    this.value = value
+  }
+
+  /**
+   * Get the value of the device.
+   *
+   * For output devices, this reads back the last call to &apos;set()&apos;, for
+   * input devices, it returns the last value read from the controller.
+   *
+   * @return {number} current value of the device
+   */
+  get () {
+    return this.value
+  }
+
+  /**
+   * Tests whether a device supports the specified driver.
+   */
+  supportsDriver (driverName) {
+    return false
+  }
+}
+
+/**
+ * @class Motor
+ *
+ * Controls a motor, which is presumed to support both forward
+ * reverse movement with values of -1.0 to 1.0.
+ */
+export class Motor extends Device {
+  /**
+   * Constructor
+   * @constructor
+   * @param {string} name - name of the motor
+   */
+  constructor (name) {
+    super(name)
+    this.reversed = false
+    this.set(0)
+  }
+
+  set (value) {
+    super.set(constrain(this.reversed ? -value : value, -1.0, 1.0))
+  }
+
+  getOutput () {
+    return Math.round(this.get() * 1023).toString()
+  }
+
+  supportsDriver (driverName) {
+    return [ &apos;PWM_HBRIDGE&apos;, &apos;PWM&apos; ].indexOf(driverName) !== -1
+  }
+}
+
+/**
+ * Servo
+ *
+ * Controls a servo via a PWM output. Input values are 0.0 to 1.0,
+ * representing the minimum and maximum position.
+ */
+export class Servo extends Device {
+  constructor (name) {
+    super(name)
+    this.minOutput = 0.0
+    this.maxOutput = 1.0
+    this.reversed = false
+    this.set(0.5)
+  }
+
+  set (value) {
+    if (this.reversed) {
+      super.set(map(value, 0.0, 1.0, this.minOutput, this.maxOutput))
+    } else {
+      super.set(map(value, 0.0, 1.0, this.maxOutput, this.minOutput))
+    }
+  }
+
+  getOutput () {
+    return Math.round(this.get() * 1023).toString()
+  }
+
+  supportsDriver (driverName) {
+    return [ &apos;PWM&apos; ].indexOf(driverName) !== -1
+  }
+}
+
+/**
+ * Digital Output
+ *
+ * A digital output device that turns a device connected to
+ * a pin, such as an LED, on and off.
+ */
+export class DigitalOutput extends Device {
+  constructor (name) {
+    super(name)
+    this.reversed = false
+    this.set(false)
+  }
+
+  set (value) {
+    super.set(!!value ^ this.reversed ? 1 : 0)
+  }
+
+  getOutput () {
+    return this.get().toString()
+  }
+
+  supportsDriver (driverName) {
+    return [ &apos;DIGITAL_OUT&apos; ].indexOf(driverName) !== -1
+  }
+}
+
+/**
+ * Digital Input
+ *
+ * A digital input pin.
+ */
+export class DigitalInput extends Device {
+  constructor (name) {
+    super(name)
+    this.value = false
+  }
+
+  get () {
+    return this.value
+  }
+
+  setInput (value) {
+    this.value = !!value
+  }
+
+  supportsDriver (driverName) {
+    return [ &apos;DIGITAL_IN&apos; ].indexOf(driverName) !== -1
+  }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
