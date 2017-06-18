@@ -133,7 +133,7 @@ var Motor = (function (Device$$1) {
   Motor.prototype.constructor = Motor;
   Motor.prototype.set = function set (value) {
     if ( value === void 0 ) value = 0;
-    Device$$1.prototype.set.call(this, constrain(this.inverted ? -value : value, -1.0, 1.0))
+    Device$$1.prototype.set.call(this, constrain(this.reversed ? -value : value, -1.0, 1.0))
   };
   Motor.prototype.getOutput = function getOutput () {
     return Math.round(this.get() * 1023).toString()
