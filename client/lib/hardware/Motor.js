@@ -30,7 +30,7 @@ export default class Motor extends Device {
    * @param {number} [value=0] - the motor power value [-1.0, 1.0]
    */
   set (value = 0) {
-    super.set(constrain(this.inverted ? -value : value, -1.0, 1.0))
+    super.set(constrain(this.reversed ? -value : value, -1.0, 1.0))
   }
 
   /**
