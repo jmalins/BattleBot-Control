@@ -28,6 +28,9 @@
  * Globals                                                                      *
  ********************************************************************************/
 
+// set to true to print commands to the serial monitor for debugging //
+#define PRINT_TO_SERIAL_MONITOR  false
+
 // states //
 enum RobotState {
   STATE_START = 1,
@@ -45,6 +48,7 @@ void updateHardware(String);
 bool getWiFiForceAPMode();
 
 #define DBG_OUTPUT_PORT Serial
+#define DBG_BAUD_RATE   115200
 
 /********************************************************************************
  * WiFi Setup                                                                   *
@@ -293,6 +297,10 @@ void setWheelPower(int left, int right) {
   left  = constrain(left,  -1023, 1023);
   right = constrain(right, -1023, 1023);
 
+  if(PRINT_TO_SERIAL_MONITOR) {
+    DBG_OUTPUT_PORT.printf("left: %d, right: %d", left, right);
+  }
+  
   digitalWrite(PIN_L_DIR, left >= 0);
   digitalWrite(PIN_R_DIR, right >= 0);
   
@@ -302,6 +310,9 @@ void setWheelPower(int left, int right) {
 
 // set the weapon power //
 void setWeaponPower(int power) {  
+  if(PRINT_TO_SERIAL_MONITOR) {
+    DBG_OUTPUT_PORT.printf(", weapon: %d\n", power);
+  }
   int usec = map(power, 0, 1023, ESC_MIN_USEC, ESC_MAX_USEC);
   weaponESC.writeMicroseconds(usec);
 }
@@ -415,7 +426,7 @@ AsyncWebSocket ws("/ws");
 
 void setup(void){
   // configure debug serial port //
-  DBG_OUTPUT_PORT.begin(115200);
+  DBG_OUTPUT_PORT.begin(DBG_BAUD_RATE);
   DBG_OUTPUT_PORT.print("\n");
   DBG_OUTPUT_PORT.setDebugOutput(true);
 
