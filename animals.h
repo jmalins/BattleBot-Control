@@ -1,6 +1,9 @@
 /**
  * List of animals from wikipedia used to provide easy to remember
- * WIFI SSID names
+ * WIFI SSID names.
+ * 
+ * Store in PROGMEM (FLASH) to conserve precious space on the heap (RAM):
+ * http://esp8266.github.io/Arduino/versions/2.3.0/doc/reference.html#progmem
  */
  
 const char animal1[] PROGMEM = "aardvark";
