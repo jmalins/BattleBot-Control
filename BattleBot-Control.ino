@@ -15,6 +15,7 @@
 #include <Servo.h>
 
 #include "NodeMCU-Hardware.h"
+#include "animals.h"
 
 /********************************************************************************
  * Network Configuration                                                        *
@@ -22,7 +23,8 @@
  
 #define HTTP_PORT       80
 #define HOST_NAME       "battlebot"
-#define AP_SSID_BASE    "BattleBot-"
+#define AP_SSID_BASE    "robot-"
+#define USE_ANIMAL      true
 
 /********************************************************************************
  * Globals                                                                      *
@@ -112,9 +114,16 @@ void setupWiFi() {
     byte mac[6];
     WiFi.softAPmacAddress(mac);
     ssid = AP_SSID_BASE;
-    for(int i = 5; i >= 0; i--) {
-      ssid += String(mac[i], HEX);
-    } 
+    if(USE_ANIMAL) {
+      // lookup an animal from table based on MAC bytes //
+      int animalNum = (mac[5] << 8 | mac[4]) % ANIMAL_COUNT;
+      ssid += FPSTR(ANIMAL_TABLE[animalNum]);
+    } else {
+      // use MAC address in hex //
+      for(int i = 5; i >= 0; i--) {
+        ssid += String(mac[i], HEX);
+      }
+    }
 
     DBG_OUTPUT_PORT.println("Starting AP, SSID: " + ssid);
     WiFi.mode(WIFI_AP);

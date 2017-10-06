@@ -1,0 +1,568 @@
+/**
+ * List of animals from wikipedia used to provide easy to remember
+ * WIFI SSID names
+ */
+ 
+const char animal1[] PROGMEM = "aardvark";
+const char animal2[] PROGMEM = "aardwolf";
+const char animal3[] PROGMEM = "african-buffalo";
+const char animal4[] PROGMEM = "african-elephant";
+const char animal5[] PROGMEM = "african-leopard";
+const char animal6[] PROGMEM = "african-wild-dog";
+const char animal7[] PROGMEM = "albatross";
+const char animal8[] PROGMEM = "alligator";
+const char animal9[] PROGMEM = "alpaca";
+const char animal10[] PROGMEM = "american-black-bear";
+const char animal11[] PROGMEM = "american-buffalo";
+const char animal12[] PROGMEM = "american-robin";
+const char animal13[] PROGMEM = "amphibian";
+const char animal14[] PROGMEM = "anaconda";
+const char animal15[] PROGMEM = "angelfish";
+const char animal16[] PROGMEM = "angelfish";
+const char animal17[] PROGMEM = "anglerfish";
+const char animal18[] PROGMEM = "ant";
+const char animal19[] PROGMEM = "anteater";
+const char animal20[] PROGMEM = "antelope";
+const char animal21[] PROGMEM = "antlion";
+const char animal22[] PROGMEM = "ape";
+const char animal23[] PROGMEM = "aphid";
+const char animal24[] PROGMEM = "arabian-leopard";
+const char animal25[] PROGMEM = "arctic-fox";
+const char animal26[] PROGMEM = "arctic-wolf";
+const char animal27[] PROGMEM = "armadillo";
+const char animal28[] PROGMEM = "arrow-crab";
+const char animal29[] PROGMEM = "asian-black-bear";
+const char animal30[] PROGMEM = "asp";
+const char animal31[] PROGMEM = "ass";
+const char animal32[] PROGMEM = "baboon";
+const char animal33[] PROGMEM = "badger";
+const char animal34[] PROGMEM = "bald-eagle";
+const char animal35[] PROGMEM = "bandicoot";
+const char animal36[] PROGMEM = "barnacle";
+const char animal37[] PROGMEM = "barracuda";
+const char animal38[] PROGMEM = "basilisk";
+const char animal39[] PROGMEM = "bass";
+const char animal40[] PROGMEM = "bat";
+const char animal41[] PROGMEM = "beaked-whale";
+const char animal42[] PROGMEM = "bear";
+const char animal43[] PROGMEM = "beaver";
+const char animal44[] PROGMEM = "bedbug";
+const char animal45[] PROGMEM = "bee";
+const char animal46[] PROGMEM = "beetle";
+const char animal47[] PROGMEM = "bird";
+const char animal48[] PROGMEM = "bison";
+const char animal49[] PROGMEM = "blackbird";
+const char animal50[] PROGMEM = "black-panther";
+const char animal51[] PROGMEM = "black-widow-spider";
+const char animal52[] PROGMEM = "blue-bird";
+const char animal53[] PROGMEM = "blue-jay";
+const char animal54[] PROGMEM = "blue-whale";
+const char animal55[] PROGMEM = "boa";
+const char animal56[] PROGMEM = "boar";
+const char animal57[] PROGMEM = "bobcat";
+const char animal58[] PROGMEM = "bobolink";
+const char animal59[] PROGMEM = "bonobo";
+const char animal60[] PROGMEM = "booby";
+const char animal61[] PROGMEM = "box-jellyfish";
+const char animal62[] PROGMEM = "bovid";
+const char animal63[] PROGMEM = "buffalo";
+const char animal64[] PROGMEM = "brown-bear";
+const char animal65[] PROGMEM = "bug";
+const char animal66[] PROGMEM = "bull";
+const char animal67[] PROGMEM = "butterfly";
+const char animal68[] PROGMEM = "buzzard";
+const char animal69[] PROGMEM = "camel";
+const char animal70[] PROGMEM = "canada-goose";
+const char animal71[] PROGMEM = "canid";
+const char animal72[] PROGMEM = "cape-buffalo";
+const char animal73[] PROGMEM = "capybara";
+const char animal74[] PROGMEM = "cardinal";
+const char animal75[] PROGMEM = "caribou";
+const char animal76[] PROGMEM = "carp";
+const char animal77[] PROGMEM = "cat";
+const char animal78[] PROGMEM = "catshark";
+const char animal79[] PROGMEM = "caterpillar";
+const char animal80[] PROGMEM = "catfish";
+const char animal81[] PROGMEM = "cattle";
+const char animal82[] PROGMEM = "centipede";
+const char animal83[] PROGMEM = "cephalopod";
+const char animal84[] PROGMEM = "chameleon";
+const char animal85[] PROGMEM = "cheetah";
+const char animal86[] PROGMEM = "chickadee";
+const char animal87[] PROGMEM = "chicken";
+const char animal88[] PROGMEM = "chimpanzee";
+const char animal89[] PROGMEM = "chinchilla";
+const char animal90[] PROGMEM = "chipmunk";
+const char animal91[] PROGMEM = "cicada";
+const char animal92[] PROGMEM = "clam";
+const char animal93[] PROGMEM = "clownfish";
+const char animal94[] PROGMEM = "cobra";
+const char animal95[] PROGMEM = "cockroach";
+const char animal96[] PROGMEM = "cod";
+const char animal97[] PROGMEM = "condor";
+const char animal98[] PROGMEM = "constrictor";
+const char animal99[] PROGMEM = "coral";
+const char animal100[] PROGMEM = "cougar";
+const char animal101[] PROGMEM = "cow";
+const char animal102[] PROGMEM = "coyote";
+const char animal103[] PROGMEM = "coypu";
+const char animal104[] PROGMEM = "crab";
+const char animal105[] PROGMEM = "crane";
+const char animal106[] PROGMEM = "crane-fly";
+const char animal107[] PROGMEM = "crawdad";
+const char animal108[] PROGMEM = "crayfish";
+const char animal109[] PROGMEM = "cricket";
+const char animal110[] PROGMEM = "crocodile";
+const char animal111[] PROGMEM = "crow";
+const char animal112[] PROGMEM = "cuckoo";
+const char animal113[] PROGMEM = "damselfly";
+const char animal114[] PROGMEM = "deer";
+const char animal115[] PROGMEM = "dhole";
+const char animal116[] PROGMEM = "dingo";
+const char animal117[] PROGMEM = "dinosaur";
+const char animal118[] PROGMEM = "dodo";
+const char animal119[] PROGMEM = "dog";
+const char animal120[] PROGMEM = "dolphin";
+const char animal121[] PROGMEM = "donkey";
+const char animal122[] PROGMEM = "dormouse";
+const char animal123[] PROGMEM = "dove";
+const char animal124[] PROGMEM = "dragonfly";
+const char animal125[] PROGMEM = "dragon";
+const char animal126[] PROGMEM = "duck";
+const char animal127[] PROGMEM = "dung-beetle";
+const char animal128[] PROGMEM = "eagle";
+const char animal129[] PROGMEM = "earthworm";
+const char animal130[] PROGMEM = "earwig";
+const char animal131[] PROGMEM = "echidna";
+const char animal132[] PROGMEM = "eel";
+const char animal133[] PROGMEM = "egret";
+const char animal134[] PROGMEM = "elephant";
+const char animal135[] PROGMEM = "elephant-seal";
+const char animal136[] PROGMEM = "elk";
+const char animal137[] PROGMEM = "emu";
+const char animal138[] PROGMEM = "english-pointer";
+const char animal139[] PROGMEM = "ermine";
+const char animal140[] PROGMEM = "falcon";
+const char animal141[] PROGMEM = "ferret";
+const char animal142[] PROGMEM = "finch";
+const char animal143[] PROGMEM = "firefly";
+const char animal144[] PROGMEM = "fish";
+const char animal145[] PROGMEM = "flamingo";
+const char animal146[] PROGMEM = "flea";
+const char animal147[] PROGMEM = "fly";
+const char animal148[] PROGMEM = "flyingfish";
+const char animal149[] PROGMEM = "fowl";
+const char animal150[] PROGMEM = "fox";
+const char animal151[] PROGMEM = "frog";
+const char animal152[] PROGMEM = "fruit-bat";
+const char animal153[] PROGMEM = "gamefowl";
+const char animal154[] PROGMEM = "galliform";
+const char animal155[] PROGMEM = "gazelle";
+const char animal156[] PROGMEM = "gecko";
+const char animal157[] PROGMEM = "gerbil";
+const char animal158[] PROGMEM = "giant-panda";
+const char animal159[] PROGMEM = "giant-squid";
+const char animal160[] PROGMEM = "gibbon";
+const char animal161[] PROGMEM = "gila-monster";
+const char animal162[] PROGMEM = "giraffe";
+const char animal163[] PROGMEM = "goat";
+const char animal164[] PROGMEM = "golden-eagle";
+const char animal165[] PROGMEM = "goldfish";
+const char animal166[] PROGMEM = "goose";
+const char animal167[] PROGMEM = "gopher";
+const char animal168[] PROGMEM = "gorilla";
+const char animal169[] PROGMEM = "grasshopper";
+const char animal170[] PROGMEM = "great-blue-heron";
+const char animal171[] PROGMEM = "great-white-shark";
+const char animal172[] PROGMEM = "grebe";
+const char animal173[] PROGMEM = "grizzly-bear";
+const char animal174[] PROGMEM = "ground-shark";
+const char animal175[] PROGMEM = "ground-sloth";
+const char animal176[] PROGMEM = "grouse";
+const char animal177[] PROGMEM = "guan";
+const char animal178[] PROGMEM = "guanaco";
+const char animal179[] PROGMEM = "guineafowl";
+const char animal180[] PROGMEM = "guinea-pig";
+const char animal181[] PROGMEM = "gull";
+const char animal182[] PROGMEM = "guppy";
+const char animal183[] PROGMEM = "haddock";
+const char animal184[] PROGMEM = "halibut";
+const char animal185[] PROGMEM = "hammerhead-shark";
+const char animal186[] PROGMEM = "hamster";
+const char animal187[] PROGMEM = "hare";
+const char animal188[] PROGMEM = "harrier";
+const char animal189[] PROGMEM = "hawk";
+const char animal190[] PROGMEM = "hedgehog";
+const char animal191[] PROGMEM = "hermit-crab";
+const char animal192[] PROGMEM = "heron";
+const char animal193[] PROGMEM = "herring";
+const char animal194[] PROGMEM = "hippopotamus";
+const char animal195[] PROGMEM = "hookworm";
+const char animal196[] PROGMEM = "hornet";
+const char animal197[] PROGMEM = "horse";
+const char animal198[] PROGMEM = "hoverfly";
+const char animal199[] PROGMEM = "human";
+const char animal200[] PROGMEM = "hummingbird";
+const char animal201[] PROGMEM = "humpback-whale";
+const char animal202[] PROGMEM = "hyena";
+const char animal203[] PROGMEM = "iguana";
+const char animal204[] PROGMEM = "jackal";
+const char animal205[] PROGMEM = "jaguar";
+const char animal206[] PROGMEM = "jay";
+const char animal207[] PROGMEM = "jellyfish";
+const char animal208[] PROGMEM = "junglefowl";
+const char animal209[] PROGMEM = "jacana";
+const char animal210[] PROGMEM = "kangaroo";
+const char animal211[] PROGMEM = "kangaroo-mouse";
+const char animal212[] PROGMEM = "kangaroo-rat";
+const char animal213[] PROGMEM = "kingfisher";
+const char animal214[] PROGMEM = "kite";
+const char animal215[] PROGMEM = "kiwi";
+const char animal216[] PROGMEM = "koala";
+const char animal217[] PROGMEM = "koi";
+const char animal218[] PROGMEM = "komodo-dragon";
+const char animal219[] PROGMEM = "krill";
+const char animal220[] PROGMEM = "ladybug";
+const char animal221[] PROGMEM = "lamprey";
+const char animal222[] PROGMEM = "landfowl";
+const char animal223[] PROGMEM = "land-snail";
+const char animal224[] PROGMEM = "lapwing";
+const char animal225[] PROGMEM = "lark";
+const char animal226[] PROGMEM = "leech";
+const char animal227[] PROGMEM = "lemming";
+const char animal228[] PROGMEM = "lemur";
+const char animal229[] PROGMEM = "leopard";
+const char animal230[] PROGMEM = "leopon";
+const char animal231[] PROGMEM = "limpet";
+const char animal232[] PROGMEM = "lion";
+const char animal233[] PROGMEM = "lionfish";
+const char animal234[] PROGMEM = "lizard";
+const char animal235[] PROGMEM = "llama";
+const char animal236[] PROGMEM = "lobster";
+const char animal237[] PROGMEM = "locust";
+const char animal238[] PROGMEM = "loon";
+const char animal239[] PROGMEM = "louse";
+const char animal240[] PROGMEM = "lungfish";
+const char animal241[] PROGMEM = "lynx";
+const char animal242[] PROGMEM = "macaw";
+const char animal243[] PROGMEM = "mackerel";
+const char animal244[] PROGMEM = "magpie";
+const char animal245[] PROGMEM = "mallard";
+const char animal246[] PROGMEM = "mammal";
+const char animal247[] PROGMEM = "manatee";
+const char animal248[] PROGMEM = "mandrill";
+const char animal249[] PROGMEM = "manta-ray";
+const char animal250[] PROGMEM = "marlin";
+const char animal251[] PROGMEM = "marmoset";
+const char animal252[] PROGMEM = "marmot";
+const char animal253[] PROGMEM = "marsupial";
+const char animal254[] PROGMEM = "marten";
+const char animal255[] PROGMEM = "mastodon";
+const char animal256[] PROGMEM = "meadowlark";
+const char animal257[] PROGMEM = "meerkat";
+const char animal258[] PROGMEM = "megamouth-shark";
+const char animal259[] PROGMEM = "mink";
+const char animal260[] PROGMEM = "minnow";
+const char animal261[] PROGMEM = "mite";
+const char animal262[] PROGMEM = "mockingbird";
+const char animal263[] PROGMEM = "mole";
+const char animal264[] PROGMEM = "mollusk";
+const char animal265[] PROGMEM = "mongoose";
+const char animal266[] PROGMEM = "monitor-lizard";
+const char animal267[] PROGMEM = "monkey";
+const char animal268[] PROGMEM = "moose";
+const char animal269[] PROGMEM = "mosquito";
+const char animal270[] PROGMEM = "moth";
+const char animal271[] PROGMEM = "mountain-goat";
+const char animal272[] PROGMEM = "mouse";
+const char animal273[] PROGMEM = "mule";
+const char animal274[] PROGMEM = "muskox";
+const char animal275[] PROGMEM = "narwhal";
+const char animal276[] PROGMEM = "neanderthal";
+const char animal277[] PROGMEM = "needlefish";
+const char animal278[] PROGMEM = "newt";
+const char animal279[] PROGMEM = "new-world-quail";
+const char animal280[] PROGMEM = "nighthawk";
+const char animal281[] PROGMEM = "nightingale";
+const char animal282[] PROGMEM = "nile-crocodile";
+const char animal283[] PROGMEM = "numbat";
+const char animal284[] PROGMEM = "ocelot";
+const char animal285[] PROGMEM = "octopus";
+const char animal286[] PROGMEM = "okapi";
+const char animal287[] PROGMEM = "old-world-quail";
+const char animal288[] PROGMEM = "olingo";
+const char animal289[] PROGMEM = "opossum";
+const char animal290[] PROGMEM = "orangutan";
+const char animal291[] PROGMEM = "orca";
+const char animal292[] PROGMEM = "oribi";
+const char animal293[] PROGMEM = "ostrich";
+const char animal294[] PROGMEM = "otter";
+const char animal295[] PROGMEM = "owl";
+const char animal296[] PROGMEM = "ox";
+const char animal297[] PROGMEM = "panda";
+const char animal298[] PROGMEM = "panther";
+const char animal299[] PROGMEM = "panthera-hybrid";
+const char animal300[] PROGMEM = "parakeet";
+const char animal301[] PROGMEM = "parrot";
+const char animal302[] PROGMEM = "parrotfish";
+const char animal303[] PROGMEM = "partridge";
+const char animal304[] PROGMEM = "peacock";
+const char animal305[] PROGMEM = "peafowl";
+const char animal306[] PROGMEM = "pelican";
+const char animal307[] PROGMEM = "penguin";
+const char animal308[] PROGMEM = "perch";
+const char animal309[] PROGMEM = "peregrine-falcon";
+const char animal310[] PROGMEM = "pheasant";
+const char animal311[] PROGMEM = "pig";
+const char animal312[] PROGMEM = "pigeon";
+const char animal313[] PROGMEM = "pike";
+const char animal314[] PROGMEM = "pilot-whale";
+const char animal315[] PROGMEM = "pinniped";
+const char animal316[] PROGMEM = "piranha";
+const char animal317[] PROGMEM = "planarian";
+const char animal318[] PROGMEM = "platypus";
+const char animal319[] PROGMEM = "polar-bear";
+const char animal320[] PROGMEM = "pony";
+const char animal321[] PROGMEM = "porcupine";
+const char animal322[] PROGMEM = "porpoise";
+const char animal323[] PROGMEM = "portuguese-man-o-war";
+const char animal324[] PROGMEM = "possum";
+const char animal325[] PROGMEM = "prairie-dog";
+const char animal326[] PROGMEM = "prawn";
+const char animal327[] PROGMEM = "praying-mantis";
+const char animal328[] PROGMEM = "primate";
+const char animal329[] PROGMEM = "ptarmigan";
+const char animal330[] PROGMEM = "puffin";
+const char animal331[] PROGMEM = "puma";
+const char animal332[] PROGMEM = "python";
+const char animal333[] PROGMEM = "quail";
+const char animal334[] PROGMEM = "quelea";
+const char animal335[] PROGMEM = "quetzal";
+const char animal336[] PROGMEM = "quokka";
+const char animal337[] PROGMEM = "rabbit";
+const char animal338[] PROGMEM = "raccoon";
+const char animal339[] PROGMEM = "rainbow-trout";
+const char animal340[] PROGMEM = "rat";
+const char animal341[] PROGMEM = "rattlesnake";
+const char animal342[] PROGMEM = "raven";
+const char animal343[] PROGMEM = "ray";
+const char animal344[] PROGMEM = "ray";
+const char animal345[] PROGMEM = "red-deer";
+const char animal346[] PROGMEM = "red-fox";
+const char animal347[] PROGMEM = "red-panda";
+const char animal348[] PROGMEM = "red-squirrel";
+const char animal349[] PROGMEM = "reindeer";
+const char animal350[] PROGMEM = "reptile";
+const char animal351[] PROGMEM = "rhinoceros";
+const char animal352[] PROGMEM = "right-whale";
+const char animal353[] PROGMEM = "roadrunner";
+const char animal354[] PROGMEM = "rodent";
+const char animal355[] PROGMEM = "rook";
+const char animal356[] PROGMEM = "rooster";
+const char animal357[] PROGMEM = "roundworm";
+const char animal358[] PROGMEM = "saber-toothed-cat";
+const char animal359[] PROGMEM = "sailfish";
+const char animal360[] PROGMEM = "salamander";
+const char animal361[] PROGMEM = "salmon";
+const char animal362[] PROGMEM = "sawfish";
+const char animal363[] PROGMEM = "scale-insect";
+const char animal364[] PROGMEM = "scallop";
+const char animal365[] PROGMEM = "scorpion";
+const char animal366[] PROGMEM = "seahorse";
+const char animal367[] PROGMEM = "sea-lion";
+const char animal368[] PROGMEM = "sea-slug";
+const char animal369[] PROGMEM = "sea-snail";
+const char animal370[] PROGMEM = "serval";
+const char animal371[] PROGMEM = "shark";
+const char animal372[] PROGMEM = "sheep";
+const char animal373[] PROGMEM = "shrew";
+const char animal374[] PROGMEM = "shrimp";
+const char animal375[] PROGMEM = "silkworm";
+const char animal376[] PROGMEM = "silverfish";
+const char animal377[] PROGMEM = "skink";
+const char animal378[] PROGMEM = "skunk";
+const char animal379[] PROGMEM = "sloth";
+const char animal380[] PROGMEM = "slug";
+const char animal381[] PROGMEM = "smelt";
+const char animal382[] PROGMEM = "snail";
+const char animal383[] PROGMEM = "snake";
+const char animal384[] PROGMEM = "snipe";
+const char animal385[] PROGMEM = "snow-leopard";
+const char animal386[] PROGMEM = "sockeye-salmon";
+const char animal387[] PROGMEM = "sole";
+const char animal388[] PROGMEM = "sparrow";
+const char animal389[] PROGMEM = "sperm-whale";
+const char animal390[] PROGMEM = "spider";
+const char animal391[] PROGMEM = "spider-monkey";
+const char animal392[] PROGMEM = "spoonbill";
+const char animal393[] PROGMEM = "squid";
+const char animal394[] PROGMEM = "squirrel";
+const char animal395[] PROGMEM = "starfish";
+const char animal396[] PROGMEM = "star-nosed-mole";
+const char animal397[] PROGMEM = "steelhead-trout";
+const char animal398[] PROGMEM = "stingray";
+const char animal399[] PROGMEM = "stoat";
+const char animal400[] PROGMEM = "stork";
+const char animal401[] PROGMEM = "sturgeon";
+const char animal402[] PROGMEM = "sugar-glider";
+const char animal403[] PROGMEM = "swallow";
+const char animal404[] PROGMEM = "swan";
+const char animal405[] PROGMEM = "swift";
+const char animal406[] PROGMEM = "swordfish";
+const char animal407[] PROGMEM = "swordtail";
+const char animal408[] PROGMEM = "tahr";
+const char animal409[] PROGMEM = "takin";
+const char animal410[] PROGMEM = "tapir";
+const char animal411[] PROGMEM = "tarantula";
+const char animal412[] PROGMEM = "tarsier";
+const char animal413[] PROGMEM = "tasmanian-devil";
+const char animal414[] PROGMEM = "termite";
+const char animal415[] PROGMEM = "tern";
+const char animal416[] PROGMEM = "thrush";
+const char animal417[] PROGMEM = "tick";
+const char animal418[] PROGMEM = "tiger";
+const char animal419[] PROGMEM = "tiger-shark";
+const char animal420[] PROGMEM = "tiglon";
+const char animal421[] PROGMEM = "titi";
+const char animal422[] PROGMEM = "toad";
+const char animal423[] PROGMEM = "tortoise";
+const char animal424[] PROGMEM = "toucan";
+const char animal425[] PROGMEM = "trapdoor-spider";
+const char animal426[] PROGMEM = "tree-frog";
+const char animal427[] PROGMEM = "trout";
+const char animal428[] PROGMEM = "tuna";
+const char animal429[] PROGMEM = "turkey";
+const char animal430[] PROGMEM = "turtle";
+const char animal431[] PROGMEM = "tyrannosaurus";
+const char animal432[] PROGMEM = "urial";
+const char animal433[] PROGMEM = "unicorn";
+const char animal434[] PROGMEM = "vampire-bat";
+const char animal435[] PROGMEM = "vampire-squid";
+const char animal436[] PROGMEM = "vaquita";
+const char animal437[] PROGMEM = "vicuna";
+const char animal438[] PROGMEM = "viper";
+const char animal439[] PROGMEM = "voalavoanala";
+const char animal440[] PROGMEM = "vole";
+const char animal441[] PROGMEM = "vulture";
+const char animal442[] PROGMEM = "wallaby";
+const char animal443[] PROGMEM = "walrus";
+const char animal444[] PROGMEM = "wasp";
+const char animal445[] PROGMEM = "warbler";
+const char animal446[] PROGMEM = "waterbuck";
+const char animal447[] PROGMEM = "water-buffalo";
+const char animal448[] PROGMEM = "water-chevrotain";
+const char animal449[] PROGMEM = "weasel";
+const char animal450[] PROGMEM = "whale";
+const char animal451[] PROGMEM = "whippet";
+const char animal452[] PROGMEM = "whitefish";
+const char animal453[] PROGMEM = "white-rhinoceros";
+const char animal454[] PROGMEM = "whooping-crane";
+const char animal455[] PROGMEM = "wild-boar";
+const char animal456[] PROGMEM = "wildcat";
+const char animal457[] PROGMEM = "wildebeest";
+const char animal458[] PROGMEM = "wildfowl";
+const char animal459[] PROGMEM = "wolf";
+const char animal460[] PROGMEM = "wolverine";
+const char animal461[] PROGMEM = "wombat";
+const char animal462[] PROGMEM = "wood-lemming";
+const char animal463[] PROGMEM = "woodchuck";
+const char animal464[] PROGMEM = "woodpecker";
+const char animal465[] PROGMEM = "woolly-dormouse";
+const char animal466[] PROGMEM = "woolly-hare";
+const char animal467[] PROGMEM = "worm";
+const char animal468[] PROGMEM = "wren";
+const char animal469[] PROGMEM = "xerinae";
+const char animal470[] PROGMEM = "yak";
+const char animal471[] PROGMEM = "yellow-perch";
+const char animal472[] PROGMEM = "zebra";
+const char animal473[] PROGMEM = "zebra-finch";
+const char animal474[] PROGMEM = "zebra-shark";
+const char animal475[] PROGMEM = "zebu";
+const char animal476[] PROGMEM = "zorilla";
+const char animal477[] PROGMEM = "zanj-sun-squirrel";
+const char animal478[] PROGMEM = "zebra-duiker";
+
+const int ANIMAL_COUNT = 478;
+
+const char* const ANIMAL_TABLE[] PROGMEM = {
+  animal1, animal2, animal3, animal4, animal5, animal6,
+  animal7, animal8, animal9, animal10, animal11, animal12,
+  animal13, animal14, animal15, animal16, animal17, animal18,
+  animal19, animal20, animal21, animal22, animal23, animal24,
+  animal25, animal26, animal27, animal28, animal29, animal30,
+  animal31, animal32, animal33, animal34, animal35, animal36,
+  animal37, animal38, animal39, animal40, animal41, animal42,
+  animal43, animal44, animal45, animal46, animal47, animal48,
+  animal49, animal50, animal51, animal52, animal53, animal54,
+  animal55, animal56, animal57, animal58, animal59, animal60,
+  animal61, animal62, animal63, animal64, animal65, animal66,
+  animal67, animal68, animal69, animal70, animal71, animal72,
+  animal73, animal74, animal75, animal76, animal77, animal78,
+  animal79, animal80, animal81, animal82, animal83, animal84,
+  animal85, animal86, animal87, animal88, animal89, animal90,
+  animal91, animal92, animal93, animal94, animal95, animal96,
+  animal97, animal98, animal99, animal100, animal101, animal102,
+  animal103, animal104, animal105, animal106, animal107, animal108,
+  animal109, animal110, animal111, animal112, animal113, animal114,
+  animal115, animal116, animal117, animal118, animal119, animal120,
+  animal121, animal122, animal123, animal124, animal125, animal126,
+  animal127, animal128, animal129, animal130, animal131, animal132,
+  animal133, animal134, animal135, animal136, animal137, animal138,
+  animal139, animal140, animal141, animal142, animal143, animal144,
+  animal145, animal146, animal147, animal148, animal149, animal150,
+  animal151, animal152, animal153, animal154, animal155, animal156,
+  animal157, animal158, animal159, animal160, animal161, animal162,
+  animal163, animal164, animal165, animal166, animal167, animal168,
+  animal169, animal170, animal171, animal172, animal173, animal174,
+  animal175, animal176, animal177, animal178, animal179, animal180,
+  animal181, animal182, animal183, animal184, animal185, animal186,
+  animal187, animal188, animal189, animal190, animal191, animal192,
+  animal193, animal194, animal195, animal196, animal197, animal198,
+  animal199, animal200, animal201, animal202, animal203, animal204,
+  animal205, animal206, animal207, animal208, animal209, animal210,
+  animal211, animal212, animal213, animal214, animal215, animal216,
+  animal217, animal218, animal219, animal220, animal221, animal222,
+  animal223, animal224, animal225, animal226, animal227, animal228,
+  animal229, animal230, animal231, animal232, animal233, animal234,
+  animal235, animal236, animal237, animal238, animal239, animal240,
+  animal241, animal242, animal243, animal244, animal245, animal246,
+  animal247, animal248, animal249, animal250, animal251, animal252,
+  animal253, animal254, animal255, animal256, animal257, animal258,
+  animal259, animal260, animal261, animal262, animal263, animal264,
+  animal265, animal266, animal267, animal268, animal269, animal270,
+  animal271, animal272, animal273, animal274, animal275, animal276,
+  animal277, animal278, animal279, animal280, animal281, animal282,
+  animal283, animal284, animal285, animal286, animal287, animal288,
+  animal289, animal290, animal291, animal292, animal293, animal294,
+  animal295, animal296, animal297, animal298, animal299, animal300,
+  animal301, animal302, animal303, animal304, animal305, animal306,
+  animal307, animal308, animal309, animal310, animal311, animal312,
+  animal313, animal314, animal315, animal316, animal317, animal318,
+  animal319, animal320, animal321, animal322, animal323, animal324,
+  animal325, animal326, animal327, animal328, animal329, animal330,
+  animal331, animal332, animal333, animal334, animal335, animal336,
+  animal337, animal338, animal339, animal340, animal341, animal342,
+  animal343, animal344, animal345, animal346, animal347, animal348,
+  animal349, animal350, animal351, animal352, animal353, animal354,
+  animal355, animal356, animal357, animal358, animal359, animal360,
+  animal361, animal362, animal363, animal364, animal365, animal366,
+  animal367, animal368, animal369, animal370, animal371, animal372,
+  animal373, animal374, animal375, animal376, animal377, animal378,
+  animal379, animal380, animal381, animal382, animal383, animal384,
+  animal385, animal386, animal387, animal388, animal389, animal390,
+  animal391, animal392, animal393, animal394, animal395, animal396,
+  animal397, animal398, animal399, animal400, animal401, animal402,
+  animal403, animal404, animal405, animal406, animal407, animal408,
+  animal409, animal410, animal411, animal412, animal413, animal414,
+  animal415, animal416, animal417, animal418, animal419, animal420,
+  animal421, animal422, animal423, animal424, animal425, animal426,
+  animal427, animal428, animal429, animal430, animal431, animal432,
+  animal433, animal434, animal435, animal436, animal437, animal438,
+  animal439, animal440, animal441, animal442, animal443, animal444,
+  animal445, animal446, animal447, animal448, animal449, animal450,
+  animal451, animal452, animal453, animal454, animal455, animal456,
+  animal457, animal458, animal459, animal460, animal461, animal462,
+  animal463, animal464, animal465, animal466, animal467, animal468,
+  animal469, animal470, animal471, animal472, animal473, animal474,
+  animal475, animal476, animal477, animal478
+};
