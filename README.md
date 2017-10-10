@@ -9,9 +9,10 @@ well-documented: Arduino, HTML5 and javascript. The hope is to leverage common m
     [here](https://www.aliexpress.com/item/NodeMCU-Development-Kit-NodeMCU-Motor-Shield-esp-wifi-esp8266-esp-12e-esp-12e-kit-diy-rc/32445659965.html).
  2. Two ubiquitous, cheap Chinese motor modules (UCCMMs). Available
     [here](https://www.aliexpress.com/item/HK-POST-FREE-Wholesale-48-1-Plastic-DC-Drive-Gear-Motor-Tyre-Tire-Wheel-For/32603795906.html). An improved quality, domestically sourced alternative with [motors](https://www.servocity.com/right-angle-gearmotor) and [wheels](https://www.servocity.com/2-55-press-fit-wheels) purchased separately.
- 3. Arduino core libraries for the [ESP8266](http://esp8266.github.io/Arduino/versions/2.3.0/doc/libraries.html#mdns-and-dns-sd-responder-esp8266mdns-library). 
- 4. Control over WiFi from a mobile device or computer via a browser-based user interface.
- 5. Cardboard robot body, ranging from a simple box, to a laser cut design from CAD. 
+ 3. 6 AA battery holder, such as [this one](https://www.aliexpress.com/item/10-PCS-6AA-Battery-Case/32675020506.html). Rechargeable NiMH batteries are highly recommended, as battery life is 1-2 hours on Alkaline cells.
+ 4. Arduino core libraries for the [ESP8266](http://esp8266.github.io/Arduino/versions/2.3.0/doc/libraries.html#mdns-and-dns-sd-responder-esp8266mdns-library). 
+ 5. Control over WiFi from a mobile device or computer via a browser-based user interface.
+ 6. Cardboard robot body, ranging from a simple box, to a laser cut design from CAD. 
   
 The goal is to keep the cost of a base "kit" to under 20USD.
 
