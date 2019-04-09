@@ -1,13 +1,16 @@
 /* eslint-disable */
 
 // define devices and controls //
-var arcadeDrive, motorMotor;
+var leftMotor, rightMotor, weaponMotor;
 var driveStick, weaponSlider, forwardButton, reverseButton;
 
 // this is run once //
 function setup () {
   // setup hardware interface //
-  arcadeDrive = new ArcadeDrive()
+  leftMotor = new Motor('leftMotor')
+  // leftMotor.reversed = true
+  rightMotor = new Motor('rightMotor')
+  // rightMotor.reversed = true
   weaponMotor = new Motor('weaponMotor')
 
   // create the drive joystick //
@@ -48,9 +51,8 @@ function setup () {
 // this is run at update rate //
 function loop () {
   // handle driving //
-  var speed = driveStick.y
-  var rotation = driveStick.x
-  arcadeDrive.setSpeedAndRotation(speed, rotation)
+  leftMotor.set(driveStick.y)
+  rightMotor.set(driveStick.x)
   
   // handle weapon control //
   weaponMotor.set(weaponSlider.value)
