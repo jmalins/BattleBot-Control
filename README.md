@@ -89,7 +89,7 @@ $ ./upload.sh wifi.config
 ```
 This command will upload any file (relative to the root of the `data/` directory) to the robot file system.
 
-When complete, reset the robot. The robot should now connect to the WiFi network specified in the file. To return to access point mode, simply delete the configuration file and reload the file system, or use the abreviated command (as above):
+When complete, reset the robot. The robot should now connect to the WiFi network specified in the file. To return to access point mode, simply delete the configuration file and reload the file system, or use the abbreviated command (as above):
 ```
 $ ./delete.sh wifi.config
 ```
